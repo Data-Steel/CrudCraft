@@ -1,0 +1,18 @@
+name: Bug report
+description: Report a Bug in CrudCraft
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes: { label: Description, placeholder: What happened? }
+    validations: { required: true }
+  - type: textarea
+    id: reproduction
+    attributes: { label: Reproduction, placeholder: Steps/code to reproduce }
+  - type: input
+    id: version
+    attributes: { label: Version, placeholder: e.g. 0.2.1 }
+  - type: textarea
+    id: logs
+    attributes: { label: Logs, render: shell }
