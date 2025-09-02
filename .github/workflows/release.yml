@@ -40,3 +40,4 @@ jobs:
 
       - name: Deploy release artifacts (signed + staged + auto-release)
         run: mvn -B -P release -Dstyle.color=always -DskipTests=false deploy
+
