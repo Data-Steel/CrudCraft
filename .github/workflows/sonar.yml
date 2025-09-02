@@ -41,6 +41,7 @@ jobs:
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
           -Dsonar.projectKey=Data-Steel_CrudCraft
           -Dsonar.organization=datasteel
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco-aggregate/jacoco.xml
 
       # Wait on the Quality Gate result
       - name: Wait for Quality Gate
