@@ -17,13 +17,8 @@ jobs:
           java-version: '21'
           cache: maven
           server-id: ossrh
-          server-username: OSSRH_USERNAME
-          server-password: OSSRH_PASSWORD
+          server-password: ${{ secrets.OSSRH_PASSWORD }}
           gpg-private-key: ${{ secrets.SIGNING_KEY }}
-          gpg-passphrase: SIGNING_PASSWORD
+          gpg-passphrase: ${{ secrets.SIGNING_PASSWORD }}
       - name: Deploy SNAPSHOTs
-        env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: mvn -B -DskipTests deploy
