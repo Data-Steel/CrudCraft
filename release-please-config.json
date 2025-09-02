@@ -1,6 +1,14 @@
 {
+  "bootstrap-sha": "",
   "release-type": "maven",
   "packages": {
-    ".": { "release-type": "maven" }
-  }
+    ".": {
+      "release-type": "maven",
+      "include-component-in-tag": false
+    }
+  },
+  "pull-request-title-pattern": "chore: release v${version}",
+  "changelog-path": "CHANGELOG.md",
+  "bump-minor-pre-major": true,
+  "handleGHRelease": true
 }
