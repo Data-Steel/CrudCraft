@@ -43,7 +43,7 @@ Follow the [Getting Started guide](guides/getting-started.md) for a full walkthr
 ## Building
 CrudCraft requires Java 21 and Maven 3.8+. Run the full build and tests with:
 ```bash
-./mvnw verify
+./mvn verify
 ```
 
 ## License
