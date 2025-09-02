@@ -1,5 +1,5 @@
 ## Summary
-- 
+- Brief description of changes
 
 ## Type
 - [ ] fix
