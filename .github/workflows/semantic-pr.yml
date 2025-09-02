@@ -16,7 +16,8 @@ jobs:
             feat
             fix
             docs
-            chore/test
+            chore
+            test
           scopes: |
             runtime
             codegen

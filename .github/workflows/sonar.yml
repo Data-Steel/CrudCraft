@@ -7,52 +7,44 @@ on:
     branches: [ develop, main ]
 
 jobs:
-  build:
-    name: CI / build (for sonar)
-    runs-on: ubuntu-latest
-    permissions: { contents: read }
-    steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: maven
-      - run: mvn -B -U verify
-
   sonar:
-    name: Sonar / analyze
-    needs: build
+    name: Sonar / build + analyze + quality gate
+    runs-on: ubuntu-latest
+    # Skip Fork-PRs
     if: >
       (github.event_name != 'pull_request')
       || (github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: ubuntu-latest
-    permissions: { contents: read }
+
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - name: Analyze
+
+      - name: Build & Test
+        run: mvn -B -U verify
+
+      - name: Sonar analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io   # of je eigen SonarQube
+          SONAR_HOST_URL: https://sonarcloud.io
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          mvn -B verify
+          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
           -Dsonar.projectKey=Data-Steel_CrudCraft
           -Dsonar.organization=datasteel
-  quality-gate:
-    name: Sonar / quality gate
-    needs: sonar
-    if: needs.sonar.result == 'success'
-    runs-on: ubuntu-latest
-    permissions: { contents: read }
-    steps:
-      - uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
+
+      - name: Wait for Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
