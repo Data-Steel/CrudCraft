@@ -44,3 +44,8 @@ CrudCraft requires Java 21 and Maven 3.8+. Run the full build and tests with:
 
 ## License
 CrudCraft is licensed under the [Apache 2.0 License](LICENSE).
+
+![CI](https://github.com/Data-Steel/CrudCraft/actions/workflows/ci.yml/badge.svg)
+![Snapshot](https://github.com/Data-Steel/CrudCraft/actions/workflows/snapshot.yml/badge.svg)
+[![Maven Central](https://img.shields.io/maven-central/v/nl.datasteel.crudcraft/crudcraft-runtime.svg)](https://central.sonatype.com/)
+
