@@ -1,0 +1,25 @@
+name: Feature request
+description: Propose a new feature or enhancement for CrudCraft
+title: "feat: "
+labels: ["feature"]
+body:
+  - type: textarea
+    id: problem
+    attributes: { label: Problem/Use case }
+    validations: { required: true }
+  - type: textarea
+    id: proposal
+    attributes: { label: Proposed solution }
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: Runtime
+        - label: Codegen
+        - label: Docs
+        - label: Projection
+        - label: Security
+        - label: Sample App
+        - label: Tools
+        - label: Other
