@@ -1,0 +1,7 @@
+nl.datasteel.crudcraft.codegen.writer.DtoGenerator
+nl.datasteel.crudcraft.codegen.writer.SearchGenerator
+nl.datasteel.crudcraft.codegen.writer.RelationshipMetaGenerator
+nl.datasteel.crudcraft.codegen.writer.stubs.RepositoryGenerator
+nl.datasteel.crudcraft.codegen.writer.stubs.MapperGenerator
+nl.datasteel.crudcraft.codegen.writer.stubs.ServiceGenerator
+nl.datasteel.crudcraft.codegen.writer.stubs.ControllerGenerator
