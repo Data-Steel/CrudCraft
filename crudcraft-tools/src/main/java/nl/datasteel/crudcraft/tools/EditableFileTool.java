@@ -37,32 +37,22 @@ import java.util.stream.Stream;
  */
 public class EditableFileTool {
 
-    /**
-     * The main method that executes the file copying process.
-     * It scans the generated sources directory for editable files,
-     * copies them to the main source directory, and deletes the original files.
-     *
-     * @param args command line arguments (not used)
-     * @throws IOException if an I/O error occurs during file operations
-     */
     public static void main(String[] args) throws IOException {
         Path sourceRoot = args.length > 0
                 ? Paths.get(args[0])
                 : Paths.get(System.getProperty("crudcraft.generatedDir",
-                        "target/generated-sources/annotations"));
+                "target/generated-sources/annotations"));
         Path destinationRoot = args.length > 1
                 ? Paths.get(args[1])
                 : Paths.get(System.getProperty("crudcraft.sourceDir",
-                        "src/main/java"));
+                "src/main/java"));
 
         if (!Files.exists(sourceRoot)) {
-            System.out.println("No generated annotation sources found. "
-                    + "Skipping editable file copy.");
+            System.out.println("No generated annotation sources found. Skipping editable file copy.");
             return;
         }
 
-        System.out.println("[CrudCraft] Scanning for editable files in: "
-                + sourceRoot.toAbsolutePath());
+        System.out.println("[CrudCraft] Scanning for editable files in: " + sourceRoot.toAbsolutePath());
 
         try (Stream<Path> paths = Files.walk(sourceRoot)) {
             paths
@@ -77,16 +67,13 @@ public class EditableFileTool {
                                 Files.createDirectories(destination.getParent());
                                 Files.copy(source, destination);
                                 Files.delete(source);
-                                System.out.println("[CrudCraft] Copied editable file: "
-                                        + destination);
+                                System.out.println("[CrudCraft] Copied editable file: " + destination);
                             } else {
                                 Files.deleteIfExists(source);
-                                System.out.println("[CrudCraft] Skipped (already exists): "
-                                        + destination);
+                                System.out.println("[CrudCraft] Skipped (already exists): " + destination);
                             }
                         } catch (IOException e) {
-                            System.err.println("[CrudCraft] Failed to copy file: " + source
-                                    + " → " + destination + ": " + e.getMessage());
+                            System.err.println("[CrudCraft] Failed to copy file: " + source + " → " + destination + ": " + e.getMessage());
                             throw new UncheckedIOException(e);
                         }
                     });
@@ -94,14 +81,18 @@ public class EditableFileTool {
     }
 
     /**
-     * Returns true if the file contains the CrudCraft editable marker.
+     * Returns true if the path is a regular file that contains the CrudCraft editable marker.
+     * Robust against directories or unreadable files on different platforms.
      */
     private static boolean isEditableCrudCraftFile(Path filePath) {
+        // Short-circuit: only regular files can be editable sources
+        if (filePath == null || !Files.isRegularFile(filePath)) {
+            return false;
+        }
         try (Stream<String> lines = Files.lines(filePath)) {
             return lines.anyMatch(line -> line.contains("@CrudCraft:editable"));
-        } catch (IOException e) {
-            System.err.println("[CrudCraft] Failed to read file: " + filePath
-                    + ": " + e.getMessage());
+        } catch (UncheckedIOException | IOException e) {
+            System.err.println("[CrudCraft] Failed to read file: " + filePath + ": " + e.getMessage());
             return false;
         }
     }
