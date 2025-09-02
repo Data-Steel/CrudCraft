@@ -10,7 +10,8 @@ jobs:
   sonar:
     name: Sonar / build + analyze + quality gate
     runs-on: ubuntu-latest
-    # Skip Fork-PRs
+
+    # Skip forked PRs
     if: >
       (github.event_name != 'pull_request')
       || (github.event.pull_request.head.repo.full_name == github.repository)
@@ -29,22 +30,23 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Build & Test
-        run: mvn -B -U verify
-
-      - name: Sonar analyze
+      # Build + Sonar analyze in one run
+      - name: Build & Sonar analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
-          mvn -B verify
+          mvn -B -U verify
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
           -Dsonar.projectKey=Data-Steel_CrudCraft
           -Dsonar.organization=datasteel
 
+      # Wait on the Quality Gate result
       - name: Wait for Quality Gate
         uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
+        with:
+          scanMetadataReportFile: target/sonar/report-task.txt
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
