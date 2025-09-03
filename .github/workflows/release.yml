@@ -2,13 +2,19 @@ name: Release to Maven Central
 
 on:
   push:
-    tags: [ 'v*.*.*' ]
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   release:
+    name: Publish to Maven Central
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -19,19 +25,19 @@ jobs:
           java-version: '21'
           cache: maven
           server-id: ossrh
-          server-username: OSSRH_USERNAME
-          server-password: OSSRH_PASSWORD
+          server-username: ${{ secrets.OSSRH_USERNAME }}
+          server-password: ${{ secrets.OSSRH_PASSWORD }}
           gpg-private-key: ${{ secrets.SIGNING_KEY }}
-          gpg-passphrase: SIGNING_PASSWORD
+          gpg-passphrase: ${{ secrets.SIGNING_PASSWORD }}
 
-      - name: Set version from tag
+      - name: Set version from tag (no -SNAPSHOT)
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           mvn -B versions:set -DnewVersion="$TAG" -DgenerateBackupPoms=false
 
-      - name: Deploy release artifacts
-        env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-        run: mvn -B -P release -DskipTests deploy
+      - name: Verify (tests)
+        run: mvn -B -U -Dstyle.color=always verify
+
+      - name: Deploy release artifacts (signed + staged + auto-release)
+        run: mvn -B -P release -Dstyle.color=always -DskipTests=false deploy
+

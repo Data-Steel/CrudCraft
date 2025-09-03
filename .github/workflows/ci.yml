@@ -2,23 +2,30 @@ name: CI
 
 on:
   pull_request:
-    branches: [ develop, main ]
+    branches: [develop]
   push:
-    branches: [ develop, main ]
+    branches: [develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     name: CI / build
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - name: Build & test
-        run: mvn -B -U verify
+
+      - name: Compile & test
+        run: mvn -B -U -Dstyle.color=always verify
