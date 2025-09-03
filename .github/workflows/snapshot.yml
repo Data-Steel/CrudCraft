@@ -48,12 +48,9 @@ jobs:
 
       - name: Set snapshot version
         run: mvn versions:set -DnewVersion=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-SNAPSHOT
-
+        
       - name: Verify (tests)
         run: mvn -B -U -Dstyle.color=always verify
-
-      - name: Show Maven effective settings (sanity)
-        run: mvn -q help:effective-settings | sed -n '1,200p'
 
       - name: Deploy SNAPSHOTs
         run: |

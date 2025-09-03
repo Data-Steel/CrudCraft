@@ -51,7 +51,7 @@ jobs:
           </settings>
           XML
 
-      - name: Set version from tag
+      - name: Set version from tag (no -SNAPSHOT)
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           mvn -B versions:set -DnewVersion="$TAG" -DgenerateBackupPoms=false
