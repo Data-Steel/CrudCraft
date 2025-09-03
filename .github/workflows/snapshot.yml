@@ -36,5 +36,8 @@ jobs:
       - name: Verify (tests)
         run: mvn -B -U -Dstyle.color=always verify
 
+      - name: Show Maven effective settings
+        run: mvn -B help:effective-settings | head -n "${EFFECTIVE_SETTINGS_LINES:-200}"
+
       - name: Deploy SNAPSHOTs
         run: mvn -B -Dstyle.color=always -DskipTests=false deploy
