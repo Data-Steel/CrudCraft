@@ -15,12 +15,14 @@ concurrency:
 
 jobs:
   sonar:
+
     name: Sonar / build + analyze + quality gate
     runs-on: ubuntu-latest
     # Skip forked PRs (no secrets)
     if: >
       (github.event_name != 'pull_request')
       || (github.event.pull_request.head.repo.full_name == github.repository)
+      || (github.author != 'dependabot[bot]')
 
     steps:
       - uses: actions/checkout@v4
