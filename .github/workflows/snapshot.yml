@@ -15,7 +15,6 @@ jobs:
   snapshot:
     name: Deploy SNAPSHOTs
     runs-on: ubuntu-latest
-    needs: []
     steps:
       - uses: actions/checkout@v4
 
@@ -29,6 +28,11 @@ jobs:
           server-password: ${{ secrets.CENTRAL_PASSWORD }}
           gpg-private-key: ${{ secrets.SIGNING_KEY }}
           gpg-passphrase: ${{ secrets.SIGNING_PASSWORD }}
+            
+      - name: Export Maven creds for settings.xml
+        run: |
+          echo "MAVEN_USERNAME=${{ secrets.CENTRAL_USERNAME }}" >> $GITHUB_ENV
+          echo "MAVEN_PASSWORD=${{ secrets.CENTRAL_PASSWORD }}" >> $GITHUB_ENV
 
       - name: Set snapshot version
         run: mvn versions:set -DnewVersion=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-SNAPSHOT
