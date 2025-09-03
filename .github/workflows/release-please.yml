@@ -2,8 +2,8 @@ name: Release Please
 
 on:
   push:
-    branches: [develop]
-  workflow_dispatch:
+    branches: [main]
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -22,4 +22,6 @@ jobs:
         with:
           command: manifest
           target-branch: main
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
           token: ${{ secrets.GITHUB_TOKEN }}

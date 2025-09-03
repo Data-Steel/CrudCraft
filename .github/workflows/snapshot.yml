@@ -15,7 +15,6 @@ jobs:
   snapshot:
     name: Deploy SNAPSHOTs
     runs-on: ubuntu-latest
-    needs: []
     steps:
       - uses: actions/checkout@v4
 
@@ -24,14 +23,35 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-          server-id: central
-          server-username: ${{ secrets.CENTRAL_USERNAME }}
-          server-password: ${{ secrets.CENTRAL_PASSWORD }}
-          gpg-private-key: ${{ secrets.SIGNING_KEY }}
-          gpg-passphrase: ${{ secrets.SIGNING_PASSWORD }}
 
+      - name: Export env for Maven auth
+        run: |
+          echo "CENTRAL_USERNAME=${{ secrets.CENTRAL_USERNAME }}" >> $GITHUB_ENV
+          echo "CENTRAL_PASSWORD=${{ secrets.CENTRAL_PASSWORD }}" >> $GITHUB_ENV
+
+      - name: Write settings.xml (explicit)
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<'XML'
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+            <servers>
+              <server>
+                <id>central</id>
+                <username>${env.CENTRAL_USERNAME}</username>
+                <password>${env.CENTRAL_PASSWORD}</password>
+              </server>
+            </servers>
+          </settings>
+          XML
+
+      - name: Set snapshot version
+        run: mvn versions:set -DnewVersion=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-SNAPSHOT
+        
       - name: Verify (tests)
         run: mvn -B -U -Dstyle.color=always verify
 
       - name: Deploy SNAPSHOTs
-        run: mvn -B -Dstyle.color=always -DskipTests=false deploy
+        run: |
+          mvn -B -U -Dstyle.color=always -DskipTests=false deploy
