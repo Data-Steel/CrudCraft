@@ -89,7 +89,7 @@
         <errorprone.version>2.41.0</errorprone.version>
 
         <!-- Plugin versions -->
-        <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
+        <maven.compiler.plugin.version>3.14.0</maven.compiler.plugin.version>
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
         <maven.pmd.plugin.version>3.27.0</maven.pmd.plugin.version>
