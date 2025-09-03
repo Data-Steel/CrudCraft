@@ -68,7 +68,7 @@
 
         <spring.boot.version>3.1.2</spring.boot.version>
         <javapoet.version>1.13.0</javapoet.version>
-        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
         <querydsl.version>5.1.0</querydsl.version>
         <springdoc.version>2.6.0</springdoc.version>
 
