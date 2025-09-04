@@ -3,6 +3,9 @@ name: Sonar (CI + Quality Gate)
 on:
   pull_request:
     branches: [ main ]
+  pull_request_target:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
   push:
     branches: [ main, 'maintenance/*' ]
 
@@ -18,15 +21,12 @@ jobs:
     name: Build + Sonar (PR hard, push soft)
     runs-on: ubuntu-latest
 
-    # Skip forked PRs (no secrets available there) and dependabot
-    if: >
-      (github.event_name != 'pull_request')
-      || ((github.event.pull_request.head.repo.full_name == github.repository)
-      && (github.actor != 'dependabot[bot]'))
-
     steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
 
       - uses: actions/setup-java@v4
         with:
@@ -34,13 +34,12 @@ jobs:
           java-version: '21'
           cache: maven
 
-      # Always build & test first so JaCoCo XML exists
       - name: Build & test (generates JaCoCo)
         run: mvn -B -U -Dstyle.color=always verify
 
-      # --- PR analysis: HARD gate ---
+      # --- PR analysis: HARD gate (both PR and PRT) ---
       - name: Sonar PR analysis (hard)
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
@@ -50,11 +49,11 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco-aggregate/jacoco.xml \
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
-            -Dsonar.pullrequest.branch=${{ github.head_ref }} \
-            -Dsonar.pullrequest.base=${{ github.base_ref }}
+            -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }} \
+            -Dsonar.pullrequest.base=${{ github.base_ref || github.event.pull_request.base.ref }}
 
       - name: Wait for Quality Gate (PR)
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
         uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
         with:
           scanMetadataReportFile: target/sonar/report-task.txt
