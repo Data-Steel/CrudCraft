@@ -1,0 +1,24 @@
+name: backport-gate
+on:
+  pull_request_target:
+    types: [opened, synchronize, labeled, unlabeled, reopened]
+
+jobs:
+  backport-gate:
+    name: backport-gate
+    if: startsWith(github.event.pull_request.base.ref, 'maintenance/') && endsWith(github.event.pull_request.base.ref, '.x')
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Enforce backport-only merges
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = pr.labels.map(l => l.name);
+            const isBot = pr.user.type === 'Bot' || pr.user.login === 'github-actions[bot]';
+            const allowed = isBot || labels.includes('backport-auto');
+            if (!allowed) {
+              core.setFailed('Direct merges to maintenance branches are blocked. Use backport labels on the PR merged to main.');
+            }

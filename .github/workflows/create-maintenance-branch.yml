@@ -1,0 +1,79 @@
+name: create-maintenance-branch
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  create-branch:
+    # Only for exact minor bumps like vMAJOR.MINOR.0
+    if: startsWith(github.event.release.tag_name, 'v') && endsWith(github.event.release.tag_name, '.0')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Derive MAJOR, MINOR and maintenance branch
+        id: v
+        shell: bash
+        run: |
+          TAG="${{ github.event.release.tag_name }}"  # e.g. v1.4.0
+          if [[ "$TAG" =~ ^v([0-9]+)\.([0-9]+)\.0$ ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+          else
+            echo "Not a minor tag (vMAJOR.MINOR.0): $TAG"
+            exit 0
+          fi
+          BRANCH="maintenance/${MAJOR}.${MINOR}.x"
+          echo "major=$MAJOR"   >> $GITHUB_OUTPUT
+          echo "minor=$MINOR"   >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Create maintenance branch from tag (idempotent)
+        if: ${{ steps.v.outputs.branch }}
+        shell: bash
+        run: |
+          git fetch --tags origin
+          if git ls-remote --exit-code --heads origin "${{ steps.v.outputs.branch }}" >/dev/null 2>&1; then
+            echo "Branch already exists: ${{ steps.v.outputs.branch }}"
+          else
+            git switch -c "${{ steps.v.outputs.branch }}" "${{ github.event.release.tag_name }}"
+            git push origin "${{ steps.v.outputs.branch }}"
+          fi
+
+      - name: Ensure backport labels exist (dynamic for this maintenance line)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = '${{ steps.v.outputs.branch }}'; // maintenance/M.N.x
+            if (!branch) return;
+
+            const labels = [
+              {
+                name: `backport:${branch}`,
+                color: '0e8a16',
+                description: `Backport this change to ${branch}`
+              },
+              {
+                name: 'backport-auto',
+                color: '5319e7',
+                description: 'Bot-created backport PR (allowed to merge into maintenance branches)'
+              }
+            ];
+
+            for (const l of labels) {
+              try {
+                await github.rest.issues.getLabel({ ...context.repo, name: l.name });
+              } catch (e) {
+                if (e.status === 404) {
+                  await github.rest.issues.createLabel({ ...context.repo, name: l.name, color: l.color, description: l.description });
+                } else {
+                  throw e;
+                }
+              }
+            }

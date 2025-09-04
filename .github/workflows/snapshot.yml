@@ -2,7 +2,7 @@ name: Snapshot Deploy
 
 on:
   push:
-    branches: [develop]
+    branches: [ main, 'maintenance/*' ]
 
 permissions:
   contents: read
@@ -15,6 +15,7 @@ jobs:
   snapshot:
     name: Deploy SNAPSHOTs
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/heads/')
     steps:
       - uses: actions/checkout@v4
 
@@ -48,10 +49,9 @@ jobs:
 
       - name: Set snapshot version
         run: mvn versions:set -DnewVersion=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-SNAPSHOT
-        
+
       - name: Verify (tests)
         run: mvn -B -U -Dstyle.color=always verify
 
       - name: Deploy SNAPSHOTs
-        run: |
-          mvn -B -U -Dstyle.color=always -DskipTests=false deploy
+        run: mvn -B -U -Dstyle.color=always -DskipTests=false deploy

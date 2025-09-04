@@ -2,9 +2,9 @@ name: Sonar (CI + Quality Gate)
 
 on:
   pull_request:
-    branches: [develop]
+    branches: [ main ]
   push:
-    branches: [develop]
+    branches: [ main, 'maintenance/*' ]
 
 permissions:
   contents: read
@@ -15,10 +15,10 @@ concurrency:
 
 jobs:
   sonar:
-
-    name: Sonar / build + analyze + quality gate
+    name: Build + Sonar (PR hard, push soft)
     runs-on: ubuntu-latest
-    # Skip forked PRs (no secrets)
+
+    # Skip forked PRs (no secrets available there) and dependabot
     if: >
       (github.event_name != 'pull_request')
       || ((github.event.pull_request.head.repo.full_name == github.repository)
@@ -34,19 +34,51 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Build & Sonar
+      # Always build & test first so JaCoCo XML exists
+      - name: Build & test (generates JaCoCo)
+        run: mvn -B -U -Dstyle.color=always verify
+
+      # --- PR analysis: HARD gate ---
+      - name: Sonar PR analysis (hard)
+        if: ${{ github.event_name == 'pull_request' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn -B -U verify \
-            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=Data-Steel_CrudCraft \
+            -Dsonar.organization=datasteel \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco-aggregate/jacoco.xml \
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
+            -Dsonar.pullrequest.branch=${{ github.head_ref }} \
+            -Dsonar.pullrequest.base=${{ github.base_ref }}
+
+      - name: Wait for Quality Gate (PR)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
+        with:
+          scanMetadataReportFile: target/sonar/report-task.txt
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+
+      # --- Push analysis: SOFT (never block) ---
+      - name: Sonar push analysis (soft)
+        if: ${{ github.event_name == 'push' }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
+        run: |
+          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=Data-Steel_CrudCraft \
             -Dsonar.organization=datasteel \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco-aggregate/jacoco.xml
 
-      - name: Wait for Quality Gate
+      - name: Wait for Quality Gate (push, soft)
+        if: ${{ github.event_name == 'push' }}
         uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
+        continue-on-error: true
         with:
           scanMetadataReportFile: target/sonar/report-task.txt
         env:
