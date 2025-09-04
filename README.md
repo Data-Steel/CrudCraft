@@ -6,6 +6,11 @@
 [![Open Issues](https://img.shields.io/github/issues/Data-Steel/CrudCraft.svg)](https://github.com/Data-Steel/CrudCraft/issues)
 [![Java](https://img.shields.io/badge/java-21%2B-blue.svg)](https://openjdk.org/projects/jdk/21/)
 
+[![Code Quality](https://sonarcloud.io/api/project_badges/measure?project=Data-Steel_CrudCraft&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Data-Steel_CrudCraft)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Data-Steel_CrudCraft&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Data-Steel_CrudCraft)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Data-Steel_CrudCraft&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=Data-Steel_CrudCraft)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Data-Steel_CrudCraft&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=Data-Steel_CrudCraft)
+
 # CrudCraft
 
 CrudCraft is a compile-time code generator for Spring Boot that assembles full CRUD APIs from annotated JPA entities. It minimizes boilerplate while preserving explicit control over data exposure, search, and security.
