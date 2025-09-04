@@ -1,0 +1,54 @@
+name: backport
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  backport:
+    if: github.event.pull_request.merged == true && contains(join(github.event.pull_request.labels.*.name, ','), 'backport:')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Setup gh
+        uses: cli/gh-action@v2
+        with:
+          version: latest
+
+      - name: Parse targets from labels (supports multiple)
+        id: targets
+        shell: bash
+        run: |
+          echo '${{ toJson(github.event.pull_request.labels) }}' > labels.json
+          # Extract any "backport:<branch>" labels, e.g. backport:maintenance/2.3.x
+          targets=$(jq -r '.[] | .name | select(startswith("backport:")) | sub("^backport:";"")' labels.json | paste -sd, -)
+          echo "targets=$targets" >> $GITHUB_OUTPUT
+
+      - name: Backport each target
+        if: steps.targets.outputs.targets != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGETS: ${{ steps.targets.outputs.targets }}
+          SRC_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        shell: bash
+        run: |
+          IFS=, read -ra arr <<< "$TARGETS"
+          for t in "${arr[@]}"; do
+            echo "Backporting to $t"
+            git fetch origin "$t"
+            git switch -c "backport/${SRC_SHA:0:7}-to-${t//\//-}" "origin/$t"
+            if git cherry-pick -x "$SRC_SHA"; then
+              git push origin "backport/${SRC_SHA:0:7}-to-${t//\//-}"
+              gh pr create --base "$t" --head "backport/${SRC_SHA:0:7}-to-${t//\//-}" \
+                --title "Backport #${{ github.event.pull_request.number }} to $t" \
+                --body "Automated backport of #${{ github.event.pull_request.number }} to \`$t\`" \
+                --label backport-auto
+            else
+              echo "::error::Cherry-pick conflict for $t"; git cherry-pick --abort; exit 1;
+            fi
+          done

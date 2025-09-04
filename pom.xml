@@ -3,7 +3,7 @@
 
     <groupId>nl.datasteel.crudcraft</groupId>
     <artifactId>crudcraft-parent</artifactId>
-    <version>0.1.1</version>
+    <version>0.0.0</version>
     <packaging>pom</packaging>
     <name>CrudCraft Parent</name>
     <description>Compile-time CRUD generator for Spring Boot.</description>

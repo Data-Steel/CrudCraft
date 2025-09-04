@@ -1,14 +1,15 @@
 {
-  "bootstrap-sha": "",
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "release-type": "maven",
-  "packages": {
-    ".": {
-      "release-type": "maven",
-      "include-component-in-tag": false
-    }
-  },
+  "include-v-in-tag": true,
+  "include-component-in-tag": false,
+  "handleGHRelease": true,
+  "bump-minor-pre-major": true,
   "pull-request-title-pattern": "chore: release v${version}",
   "changelog-path": "CHANGELOG.md",
-  "bump-minor-pre-major": true,
-  "handleGHRelease": true
+  "packages": {
+    ".": {
+      "release-type": "maven"
+    }
+  }
 }

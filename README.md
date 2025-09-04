@@ -4,7 +4,7 @@
 
 [![License](https://img.shields.io/github/license/Data-Steel/CrudCraft.svg)](LICENSE)
 [![Open Issues](https://img.shields.io/github/issues/Data-Steel/CrudCraft.svg)](https://github.com/Data-Steel/CrudCraft/issues)
-[![Java](https://img.shields.io/badge/java-17%2B-blue.svg)](https://openjdk.org/projects/jdk/17/)
+[![Java](https://img.shields.io/badge/java-21%2B-blue.svg)](https://openjdk.org/projects/jdk/21/)
 
 
 # CrudCraft
