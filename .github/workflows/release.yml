@@ -17,7 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
+          # Build exactly the released tag (e.g., v1.0.0)
+          ref: ${{ github.event.release.tag_name }}
 
       - uses: actions/setup-java@v4
         with:
@@ -27,7 +30,15 @@ jobs:
           gpg-private-key: ${{ secrets.SIGNING_KEY }}
           gpg-passphrase:  ${{ secrets.SIGNING_PASSWORD }}
 
-      - name: Export env for Central auth & GPG
+      - name: Configure GPG for headless use
+        run: |
+          mkdir -p ~/.gnupg
+          echo "use-agent" >> ~/.gnupg/gpg.conf
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpgconf --kill gpg-agent
+
+      - name: Export env for Central auth
         run: |
           echo "CENTRAL_USERNAME=${{ secrets.CENTRAL_USERNAME }}" >> $GITHUB_ENV
           echo "CENTRAL_PASSWORD=${{ secrets.CENTRAL_PASSWORD }}" >> $GITHUB_ENV
@@ -51,11 +62,15 @@ jobs:
 
       - name: Set version from tag (no -SNAPSHOT)
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          mvn -B versions:set -DnewVersion="$TAG" -DgenerateBackupPoms=false
+          TAG="${{ github.event.release.tag_name }}"   # e.g. v1.0.0
+          VERSION="${TAG#v}"
+          mvn -B versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
 
-      - name: Verify (tests + build)
-        run: mvn -B -U -Dstyle.color=always verify
-
-      - name: Deploy (publish to Central)
-        run: mvn -B -P release -Dstyle.color=always -DskipTests=false deploy
+      - name: Build, sign & deploy
+        run: |
+          mvn -B -U -P release \
+            -Dgpg.passphrase="${{ secrets.SIGNING_PASSWORD }}" \
+            -Dgpg.executable=gpg \
+            -DskipTests=false \
+            -Dstyle.color=always \
+            deploy
