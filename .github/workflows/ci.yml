@@ -3,6 +3,9 @@ name: CI
 on:
   pull_request:
     branches: [ main ]
+  pull_request_target:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
   push:
     branches: [ main, 'maintenance/*' ]
 
@@ -17,9 +20,14 @@ jobs:
   build:
     name: CI / build
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+      # For pull_request_target we must explicitly check out the PR HEAD commit
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || '' }}
 
       - uses: actions/setup-java@v4
         with:
