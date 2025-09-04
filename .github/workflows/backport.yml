@@ -17,14 +17,15 @@ jobs:
       (github.event.action == 'labeled' && github.event.pull_request.merged == true &&
        startsWith(github.event.label.name, 'backport:'))
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
 
-      - name: Setup GitHub CLI
-        uses: actions/setup-gh-cli@v4
-        with:
-          version: latest
+      - name: Ensure gh is present
+        run: gh --version
 
       - name: Configure git author
         run: |
@@ -41,14 +42,10 @@ jobs:
 
       - name: Backport each target
         if: steps.targets.outputs.targets != ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TARGETS: ${{ steps.targets.outputs.targets }}
-          SRC_SHA: ${{ github.event.pull_request.merge_commit_sha }}
-          REPO:    ${{ github.repository }}
         shell: bash
         run: |
-          IFS=, read -ra arr <<< "$TARGETS"
+          IFS=, read -ra arr <<< "${{ steps.targets.outputs.targets }}"
+          SRC_SHA='${{ github.event.pull_request.merge_commit_sha }}'
           for t in "${arr[@]}"; do
             echo "Backporting to $t"
             git fetch origin "$t"
