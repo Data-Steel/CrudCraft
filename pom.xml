@@ -77,7 +77,7 @@
         <compile.testing.version>0.21.0</compile.testing.version>
         <commons.csv.version>1.10.0</commons.csv.version>
         <guava.version>31.1-jre</guava.version>
-        <java.jwt.version>4.4.0</java.jwt.version>
+        <java.jwt.version>4.5.0</java.jwt.version>
         <jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
         <jakarta.persistence-api.version>3.1.0</jakarta.persistence-api.version>
         <jcip.annotations.version>1.0</jcip.annotations.version>
