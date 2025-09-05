@@ -1,0 +1,67 @@
+name: Cut Release (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "SemVer version (e.g. 1.1.0)"
+        required: true
+        type: string
+      target_ref:
+        description: "Branch or commit to release from"
+        required: false
+        default: "main"
+        type: string
+      generate_notes:
+        description: "Auto-generate GitHub release notes"
+        required: false
+        default: true
+        type: boolean
+      prerelease:
+        description: "Mark GitHub release as prerelease"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  cut-release:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version }}
+      TARGET:  ${{ inputs.target_ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.target_ref }}
+
+      - name: Validate version and tag does not exist
+        shell: bash
+        run: |
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version '$VERSION'. Use SemVer like 1.2.3"
+            exit 1
+          fi
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "::error::Tag v$VERSION already exists"
+            exit 1
+          fi
+
+      - name: Create and push annotated tag
+        run: |
+          git tag -a "v$VERSION" -m "v$VERSION"
+          git push origin "v$VERSION"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=()
+          ${{ inputs.generate_notes && 'flags+=(--generate-notes)' || 'true' }}
+          ${{ inputs.prerelease && 'flags+=(--prerelease)' || 'true' }}
+          # Add a small marker in the body; optional
+          body="published-by: manual-cut-release"
+          gh release create "v$VERSION" --target "$TARGET" --title "v$VERSION" --notes "$body" "${flags[@]}"
