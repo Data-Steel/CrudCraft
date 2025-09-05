@@ -83,8 +83,10 @@ jobs:
       - name: Build, sign & deploy
         run: |
           mvn -B -U -P release \
+            -pl '!crudcraft-sample-app' -am \
             -Dgpg.passphrase="${{ secrets.SIGNING_PASSWORD }}" \
             -Dgpg.executable=gpg \
             -DskipTests=false \
             -Dstyle.color=always \
             deploy
+

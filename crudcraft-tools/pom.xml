@@ -6,6 +6,8 @@
         <artifactId>crudcraft-parent</artifactId>
         <version>1.0.0</version>
     </parent>
+    <name>CrudCraft Tools</name>
+
     <artifactId>crudcraft-tools</artifactId>
     <packaging>jar</packaging>
 

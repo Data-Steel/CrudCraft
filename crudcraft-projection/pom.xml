@@ -8,6 +8,7 @@
     </parent>
     <artifactId>crudcraft-projection</artifactId>
     <packaging>jar</packaging>
+    <name>CrudCraft Projection</name>
 
     <dependencies>
         <!-- SpotBugs -->

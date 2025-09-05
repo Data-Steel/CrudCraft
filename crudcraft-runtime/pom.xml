@@ -8,6 +8,7 @@
     </parent>
     <artifactId>crudcraft-runtime</artifactId>
     <packaging>jar</packaging>
+    <name>CrudCraft Runtime</name>
 
     <dependencies>
         <!-- SpotBugs -->

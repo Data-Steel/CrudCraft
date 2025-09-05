@@ -8,6 +8,7 @@
     </parent>
     <artifactId>crudcraft-codegen</artifactId>
     <packaging>jar</packaging>
+    <name>CrudCraft Codegen</name>
 
     <dependencies>
         <!-- Annotation API -->
