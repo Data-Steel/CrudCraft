@@ -30,16 +30,18 @@ jobs:
   cut-release:
     runs-on: ubuntu-latest
     env:
-      VERSION: ${{ inputs.version }}
-      TARGET:  ${{ inputs.target_ref }}
-      GH_TOKEN: ${{ github.token }}
+      VERSION:  ${{ inputs.version }}
+      TARGET:   ${{ inputs.target_ref }}
+      # Use PAT, not GITHUB_TOKEN, so release.published will trigger other workflows
+      GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
       REPO:     ${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ inputs.target_ref }}
-          persist-credentials: true
+          # we overwrite remote URL to use PAT below; persist-credentials can stay true/false
+          persist-credentials: false
 
       - name: Validate version and tag does not exist
         shell: bash
@@ -54,10 +56,10 @@ jobs:
             exit 1
           fi
 
-      - name: Configure git identity & auth
+      - name: Configure git identity & auth (use PAT)
         shell: bash
         run: |
-          git config user.name  "github-actions[bot]"
+          git config user.name  "github-actions[bot]"  # or the PAT user's name if you prefer
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
 
@@ -66,15 +68,11 @@ jobs:
           git tag -a "v$VERSION" -m "v$VERSION"
           git push origin "v$VERSION"
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release (uses PAT via GH_TOKEN)
         run: |
           flags=()
-          if [[ "${{ inputs.generate_notes }}" == "true" ]]; then
-            flags+=(--generate-notes)
-          fi
-          if [[ "${{ inputs.prerelease }}" == "true" ]]; then
-            flags+=(--prerelease)
-          fi
+          if [[ "${{ inputs.generate_notes }}" == "true" ]]; then flags+=(--generate-notes); fi
+          if [[ "${{ inputs.prerelease }}" == "true" ]]; then flags+=(--prerelease); fi
           gh release create "v$VERSION" \
             --target "$TARGET" \
             --title "v$VERSION" \
