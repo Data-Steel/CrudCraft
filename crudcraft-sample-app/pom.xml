@@ -6,8 +6,6 @@
         <artifactId>crudcraft-parent</artifactId>
         <version>1.0.0</version>
     </parent>
-    <name>CrudCraft Sampel App</name>
-
     <artifactId>crudcraft-sample-app</artifactId>
     <packaging>jar</packaging>
     <name>CrudCraft Demo App</name>
