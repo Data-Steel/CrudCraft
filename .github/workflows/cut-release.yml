@@ -32,11 +32,14 @@ jobs:
     env:
       VERSION: ${{ inputs.version }}
       TARGET:  ${{ inputs.target_ref }}
+      GH_TOKEN: ${{ github.token }}
+      REPO:     ${{ github.repository }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ inputs.target_ref }}
+          persist-credentials: true
 
       - name: Validate version and tag does not exist
         shell: bash
@@ -45,10 +48,18 @@ jobs:
             echo "::error::Invalid version '$VERSION'. Use SemVer like 1.2.3"
             exit 1
           fi
+          git fetch --tags --force
           if git rev-parse "v$VERSION" >/dev/null 2>&1; then
             echo "::error::Tag v$VERSION already exists"
             exit 1
           fi
+
+      - name: Configure git identity & auth
+        shell: bash
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
 
       - name: Create and push annotated tag
         run: |
@@ -56,12 +67,12 @@ jobs:
           git push origin "v$VERSION"
 
       - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           flags=()
           ${{ inputs.generate_notes && 'flags+=(--generate-notes)' || 'true' }}
           ${{ inputs.prerelease && 'flags+=(--prerelease)' || 'true' }}
-          # Add a small marker in the body; optional
-          body="published-by: manual-cut-release"
-          gh release create "v$VERSION" --target "$TARGET" --title "v$VERSION" --notes "$body" "${flags[@]}"
+          gh release create "v$VERSION" \
+            --target "$TARGET" \
+            --title "v$VERSION" \
+            --notes "published-by: manual-cut-release" \
+            "${flags[@]}"
