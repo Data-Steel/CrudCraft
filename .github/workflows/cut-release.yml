@@ -69,8 +69,12 @@ jobs:
       - name: Create GitHub Release
         run: |
           flags=()
-          ${{ inputs.generate_notes && 'flags+=(--generate-notes)' || 'true' }}
-          ${{ inputs.prerelease && 'flags+=(--prerelease)' || 'true' }}
+          if [[ "${{ inputs.generate_notes }}" == "true" ]]; then
+            flags+=(--generate-notes)
+          fi
+          if [[ "${{ inputs.prerelease }}" == "true" ]]; then
+            flags+=(--prerelease)
+          fi
           gh release create "v$VERSION" \
             --target "$TARGET" \
             --title "v$VERSION" \
