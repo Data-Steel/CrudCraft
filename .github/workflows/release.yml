@@ -2,7 +2,9 @@ name: Release to Maven Central
 
 on:
   release:
-    types: [ published ]
+    types: [published]
+  push:
+    tags: [ 'v*' ]
 
 permissions:
   contents: read
@@ -15,12 +17,24 @@ jobs:
   release:
     name: Publish to Maven Central
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+
     steps:
+      # Skip if triggered by tag push AND a GitHub Release already exists for this tag
+      - name: Skip if release exists (tag push only)
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            echo "Release ${GITHUB_REF_NAME} already exists, skipping publish."
+            exit 0
+          fi
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # Build exactly the released tag (e.g., v1.0.0)
-          ref: ${{ github.event.release.tag_name }}
+          # Build exactly the released tag (release event) or the pushed tag (tag event)
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref_name }}
 
       - uses: actions/setup-java@v4
         with:
@@ -62,7 +76,7 @@ jobs:
 
       - name: Set version from tag (no -SNAPSHOT)
         run: |
-          TAG="${{ github.event.release.tag_name }}"   # e.g. v1.0.0
+          TAG="${{ github.event_name == 'release' && github.event.release.tag_name || github.ref_name }}"
           VERSION="${TAG#v}"
           mvn -B versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
 
