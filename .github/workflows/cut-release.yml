@@ -1,0 +1,82 @@
+name: Cut Release (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "SemVer version (e.g. 1.1.0)"
+        required: true
+        type: string
+      target_ref:
+        description: "Branch or commit to release from"
+        required: false
+        default: "main"
+        type: string
+      generate_notes:
+        description: "Auto-generate GitHub release notes"
+        required: false
+        default: true
+        type: boolean
+      prerelease:
+        description: "Mark GitHub release as prerelease"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  cut-release:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version }}
+      TARGET:  ${{ inputs.target_ref }}
+      GH_TOKEN: ${{ github.token }}
+      REPO:     ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.target_ref }}
+          persist-credentials: true
+
+      - name: Validate version and tag does not exist
+        shell: bash
+        run: |
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version '$VERSION'. Use SemVer like 1.2.3"
+            exit 1
+          fi
+          git fetch --tags --force
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "::error::Tag v$VERSION already exists"
+            exit 1
+          fi
+
+      - name: Configure git identity & auth
+        shell: bash
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+
+      - name: Create and push annotated tag
+        run: |
+          git tag -a "v$VERSION" -m "v$VERSION"
+          git push origin "v$VERSION"
+
+      - name: Create GitHub Release
+        run: |
+          flags=()
+          if [[ "${{ inputs.generate_notes }}" == "true" ]]; then
+            flags+=(--generate-notes)
+          fi
+          if [[ "${{ inputs.prerelease }}" == "true" ]]; then
+            flags+=(--prerelease)
+          fi
+          gh release create "v$VERSION" \
+            --target "$TARGET" \
+            --title "v$VERSION" \
+            --notes "published-by: manual-cut-release" \
+            "${flags[@]}"
