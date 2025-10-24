@@ -47,7 +47,7 @@ jobs:
           fi
 
       - name: Ensure backport labels exist (dynamic for this maintenance line)
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const branch = '${{ steps.v.outputs.branch }}'; // maintenance/M.N.x
