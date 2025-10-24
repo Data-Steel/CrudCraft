@@ -98,8 +98,8 @@ public record PropertySpec(FieldDescriptor descriptor, String name, Set<SearchOp
     private TypeName resolveSearchType(TypeName original, String targetFqn) {
         String simple = targetFqn.substring(targetFqn.lastIndexOf('.') + 1);
         String pkgBase = targetFqn.substring(0, targetFqn.lastIndexOf('.'));
-        com.squareup.javapoet.ClassName searchClass =
-                com.squareup.javapoet.ClassName.get(pkgBase + ".search", simple + "SearchRequest");
+        ClassName searchClass =
+                ClassName.get(pkgBase + ".search", simple + "SearchRequest");
 
         TypeName mapped;
         if (original instanceof ParameterizedTypeName ptn) {
