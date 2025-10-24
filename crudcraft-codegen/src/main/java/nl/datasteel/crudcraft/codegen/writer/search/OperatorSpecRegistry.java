@@ -109,8 +109,7 @@ public final class OperatorSpecRegistry {
     // ────────────────────────────────────────────────────────────────────────
 
     /**
-     * VALUE operators:
-     * We use Set<T> so IN/NOT_IN are natural, and EQUALS/NOT_EQUALS can pass 0/1/n items.
+     * VALUE operators
      */
     public static final class ValueSpec {
         ValueSpec() {}

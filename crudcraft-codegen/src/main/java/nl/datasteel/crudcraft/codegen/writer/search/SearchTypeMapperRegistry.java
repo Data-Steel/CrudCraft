@@ -40,7 +40,6 @@ public final class SearchTypeMapperRegistry {
 
     /**
      * A mapper turns a model field type into a SearchRequest field type.
-     * It can also map parameterized types (e.g., Set<T>) element-wise.
      */
     public interface Mapper {
         boolean supports(TypeName original);
