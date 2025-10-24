@@ -70,7 +70,7 @@
         <javapoet.version>1.13.0</javapoet.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <querydsl.version>5.1.0</querydsl.version>
-        <springdoc.version>2.6.0</springdoc.version>
+        <springdoc.version>2.8.13</springdoc.version>
 
         <!-- Dependency versions -->
         <auto.service.version>1.1.1</auto.service.version>
