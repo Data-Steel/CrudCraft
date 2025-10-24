@@ -2,10 +2,6 @@ Possible Annotations:
 Compile-time Annotations
 @Immutable: Ensures the model is immutable post-creation.
 
-@ReadOnly: Marks entities as read-only, disabling write operations.
-
-@Validated: Automatically applies validation rules to models.
-
 @DefaultSort: Defines a default sorting mechanism.
 
 @SensitiveData: Marks fields for secure handling/logging (e.g., password, emails).
@@ -15,17 +11,6 @@ Compile-time Annotations
 @Cascade: Controls cascading behaviors for relationships.
 
 @Versioned: Implements version control and optimistic locking.
-
-Field-level Annotations
-@EnumValues: Restricts field values to a predefined enum.
-
-@LengthLimit: Enforces min/max length validation on String fields.
-
-@Range: Applies numerical value constraints.
-
-@PatternMatch: Applies regex validation on strings.
-
-@Nullable: Explicitly allows null values.
 
 @Default: Provides default field values when none specified.
 
