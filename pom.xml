@@ -75,7 +75,7 @@
         <!-- Dependency versions -->
         <auto.service.version>1.1.1</auto.service.version>
         <compile.testing.version>0.21.0</compile.testing.version>
-        <commons.csv.version>1.10.0</commons.csv.version>
+        <commons.csv.version>1.14.1</commons.csv.version>
         <guava.version>31.1-jre</guava.version>
         <java.jwt.version>4.4.0</java.jwt.version>
         <jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
