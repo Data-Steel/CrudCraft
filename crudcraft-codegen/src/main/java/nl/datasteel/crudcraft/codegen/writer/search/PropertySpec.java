@@ -30,39 +30,33 @@ import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 
 /**
  * Represents a property specification for a searchable field in a model.
- * This includes the field descriptor, the name of the property, and the
- * set of search operators applicable to this property.
  */
 public record PropertySpec(FieldDescriptor descriptor, String name, Set<SearchOperator> operators) {
 
-    /**
-     * Immutable constructor for PropertySpec.
-     */
     public PropertySpec(FieldDescriptor descriptor, String name, Set<SearchOperator> operators) {
         this.descriptor = descriptor;
         this.name = name;
         this.operators = operators == null ? Set.of() : Set.copyOf(operators);
     }
 
-    /**
-     * Adds the necessary fields and methods to the provided TypeSpec.Builder for this property.
-     */
     public void addMembers(TypeSpec.Builder cls) {
         TypeName raw = TypeName.get(descriptor.getType());
         TypeName type = raw.isPrimitive() ? raw.box() : raw;
+
+        // ── NEW: map the type early so imports get generated consistently
+        type = SearchTypeMapperRegistry.map(type);
 
         if (descriptor.getRelType() != RelationshipType.NONE || descriptor.isEmbedded()) {
             type = resolveSearchType(type, descriptor.getTargetType());
         }
 
+        // Operators decide which fields are generated; we pass fully mapped TypeName
         if (operators.stream().anyMatch(OperatorSpecRegistry::isValueOperator)) {
             OperatorSpecRegistry.value().addFields(cls, name, type);
         }
-
         if (operators.stream().anyMatch(OperatorSpecRegistry::isRangeOperator)) {
             OperatorSpecRegistry.range().addFields(cls, name, type);
         }
-
         if (operators.stream().anyMatch(OperatorSpecRegistry::isSizeOperator)) {
             OperatorSpecRegistry.size().addFields(cls, name, TypeName.INT.box());
         }
@@ -74,11 +68,6 @@ public record PropertySpec(FieldDescriptor descriptor, String name, Set<SearchOp
         cls.addMethod(SearchAccessorUtil.setter(opField, opEnum));
     }
 
-    /**
-     * Adds statements to copy all properties from another instance.
-     *
-     * @param ctor constructor builder to append the copy statements to
-     */
     public void addCopyStatements(MethodSpec.Builder ctor) {
         for (String field : fieldNames()) {
             String up = Character.toUpperCase(field.charAt(0)) + field.substring(1);
@@ -86,9 +75,6 @@ public record PropertySpec(FieldDescriptor descriptor, String name, Set<SearchOp
         }
     }
 
-    /**
-     * Returns the names of all fields added for this property including operator fields.
-     */
     private Set<String> fieldNames() {
         Set<String> names = new LinkedHashSet<>();
         if (operators.stream().anyMatch(OperatorSpecRegistry::isValueOperator)) {
@@ -106,19 +92,21 @@ public record PropertySpec(FieldDescriptor descriptor, String name, Set<SearchOp
     }
 
     /**
-     * Resolves the search type for relationship or embedded fields by mapping the
-     * target entity to its corresponding {@code SearchRequest} type.
-     * If the original type is parameterized (e.g. {@code Set<Foo>}), the raw type
-     * is preserved while the generic type is replaced by {@code FooSearchRequest}.
+     * For relations/embedded: replace element type by <Target>SearchRequest (and keep raw type).
+     * We still pass the result through the registry to guarantee imports for collections.
      */
     private TypeName resolveSearchType(TypeName original, String targetFqn) {
         String simple = targetFqn.substring(targetFqn.lastIndexOf('.') + 1);
         String pkgBase = targetFqn.substring(0, targetFqn.lastIndexOf('.'));
-        ClassName searchClass = ClassName.get(pkgBase + ".search", simple + "SearchRequest");
+        ClassName searchClass =
+                ClassName.get(pkgBase + ".search", simple + "SearchRequest");
+
+        TypeName mapped;
         if (original instanceof ParameterizedTypeName ptn) {
-            return ParameterizedTypeName.get(ptn.rawType, searchClass);
+            mapped = ParameterizedTypeName.get(ptn.rawType, searchClass);
+        } else {
+            mapped = searchClass;
         }
-        return searchClass;
+        return SearchTypeMapperRegistry.map(mapped);
     }
 }
-
