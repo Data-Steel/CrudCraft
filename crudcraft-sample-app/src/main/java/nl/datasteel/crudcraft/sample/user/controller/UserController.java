@@ -1,19 +1,17 @@
-/*
- * Copyright (c) 2025 CrudCraft contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
+//  Copyright (c) 2025 CrudCraft contributors
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+// /
 package nl.datasteel.crudcraft.sample.user.controller;
 
 import jakarta.validation.Valid;
@@ -77,8 +75,8 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
  * - Source model: User
  * - Package: nl.datasteel.crudcraft.sample.user.controller
  * - Generator: ControllerGenerator
- * - Generation time: 2025-09-02T09:10:33.9334971+02:00
- * - CrudCraft version: 0.1.0
+ * - Generation time: 2025-10-24T15:28:06.6370404+02:00
+ * - CrudCraft version: null
  *
  * Recommendations:
  * - You may customize method behavior, add validation, or extend with additional endpoints.
@@ -117,13 +115,6 @@ public class UserController {
         return PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
     }
 
-    @DeleteMapping("/batch/delete")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteAllByIds(@RequestBody Collection<UUID> ids) {
-        service.deleteAllByIds(ids);
-        return ResponseEntity.noContent().build();
-    }
-
     @PutMapping("/batch")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDto>> updateAll(
@@ -133,6 +124,33 @@ public class UserController {
                 .map(FieldSecurityUtil::filterRead)
                 .toList();
         return ResponseEntity.ok(dtos);
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponseDto> patch(@PathVariable("id") UUID id,
+            @RequestBody UserRequestDto request) {
+        FieldSecurityUtil.filterWrite(request);
+        UserResponseDto patched = service.patch(id, request);
+        return ResponseEntity.ok(FieldSecurityUtil.filterRead(patched));
+    }
+
+    @DeleteMapping("/batch/delete")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteAllByIds(@RequestBody Collection<UUID> ids) {
+        service.deleteAllByIds(ids);
+        return ResponseEntity.noContent().build();
+    }
+
+    @RequestMapping(
+            value = "/exists/{id}",
+            method = {RequestMethod.HEAD, RequestMethod.GET}
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> exists(@PathVariable("id") UUID id) {
+        return service.existsById(id)
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build();
     }
 
     @GetMapping
@@ -149,6 +167,27 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponseDto> post(@RequestBody UserRequestDto request) {
+        FieldSecurityUtil.filterWrite(request);
+        UserResponseDto created = service.create(request);
+        return ResponseEntity.status(201).body(FieldSecurityUtil.filterRead(created));
+    }
+
+    @GetMapping("/count")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Long>> count() {
+        long total = service.count();
+        return ResponseEntity.ok(Map.of("count", total));
+    }
+
+    @PostMapping("/validate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> validate(@Valid @RequestBody UserRequestDto request) {
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/batch")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDto>> createAll(
@@ -158,6 +197,103 @@ public class UserController {
                 .map(FieldSecurityUtil::filterRead)
                 .toList();
         return ResponseEntity.status(201).body(dtos);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/batch/upsert")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserResponseDto>> upsertAll(
+            @RequestBody Collection<UserRequestDto> requests) {
+        requests.forEach(FieldSecurityUtil::filterWrite);
+        List<UserResponseDto> dtos = service.upsertAll(requests).stream()
+                .map(FieldSecurityUtil::filterRead)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponseDto> getOne(@PathVariable UUID id) {
+        UserResponseDto dto = service.findById(id);
+        return ResponseEntity.ok(FieldSecurityUtil.filterRead(dto));
+    }
+
+    @PostMapping("/batch/ids")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PaginatedResponse<UserResponseDto>> findByIds(
+            @RequestBody List<UUID> ids) {
+        var dtos = service.findByIds(ids).stream()
+            .map(FieldSecurityUtil::filterRead)
+            .toList();
+        PaginatedResponse<UserResponseDto> response = new PaginatedResponse<>(
+            dtos,
+            0,
+            dtos.size(),
+            1,
+            dtos.size(),
+            true,
+            true
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/ref")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PaginatedResponse<UserRef>> getAllRef(Pageable pageable,
+            @ModelAttribute UserSearchRequest searchRequest) {
+        Page<UserRef> page = service.searchRef(searchRequest, clampPageable(pageable));
+        Page<UserRef> dtoPage = page.map(FieldSecurityUtil::filterRead);
+        PaginatedResponse<UserRef> response = new PaginatedResponse<>(
+            dtoPage.getContent(), dtoPage.getNumber(), dtoPage.getSize(),
+            dtoPage.getTotalPages(), dtoPage.getTotalElements(),
+            dtoPage.isFirst(), dtoPage.isLast()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponseDto> update(@PathVariable("id") UUID id,
+            @RequestBody UserRequestDto request) {
+        FieldSecurityUtil.filterWrite(request);
+        UserResponseDto updated = service.update(id, request);
+        return ResponseEntity.ok(FieldSecurityUtil.filterRead(updated));
+    }
+
+    @PatchMapping("/batch")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserResponseDto>> patchAll(
+            @Valid @RequestBody List<Identified<UUID, UserRequestDto>> requests) {
+        requests.forEach(r -> FieldSecurityUtil.filterWrite(r.getData()));
+        List<UserResponseDto> dtos = service.patchAll(requests).stream()
+                .map(FieldSecurityUtil::filterRead)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PaginatedResponse<UserResponseDto>> search(
+            @ModelAttribute UserSearchRequest searchRequest, @RequestParam("limit") Integer limit) {
+        if (limit == null || limit <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
+        int clamped = Math.min(limit, maxPageSize);
+        Page<UserResponseDto> page = service.search(searchRequest, PageRequest.of(0, clamped));
+        // service.search(searchRequest, PageRequest.of(0, clamped))
+        Page<UserResponseDto> dtoPage = page.map(FieldSecurityUtil::filterRead);
+        PaginatedResponse<UserResponseDto> response = new PaginatedResponse<>(
+            dtoPage.getContent(), dtoPage.getNumber(), dtoPage.getSize(),
+            dtoPage.getTotalPages(), dtoPage.getTotalElements(),
+            dtoPage.isFirst(), dtoPage.isLast()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/export")
@@ -248,143 +384,5 @@ public class UserController {
                 .header(HttpHeaders.CONTENT_TYPE, contentType)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
                 .body(body);
-    }
-
-    @PostMapping("/validate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> validate(@Valid @RequestBody UserRequestDto request) {
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/count")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, Long>> count() {
-        long total = service.count();
-        return ResponseEntity.ok(Map.of("count", total));
-    }
-
-    @PatchMapping("/batch")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponseDto>> patchAll(
-            @Valid @RequestBody List<Identified<UUID, UserRequestDto>> requests) {
-        requests.forEach(r -> FieldSecurityUtil.filterWrite(r.getData()));
-        List<UserResponseDto> dtos = service.patchAll(requests).stream()
-                .map(FieldSecurityUtil::filterRead)
-                .toList();
-        return ResponseEntity.ok(dtos);
-    }
-
-    @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponseDto> patch(@PathVariable("id") UUID id,
-            @RequestBody UserRequestDto request) {
-        FieldSecurityUtil.filterWrite(request);
-        UserResponseDto patched = service.patch(id, request);
-        return ResponseEntity.ok(FieldSecurityUtil.filterRead(patched));
-    }
-
-    @RequestMapping(
-            value = "/exists/{id}",
-            method = {RequestMethod.HEAD, RequestMethod.GET}
-    )
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> exists(@PathVariable("id") UUID id) {
-        return service.existsById(id)
-                ? ResponseEntity.ok().build()
-                : ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/search")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PaginatedResponse<UserResponseDto>> search(
-            @ModelAttribute UserSearchRequest searchRequest, @RequestParam("limit") Integer limit) {
-        if (limit == null || limit <= 0) {
-            return ResponseEntity.badRequest().build();
-        }
-        int clamped = Math.min(limit, maxPageSize);
-        Page<UserResponseDto> page = service.search(searchRequest, PageRequest.of(0, clamped));
-        // service.search(searchRequest, PageRequest.of(0, clamped))
-        Page<UserResponseDto> dtoPage = page.map(FieldSecurityUtil::filterRead);
-        PaginatedResponse<UserResponseDto> response = new PaginatedResponse<>(
-            dtoPage.getContent(), dtoPage.getNumber(), dtoPage.getSize(),
-            dtoPage.getTotalPages(), dtoPage.getTotalElements(),
-            dtoPage.isFirst(), dtoPage.isLast()
-        );
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponseDto> update(@PathVariable("id") UUID id,
-            @RequestBody UserRequestDto request) {
-        FieldSecurityUtil.filterWrite(request);
-        UserResponseDto updated = service.update(id, request);
-        return ResponseEntity.ok(FieldSecurityUtil.filterRead(updated));
-    }
-
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponseDto> post(@RequestBody UserRequestDto request) {
-        FieldSecurityUtil.filterWrite(request);
-        UserResponseDto created = service.create(request);
-        return ResponseEntity.status(201).body(FieldSecurityUtil.filterRead(created));
-    }
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
-        service.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/ref")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PaginatedResponse<UserRef>> getAllRef(Pageable pageable,
-            @ModelAttribute UserSearchRequest searchRequest) {
-        Page<UserRef> page = service.searchRef(searchRequest, clampPageable(pageable));
-        Page<UserRef> dtoPage = page.map(FieldSecurityUtil::filterRead);
-        PaginatedResponse<UserRef> response = new PaginatedResponse<>(
-            dtoPage.getContent(), dtoPage.getNumber(), dtoPage.getSize(),
-            dtoPage.getTotalPages(), dtoPage.getTotalElements(),
-            dtoPage.isFirst(), dtoPage.isLast()
-        );
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponseDto> getOne(@PathVariable UUID id) {
-        UserResponseDto dto = service.findById(id);
-        return ResponseEntity.ok(FieldSecurityUtil.filterRead(dto));
-    }
-
-    @PostMapping("/batch/upsert")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponseDto>> upsertAll(
-            @RequestBody Collection<UserRequestDto> requests) {
-        requests.forEach(FieldSecurityUtil::filterWrite);
-        List<UserResponseDto> dtos = service.upsertAll(requests).stream()
-                .map(FieldSecurityUtil::filterRead)
-                .toList();
-        return ResponseEntity.ok(dtos);
-    }
-
-    @PostMapping("/batch/ids")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PaginatedResponse<UserResponseDto>> findByIds(
-            @RequestBody List<UUID> ids) {
-        var dtos = service.findByIds(ids).stream()
-            .map(FieldSecurityUtil::filterRead)
-            .toList();
-        PaginatedResponse<UserResponseDto> response = new PaginatedResponse<>(
-            dtos,
-            0,
-            dtos.size(),
-            1,
-            dtos.size(),
-            true,
-            true
-        );
-        return ResponseEntity.ok(response);
     }
 }
