@@ -16,68 +16,203 @@
 
 package nl.datasteel.crudcraft.codegen.writer.search;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+
+import javax.lang.model.element.Modifier;
+import java.util.EnumSet;
+import java.util.Objects;
+import java.util.Set;
+
 import nl.datasteel.crudcraft.annotations.SearchOperator;
 
 /**
- * Utility class that provides static methods to retrieve operator specifications
- * based on the SearchOperator enum. This class is used to encapsulate the logic
- * for determining the type of operator and returning the corresponding OperatorSpec.
+ * Registry that defines which fields are generated per operator family.
+ * IMPORTANT:
+ * - Always build types with JavaPoet (ClassName/ParameterizedTypeName) so imports are emitted.
+ * - value()/range()/size() MUST return fresh instances (tests require not-same).
  */
 public final class OperatorSpecRegistry {
 
-    /**
-     * Private constructor to prevent instantiation of this utility class.
-     * This class is designed to provide static methods for operator specifications.
-     */
-    private OperatorSpecRegistry() {
-    }
+    private OperatorSpecRegistry() {}
 
-    /**
-     * Returns ValueOperatorSpec for operators that involve value checks.
-     */
-    public static OperatorSpec value() {
-        return new ValueOperatorSpec();
-    }
+    // ────────────────────────────────────────────────────────────────────────
+    // Operator classification — aligned with CrudCraft enum
+    // ────────────────────────────────────────────────────────────────────────
 
-    /**
-     * Returns ContainsOperatorSpec for operators that involve containment checks.
-     */
-    public static OperatorSpec range() {
-        return new RangeOperatorSpec();
-    }
+    // Value-like (single/multi token) comparisons & set/collection membership
+    private static final EnumSet<SearchOperator> VALUE_OPS = EnumSet.of(
+            // equality / inequality
+            SearchOperator.EQUALS,
+            SearchOperator.NOT_EQUALS,
 
-    /**
-     * Returns ContainsOperatorSpec for operators that involve size checks.
-     */
-    public static OperatorSpec size() {
-        return new SizeOperatorSpec();
-    }
+            // membership
+            SearchOperator.IN,
+            SearchOperator.NOT_IN,
 
-    /**
-     * Checks if the given operator is a range operator.
-     */
-    public static boolean isRangeOperator(SearchOperator op) {
-        return op == SearchOperator.RANGE || op == SearchOperator.BETWEEN;
-    }
+            // string/regex patterns
+            SearchOperator.CONTAINS,
+            SearchOperator.STARTS_WITH,
+            SearchOperator.ENDS_WITH,
+            SearchOperator.REGEX,
 
-    /**
-     * Checks if the given operator is a size operator.
-     */
-    public static boolean isSizeOperator(SearchOperator op) {
-        return op == SearchOperator.SIZE_EQUALS
-                || op == SearchOperator.SIZE_GT
-                || op == SearchOperator.SIZE_LT;
-    }
+            // collection membership helpers (NOT size/empty)
+            SearchOperator.CONTAINS_ALL,
+            SearchOperator.CONTAINS_KEY,
+            SearchOperator.CONTAINS_VALUE
+    );
 
-    /**
-     * Checks if the given operator is a value operator.
-     * Value operators are those that do not involve range or size checks,
-     * and are not related to emptiness checks.
-     */
+    // Range-like comparisons (including temporal)
+    private static final EnumSet<SearchOperator> RANGE_OPS = EnumSet.of(
+            SearchOperator.RANGE,
+            SearchOperator.BETWEEN,
+            SearchOperator.GT,
+            SearchOperator.GTE,
+            SearchOperator.LT,
+            SearchOperator.LTE,
+            SearchOperator.BEFORE,
+            SearchOperator.AFTER
+    );
+
+    // Size-like comparisons (collections)
+    private static final EnumSet<SearchOperator> SIZE_OPS = EnumSet.of(
+            SearchOperator.SIZE_EQUALS,
+            SearchOperator.SIZE_GT,
+            SearchOperator.SIZE_LT
+    );
+
     public static boolean isValueOperator(SearchOperator op) {
-        return !isRangeOperator(op) && !isSizeOperator(op)
-                && op != SearchOperator.IS_EMPTY
-                && op != SearchOperator.NOT_EMPTY;
+        return VALUE_OPS.contains(op);
+    }
+
+    public static boolean isRangeOperator(SearchOperator op) {
+        return RANGE_OPS.contains(op);
+    }
+
+    public static boolean isSizeOperator(SearchOperator op) {
+        return SIZE_OPS.contains(op);
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Factory methods — must return FRESH instances
+    // ────────────────────────────────────────────────────────────────────────
+
+    public static ValueSpec value() { return new ValueSpec(); }
+    public static RangeSpec range() { return new RangeSpec(); }
+    public static SizeSpec  size()  { return new SizeSpec(); }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Implementations that actually add fields to the SearchRequest class
+    // ────────────────────────────────────────────────────────────────────────
+
+    /**
+     * VALUE operators
+     */
+    public static final class ValueSpec {
+        ValueSpec() {}
+        public void addFields(com.squareup.javapoet.TypeSpec.Builder cls, String name, TypeName elementType) {
+            Objects.requireNonNull(cls);
+            Objects.requireNonNull(name);
+            Objects.requireNonNull(elementType);
+
+            ClassName setRaw = ClassName.get(Set.class);
+            ParameterizedTypeName fieldType = ParameterizedTypeName.get(setRaw, elementType);
+
+            FieldSpec f = FieldSpec.builder(fieldType, name, Modifier.PRIVATE).build();
+            cls.addField(f);
+
+            cls.addMethod(MethodSpec.methodBuilder("get" + up(name))
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(fieldType)
+                    .addStatement("return this.$N", name)
+                    .build());
+
+            cls.addMethod(MethodSpec.methodBuilder("set" + up(name))
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(fieldType, name)
+                    .addStatement("this.$N = $N", name, name)
+                    .build());
+        }
+    }
+
+    /**
+     * RANGE operators:
+     * Generate two fields: T nameStart; T nameEnd;
+     */
+    public static final class RangeSpec {
+        RangeSpec() {}
+        public void addFields(com.squareup.javapoet.TypeSpec.Builder cls, String name, TypeName type) {
+            Objects.requireNonNull(cls);
+            Objects.requireNonNull(name);
+            Objects.requireNonNull(type);
+
+            String start = name + "Start";
+            String end   = name + "End";
+
+            FieldSpec fStart = FieldSpec.builder(type, start, Modifier.PRIVATE).build();
+            FieldSpec fEnd   = FieldSpec.builder(type, end,   Modifier.PRIVATE).build();
+
+            cls.addField(fStart);
+            cls.addField(fEnd);
+
+            cls.addMethod(MethodSpec.methodBuilder("get" + up(start))
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(type)
+                    .addStatement("return this.$N", start)
+                    .build());
+
+            cls.addMethod(MethodSpec.methodBuilder("set" + up(start))
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(type, start)
+                    .addStatement("this.$N = $N", start, start)
+                    .build());
+
+            cls.addMethod(MethodSpec.methodBuilder("get" + up(end))
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(type)
+                    .addStatement("return this.$N", end)
+                    .build());
+
+            cls.addMethod(MethodSpec.methodBuilder("set" + up(end))
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(type, end)
+                    .addStatement("this.$N = $N", end, end)
+                    .build());
+        }
+    }
+
+    /**
+     * SIZE operators:
+     * Single Integer-like field with original name.
+     */
+    public static final class SizeSpec {
+        SizeSpec() {}
+        public void addFields(com.squareup.javapoet.TypeSpec.Builder cls, String name, TypeName boxedInteger) {
+            Objects.requireNonNull(cls);
+            Objects.requireNonNull(name);
+            Objects.requireNonNull(boxedInteger);
+
+            FieldSpec f = FieldSpec.builder(boxedInteger, name, Modifier.PRIVATE).build();
+            cls.addField(f);
+
+            cls.addMethod(MethodSpec.methodBuilder("get" + up(name))
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(boxedInteger)
+                    .addStatement("return this.$N", name)
+                    .build());
+
+            cls.addMethod(MethodSpec.methodBuilder("set" + up(name))
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(boxedInteger, name)
+                    .addStatement("this.$N = $N", name, name)
+                    .build());
+        }
+    }
+
+    private static String up(String s) {
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 }
-

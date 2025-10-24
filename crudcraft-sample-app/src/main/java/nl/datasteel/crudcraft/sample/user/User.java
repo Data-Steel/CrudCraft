@@ -30,6 +30,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -111,6 +112,11 @@ public class User {
     @Request
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
+
+    @Dto
+    @Request
+    @Searchable
+    private Set<Instant> test;
 
     /**
      * Roles assigned to the user. CrudCraft maps this element collection to a
