@@ -47,6 +47,7 @@ public class FlagsExtractor implements ModelPartExtractor<ModelFlags> {
         boolean editable = craft != null && craft.editable();
         boolean crudEntity = craft != null;
         boolean embeddable = cls.getAnnotation(Embeddable.class) != null;
-        return new ModelFlags(editable, crudEntity, embeddable);
+        boolean abstractClass = cls.getModifiers().contains(javax.lang.model.element.Modifier.ABSTRACT);
+        return new ModelFlags(editable, crudEntity, embeddable, abstractClass);
     }
 }

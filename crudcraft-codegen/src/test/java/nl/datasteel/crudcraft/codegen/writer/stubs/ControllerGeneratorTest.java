@@ -43,7 +43,7 @@ class ControllerGeneratorTest {
                                        boolean secure,
                                        Class<? extends CrudSecurityPolicy> secPolicy) {
         ModelIdentity id = new ModelIdentity("Order", "com.example", List.of(), "com.example");
-        ModelFlags flags = new ModelFlags(editable, true, false);
+        ModelFlags flags = new ModelFlags(editable, true, false, false);
         EndpointOptions ep = new EndpointOptions(template, omit, include, policy);
         ModelSecurity sec = new ModelSecurity(secure, secPolicy, List.of());
         return new ModelDescriptor(id, flags, ep, sec);

@@ -42,7 +42,7 @@ class ModelDescriptorTest {
 
     private ModelDescriptor sample() {
         ModelIdentity id = new ModelIdentity("M", "pkg", List.of(field()), "base");
-        ModelFlags flags = new ModelFlags(true, true, false);
+        ModelFlags flags = new ModelFlags(true, true, false, false);
         EndpointOptions ep = new EndpointOptions(CrudTemplate.FULL, new CrudEndpoint[0], new CrudEndpoint[0], CrudTemplate.class);
         ModelSecurity sec = new ModelSecurity(true, P.class, List.of());
         return new ModelDescriptor(id, flags, ep, sec);
@@ -79,7 +79,7 @@ class ModelDescriptorTest {
     void notEqualWhenNameDiffers() {
         ModelDescriptor a = sample();
         ModelIdentity id2 = new ModelIdentity("N", "pkg", List.of(field()), "base");
-        ModelFlags flags = new ModelFlags(true, true, false);
+        ModelFlags flags = new ModelFlags(true, true, false, false);
         EndpointOptions ep = new EndpointOptions(CrudTemplate.FULL, new CrudEndpoint[0], new CrudEndpoint[0], CrudTemplate.class);
         ModelSecurity sec = new ModelSecurity(true, P.class, List.of());
         ModelDescriptor b = new ModelDescriptor(id2, flags, ep, sec);

@@ -32,6 +32,7 @@ import nl.datasteel.crudcraft.annotations.security.RowSecurityHandler;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.util.JavaPoetUtils;
 import nl.datasteel.crudcraft.codegen.util.StubGeneratorUtil;
+import nl.datasteel.crudcraft.codegen.writer.Generator;
 import nl.datasteel.crudcraft.codegen.writer.WriteContext;
 
 /**
@@ -39,6 +40,24 @@ import nl.datasteel.crudcraft.codegen.writer.WriteContext;
  * with hooks to fix and clear bidirectional links.
  */
 public class ServiceGenerator implements StubGenerator {
+
+    @Override
+    public List<JavaFile> generate(ModelDescriptor modelDescriptor, WriteContext ctx) {
+        if (!Generator.isValidModelDescriptor(modelDescriptor, ctx)) {
+            return List.of();
+        }
+        
+        // Skip service generation for abstract classes
+        if (modelDescriptor.isAbstract()) {
+            ctx.env().getMessager().printMessage(
+                    Diagnostic.Kind.NOTE,
+                    "Skipping service generation for abstract entity: " + modelDescriptor.getName()
+            );
+            return List.of();
+        }
+        
+        return List.of(build(modelDescriptor, ctx));
+    }
 
     /**
      * Generates the service class for the given model descriptor.

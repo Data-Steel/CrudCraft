@@ -81,6 +81,11 @@ public final class IdentityExtractor implements ModelPartExtractor<ModelIdentity
      */
     private static List<FieldDescriptor> extractFields(TypeElement cls, ProcessingEnvironment env) {
         List<FieldDescriptor> fields = new ArrayList<>();
+        
+        // First, collect fields from parent classes (including abstract parents)
+        fields.addAll(extractInheritedFields(cls, env));
+        
+        // Then add fields from the current class
         for (var element : cls.getEnclosedElements()) {
             if (element.getKind() != ElementKind.FIELD) {
                 continue;
@@ -94,6 +99,53 @@ public final class IdentityExtractor implements ModelPartExtractor<ModelIdentity
             }
         }
         return fields;
+    }
+
+    /**
+     * Recursively extracts fields from parent classes.
+     *
+     * @param cls the TypeElement representing the model class
+     * @param env processing environment for annotation utilities
+     * @return a list of FieldDescriptor objects from parent classes
+     */
+    private static List<FieldDescriptor> extractInheritedFields(TypeElement cls, ProcessingEnvironment env) {
+        List<FieldDescriptor> inheritedFields = new ArrayList<>();
+        
+        // Get the superclass
+        TypeMirror superclass = cls.getSuperclass();
+        if (superclass instanceof DeclaredType dt) {
+            var superElement = dt.asElement();
+            if (superElement instanceof TypeElement superType) {
+                // Only process if it's not Object
+                String superName = superType.getQualifiedName().toString();
+                if (!"java.lang.Object".equals(superName)) {
+                    // Recursively get fields from the parent
+                    inheritedFields.addAll(extractInheritedFields(superType, env));
+                    
+                    // Add fields from this parent
+                    for (var element : superType.getEnclosedElements()) {
+                        if (element.getKind() != ElementKind.FIELD) {
+                            continue;
+                        }
+                        VariableElement field = (VariableElement) element;
+                        
+                        // Skip static and transient fields
+                        if (field.getModifiers().contains(javax.lang.model.element.Modifier.STATIC) ||
+                            field.getModifiers().contains(javax.lang.model.element.Modifier.TRANSIENT)) {
+                            continue;
+                        }
+
+                        if (field.getAnnotation(Embedded.class) != null) {
+                            inheritedFields.addAll(readEmbeddedFields(field, env));
+                        } else {
+                            inheritedFields.add(readField(field, env));
+                        }
+                    }
+                }
+            }
+        }
+        
+        return inheritedFields;
     }
 
     /**

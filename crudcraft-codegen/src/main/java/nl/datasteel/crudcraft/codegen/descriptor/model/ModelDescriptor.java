@@ -140,6 +140,15 @@ public class ModelDescriptor {
     }
 
     /**
+     * Returns whether the model is an abstract class.
+     *
+     * @return true if the model is abstract, false otherwise
+     */
+    public boolean isAbstract() {
+        return flags.isAbstract();
+    }
+
+    /**
      * Returns the template used for generating endpoints for this model.
      *
      * @return the CrudTemplate object representing the template
