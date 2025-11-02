@@ -300,7 +300,7 @@
                             <exclude>**/build/**</exclude>
                         </excludes>
                         <mapping>
-                            <java>JAVADOC_STYLE</java>
+                            <java>SLASHSTAR_STYLE</java>
                         </mapping>
                         <properties>
                             <year>YEAR</year>
