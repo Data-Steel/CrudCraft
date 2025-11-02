@@ -36,7 +36,7 @@ class ModelDescriptorTest {
     }
 
     private FieldDescriptor field() {
-        return new FieldDescriptor(new Identity("f", null), null, null, null, null, null, null);
+        return new FieldDescriptor(new Identity("f", null, null), null, null, null, null, null, null);
     }
 
     private ModelDescriptor sample() {

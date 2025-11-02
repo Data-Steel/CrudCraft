@@ -117,6 +117,15 @@ public class FieldDescriptor {
     }
 
     /**
+     * Returns the JavaDoc comment for the field.
+     *
+     * @return the JavaDoc comment, or null if none is available
+     */
+    public String getJavadoc() {
+        return identity.getJavadoc();
+    }
+
+    /**
      * Returns whether the field is included in the DTO.
      * This is used to determine if the field should be part of a Data Transfer Object.
      *

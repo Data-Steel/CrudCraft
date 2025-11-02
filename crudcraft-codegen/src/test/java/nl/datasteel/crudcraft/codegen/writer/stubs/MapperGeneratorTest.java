@@ -40,7 +40,7 @@ class MapperGeneratorTest {
 
     private FieldDescriptor parentField(TypeMirror type) {
         return new FieldDescriptor(
-                new Identity("parent", type),
+                new Identity("parent", type, null),
                 new DtoOptions(true, true, true, new String[0]),
                 new EnumOptions(false, List.of()),
                 new Relationship(RelationshipType.MANY_TO_ONE, "", "nl.other.Parent", true, false),
@@ -52,7 +52,7 @@ class MapperGeneratorTest {
 
     private FieldDescriptor childrenField(TypeMirror type) {
         return new FieldDescriptor(
-                new Identity("children", type),
+                new Identity("children", type, null),
                 new DtoOptions(true, true, true, new String[0]),
                 new EnumOptions(false, List.of()),
                 new Relationship(RelationshipType.ONE_TO_MANY, "", "nl.other.Child", true, false),
@@ -64,7 +64,7 @@ class MapperGeneratorTest {
 
     private FieldDescriptor simpleField(TypeMirror type) {
         return new FieldDescriptor(
-                new Identity("name", type),
+                new Identity("name", type, null),
                 new DtoOptions(true, true, true, new String[0]),
                 new EnumOptions(false, List.of()),
                 new Relationship(RelationshipType.NONE, "", null, false, false),

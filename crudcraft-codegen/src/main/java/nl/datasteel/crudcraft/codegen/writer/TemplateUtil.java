@@ -60,4 +60,88 @@ public final class TemplateUtil {
                 .addMember("allowableValues", "{" + joined + "}")
                 .build();
     }
+
+    /**
+     * Generates an OpenAPI Schema annotation for a field with optional description
+     * and nullable status. If description is null or empty, description is omitted.
+     *
+     * @param description the description to include, may be null
+     * @param nullable whether the field can be null
+     * @return an AnnotationSpec for the Schema annotation
+     */
+    public static AnnotationSpec schemaForField(String description, boolean nullable) {
+        AnnotationSpec.Builder builder = AnnotationSpec.builder(
+                ClassName.get("io.swagger.v3.oas.annotations.media", "Schema"));
+        
+        if (description != null && !description.trim().isEmpty()) {
+            // Clean up javadoc formatting
+            String cleaned = cleanJavadoc(description);
+            builder.addMember("description", "$S", cleaned);
+        }
+        
+        if (nullable) {
+            builder.addMember("nullable", "$L", true);
+        }
+        
+        return builder.build();
+    }
+
+    /**
+     * Generates an OpenAPI Schema annotation for an enum field with allowable values
+     * and optional description.
+     *
+     * @param description the description to include, may be null
+     * @param values the list of allowable enum values
+     * @param nullable whether the field can be null
+     * @return an AnnotationSpec for the Schema annotation
+     */
+    public static AnnotationSpec schemaForEnum(String description, List<String> values, 
+                                                boolean nullable) {
+        String joined = values.stream()
+                .map(v -> "\"" + v + "\"")
+                .collect(java.util.stream.Collectors.joining(", "));
+        
+        AnnotationSpec.Builder builder = AnnotationSpec.builder(
+                ClassName.get("io.swagger.v3.oas.annotations.media", "Schema"));
+        
+        if (description != null && !description.trim().isEmpty()) {
+            String cleaned = cleanJavadoc(description);
+            builder.addMember("description", "$S", cleaned);
+        }
+        
+        builder.addMember("allowableValues", "{" + joined + "}");
+        
+        if (nullable) {
+            builder.addMember("nullable", "$L", true);
+        }
+        
+        return builder.build();
+    }
+
+    /**
+     * Cleans JavaDoc comments by removing leading asterisks and extra whitespace.
+     *
+     * @param javadoc the raw JavaDoc comment
+     * @return cleaned description suitable for OpenAPI
+     */
+    private static String cleanJavadoc(String javadoc) {
+        if (javadoc == null) {
+            return "";
+        }
+        
+        // Remove leading/trailing whitespace and normalize line endings
+        String cleaned = javadoc.trim();
+        
+        // Remove JavaDoc tags like @param, @return, etc.
+        cleaned = cleaned.replaceAll("(?m)^\\s*@\\w+.*$", "");
+        
+        // Remove extra blank lines
+        cleaned = cleaned.replaceAll("(?m)^\\s*$\\n", "");
+        
+        // Collapse multiple spaces into one
+        cleaned = cleaned.replaceAll(" +", " ");
+        
+        // Remove leading/trailing whitespace again after processing
+        return cleaned.trim();
+    }
 }

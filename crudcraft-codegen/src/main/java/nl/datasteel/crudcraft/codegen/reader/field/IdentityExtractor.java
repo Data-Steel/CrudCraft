@@ -42,6 +42,7 @@ public class IdentityExtractor implements FieldPartExtractor<Identity> {
     public Identity extract(VariableElement field, ProcessingEnvironment env) {
         FieldPartExtractor.log(env.getMessager(), Diagnostic.Kind.NOTE, field,
                 "Extracting Identity field part");
-        return new Identity(field.getSimpleName().toString(), field.asType());
+        String javadoc = env.getElementUtils().getDocComment(field);
+        return new Identity(field.getSimpleName().toString(), field.asType(), javadoc);
     }
 }

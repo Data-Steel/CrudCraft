@@ -54,7 +54,7 @@ class FieldDescriptorTest {
 
     private FieldDescriptor sample() {
         TypeMirror tm = stringType();
-        Identity id = new Identity("field", tm);
+        Identity id = new Identity("field", tm, null);
         DtoOptions dto = new DtoOptions(true, true, false, new String[]{"X"});
         EnumOptions eo = new EnumOptions(false, List.of());
         Relationship rel = new Relationship(RelationshipType.NONE, "", "java.lang.String", false, false);
@@ -100,7 +100,7 @@ class FieldDescriptorTest {
     void notEqualWhenIdentityDiffers() {
         FieldDescriptor a = sample();
         TypeMirror tm = stringType();
-        Identity otherId = new Identity("other", tm);
+        Identity otherId = new Identity("other", tm, null);
         DtoOptions dto = new DtoOptions(true, true, false, new String[]{"X"});
         EnumOptions eo = new EnumOptions(false, List.of());
         Relationship rel = new Relationship(RelationshipType.NONE, "", "java.lang.String", false, false);
