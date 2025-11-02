@@ -73,4 +73,52 @@ class RelationshipMetaGeneratorTest {
         assertTrue(src.contains("author_booksField"));
         assertFalse(src.contains("publisherField"));
     }
+
+    @Test
+    void generatesUniqueVariableNamesForMultipleOneToManyRelationships() {
+        // Test for issue: duplicate local variable names when multiple @OneToMany relations exist
+        FieldDescriptor fd1 = mock(FieldDescriptor.class);
+        when(fd1.getName()).thenReturn("comments");
+        when(fd1.getTargetType()).thenReturn("com.example.Comment");
+        when(fd1.getRelType()).thenReturn(RelationshipType.ONE_TO_MANY);
+        when(fd1.getMappedBy()).thenReturn("post");
+
+        FieldDescriptor fd2 = mock(FieldDescriptor.class);
+        when(fd2.getName()).thenReturn("likes");
+        when(fd2.getTargetType()).thenReturn("com.example.Like");
+        when(fd2.getRelType()).thenReturn(RelationshipType.ONE_TO_MANY);
+        when(fd2.getMappedBy()).thenReturn("post");
+
+        ModelDescriptor md = mock(ModelDescriptor.class);
+        when(md.getName()).thenReturn("Post");
+        when(md.getPackageName()).thenReturn("com.example");
+        when(md.getFields()).thenReturn(List.of(fd1, fd2));
+
+        RelationshipMetaGenerator gen = new RelationshipMetaGenerator();
+        List<JavaFile> files = gen.generate(md, ctx);
+        assertEquals(1, files.size());
+        String src = files.get(0).toString();
+
+        // Verify unique variable names for the first relationship
+        assertTrue(src.contains("commentsChildren"), "Should have commentsChildren variable");
+        assertTrue(src.contains("commentsChild"), "Should have commentsChild variable");
+        
+        // Verify unique variable names for the second relationship
+        assertTrue(src.contains("likesChildren"), "Should have likesChildren variable");
+        assertTrue(src.contains("likesChild"), "Should have likesChild variable");
+
+        // Verify correct inverse handling - should use .set() not .add()/.remove()
+        assertTrue(src.contains("comments_postField.set(commentsChild, entity)"),
+                "Should set inverse field for comments");
+        assertTrue(src.contains("likes_postField.set(likesChild, entity)"),
+                "Should set inverse field for likes");
+        assertTrue(src.contains("comments_postField.set(commentsChild, null)"),
+                "Should clear inverse field for comments");
+        assertTrue(src.contains("likes_postField.set(likesChild, null)"),
+                "Should clear inverse field for likes");
+
+        // Should NOT contain the old incorrect code patterns
+        assertFalse(src.contains(".add(entity)"), "Should not use .add() for ONE_TO_MANY inverse");
+        assertFalse(src.contains(".remove(entity)"), "Should not use .remove() for ONE_TO_MANY inverse");
+    }
 }
