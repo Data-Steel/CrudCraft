@@ -5,3 +5,4 @@ nl.datasteel.crudcraft.codegen.writer.stubs.RepositoryGenerator
 nl.datasteel.crudcraft.codegen.writer.stubs.MapperGenerator
 nl.datasteel.crudcraft.codegen.writer.stubs.ServiceGenerator
 nl.datasteel.crudcraft.codegen.writer.stubs.ControllerGenerator
+nl.datasteel.crudcraft.codegen.writer.InsomniaGenerator
