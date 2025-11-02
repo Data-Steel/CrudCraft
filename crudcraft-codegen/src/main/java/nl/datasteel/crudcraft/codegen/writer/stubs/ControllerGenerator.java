@@ -1,19 +1,20 @@
 /*
- * Copyright (c) 2025 CrudCraft contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * /*
+ *  * Copyright (c) 2025 CrudCraft contributors
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *  */
  */
-
 package nl.datasteel.crudcraft.codegen.writer.stubs;
 
 import com.squareup.javapoet.AnnotationSpec;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.FilerException;
@@ -51,6 +53,24 @@ import nl.datasteel.crudcraft.codegen.writer.controller.EndpointSpec;
  * Generates REST controllers directly from templates without relying on an abstract base class.
  */
 public class ControllerGenerator implements StubGenerator {
+
+    @Override
+    public List<JavaFile> generate(ModelDescriptor modelDescriptor, WriteContext ctx) {
+        if (!Generator.isValidModelDescriptor(modelDescriptor, ctx)) {
+            return List.of();
+        }
+        
+        // Skip controller generation for abstract classes
+        if (modelDescriptor.isAbstract()) {
+            ctx.env().getMessager().printMessage(
+                    Diagnostic.Kind.NOTE,
+                    "Skipping controller generation for abstract entity: " + modelDescriptor.getName()
+            );
+            return List.of();
+        }
+        
+        return List.of(build(modelDescriptor, ctx));
+    }
 
     @Override
     public JavaFile build(ModelDescriptor modelDescriptor, WriteContext ctx) {
@@ -164,6 +184,16 @@ public class ControllerGenerator implements StubGenerator {
         if (!Generator.isValidModelDescriptor(modelDescriptor, ctx)) {
             return;
         }
+        
+        // Skip controller generation for abstract classes
+        if (modelDescriptor.isAbstract()) {
+            ctx.env().getMessager().printMessage(
+                    Diagnostic.Kind.NOTE,
+                    "Skipping controller generation for abstract entity: " + modelDescriptor.getName()
+            );
+            return;
+        }
+        
         EndpointContext epCtx = resolveEndpoints(modelDescriptor, ctx);
         JavaFile javaFile = build(modelDescriptor, ctx, epCtx);
         String code = javaFile.toString();

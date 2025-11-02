@@ -1,19 +1,20 @@
 /*
- * Copyright (c) 2025 CrudCraft contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * /*
+ *  * Copyright (c) 2025 CrudCraft contributors
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *  */
  */
-
 package nl.datasteel.crudcraft.codegen.descriptor;
 
 import java.util.List;
@@ -42,7 +43,7 @@ class ModelDescriptorTest {
 
     private ModelDescriptor sample() {
         ModelIdentity id = new ModelIdentity("M", "pkg", List.of(field()), "base");
-        ModelFlags flags = new ModelFlags(true, true, false);
+        ModelFlags flags = new ModelFlags(true, true, false, false);
         EndpointOptions ep = new EndpointOptions(CrudTemplate.FULL, new CrudEndpoint[0], new CrudEndpoint[0], CrudTemplate.class);
         ModelSecurity sec = new ModelSecurity(true, P.class, List.of());
         return new ModelDescriptor(id, flags, ep, sec);
@@ -79,7 +80,7 @@ class ModelDescriptorTest {
     void notEqualWhenNameDiffers() {
         ModelDescriptor a = sample();
         ModelIdentity id2 = new ModelIdentity("N", "pkg", List.of(field()), "base");
-        ModelFlags flags = new ModelFlags(true, true, false);
+        ModelFlags flags = new ModelFlags(true, true, false, false);
         EndpointOptions ep = new EndpointOptions(CrudTemplate.FULL, new CrudEndpoint[0], new CrudEndpoint[0], CrudTemplate.class);
         ModelSecurity sec = new ModelSecurity(true, P.class, List.of());
         ModelDescriptor b = new ModelDescriptor(id2, flags, ep, sec);

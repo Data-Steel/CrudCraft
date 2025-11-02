@@ -1,19 +1,20 @@
 /*
- * Copyright (c) 2025 CrudCraft contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * /*
+ *  * Copyright (c) 2025 CrudCraft contributors
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *     http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *  */
  */
-
 package nl.datasteel.crudcraft.codegen.writer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -65,18 +66,30 @@ public class DtoGenerator implements Generator {
             return List.of();
         }
 
-        List<FieldDescriptor> requestFields = md.getFields().stream()
-                .filter(fd -> fd.inRequest()
-                        || (fd.inDto() && fd.getRelType() != RelationshipType.NONE
-                        && !fd.isEmbedded()))
-                .toList();
-
         List<FieldDescriptor> dtoFields = md.getFields().stream()
                 .filter(FieldDescriptor::inDto)
                 .toList();
 
         List<FieldDescriptor> refFields = dtoFields.stream()
                 .filter(fd -> fd.inRef() || "id".equalsIgnoreCase(fd.getName()))
+                .toList();
+
+        // For abstract classes, only generate Ref DTO
+        if (md.isAbstract()) {
+            ctx.env().getMessager().printMessage(
+                    javax.tools.Diagnostic.Kind.NOTE,
+                    "Skipping Request and Response DTOs for abstract entity: " + md.getName()
+                            + ". Only generating Ref DTO."
+            );
+            JavaFile ref = generateDto(DtoType.REF, md, refFields);
+            return List.of(ref);
+        }
+
+        // For non-abstract classes, generate all DTOs
+        List<FieldDescriptor> requestFields = md.getFields().stream()
+                .filter(fd -> fd.inRequest()
+                        || (fd.inDto() && fd.getRelType() != RelationshipType.NONE
+                        && !fd.isEmbedded()))
                 .toList();
 
         JavaFile req = generateDto(DtoType.REQUEST, md, requestFields);
