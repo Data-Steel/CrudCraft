@@ -22,6 +22,7 @@ import nl.datasteel.crudcraft.annotations.security.CrudSecurityPolicy;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.writer.controller.method.ControllerMethodComponent;
 import nl.datasteel.crudcraft.codegen.writer.controller.method.ControllerMethodContext;
+import nl.datasteel.crudcraft.codegen.writer.controller.method.OpenApiDocComponent;
 import nl.datasteel.crudcraft.codegen.writer.controller.method.ParameterComponent;
 import nl.datasteel.crudcraft.codegen.writer.controller.method.ResponseComponent;
 import nl.datasteel.crudcraft.codegen.writer.controller.method.RouteDeclarationComponent;
@@ -42,6 +43,7 @@ public class ControllerMethodGenerator {
     public ControllerMethodGenerator() {
         this(List.of(
                 new RouteDeclarationComponent(),
+                new OpenApiDocComponent(),
                 new ParameterComponent(),
                 new SecurityComponent(),
                 new ResponseComponent()
