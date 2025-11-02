@@ -1,0 +1,48 @@
+name: Copyright Headers
+
+on:
+  pull_request:
+    branches: [ main, 'maintenance/*' ]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [ main, 'maintenance/*' ]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: copyright-headers-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format-headers:
+    name: Format Copyright Headers
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Format copyright headers
+        run: mvn -B license:format
+
+      - name: Check for changes
+        id: check
+        run: |
+          git diff --quiet || echo "changes=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push changes
+        if: steps.check.outputs.changes == 'true' && github.event_name == 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: Format copyright headers"
+          git push

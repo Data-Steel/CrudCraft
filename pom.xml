@@ -290,7 +290,7 @@
                     <artifactId>license-maven-plugin</artifactId>
                     <version>5.0.0</version>
                     <configuration>
-                        <header>${project.basedir}/.license-header</header>
+                        <header>${maven.multiModuleProjectDirectory}/.license-header</header>
                         <includes>
                             <include>**/src/**</include>
                         </includes>
