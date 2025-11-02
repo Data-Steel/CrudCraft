@@ -98,7 +98,7 @@ public final class TemplateUtil {
     public static AnnotationSpec schemaForEnum(String description, List<String> values, 
                                                 boolean nullable) {
         String joined = values.stream()
-                .map(v -> "\"" + v + "\"")
+                .map(v -> "\"" + v.replace("\"", "\\\"") + "\"")
                 .collect(java.util.stream.Collectors.joining(", "));
         
         AnnotationSpec.Builder builder = AnnotationSpec.builder(
@@ -129,11 +129,14 @@ public final class TemplateUtil {
             return "";
         }
         
-        // Remove leading/trailing whitespace and normalize line endings
-        String cleaned = javadoc.trim();
+        // Normalize line endings to Unix style first
+        String cleaned = javadoc.replace("\r\n", "\n").replace("\r", "\n");
         
-        // Remove JavaDoc tags like @param, @return, etc.
-        cleaned = cleaned.replaceAll("(?m)^\\s*@\\w+.*$", "");
+        // Remove leading/trailing whitespace
+        cleaned = cleaned.trim();
+        
+        // Remove JavaDoc tags like @param, @return, etc. (handles multi-line tags)
+        cleaned = cleaned.replaceAll("(?m)^\\s*@\\w+[^\\n]*(?:\\n(?!\\s*@)[^\\n]*)*", "");
         
         // Remove extra blank lines
         cleaned = cleaned.replaceAll("(?m)^\\s*$\\n", "");
