@@ -183,6 +183,16 @@ public class ControllerGenerator implements StubGenerator {
         if (!Generator.isValidModelDescriptor(modelDescriptor, ctx)) {
             return;
         }
+        
+        // Skip controller generation for abstract classes
+        if (modelDescriptor.isAbstract()) {
+            ctx.env().getMessager().printMessage(
+                    Diagnostic.Kind.NOTE,
+                    "Skipping controller generation for abstract entity: " + modelDescriptor.getName()
+            );
+            return;
+        }
+        
         EndpointContext epCtx = resolveEndpoints(modelDescriptor, ctx);
         JavaFile javaFile = build(modelDescriptor, ctx, epCtx);
         String code = javaFile.toString();
