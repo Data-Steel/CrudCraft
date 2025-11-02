@@ -126,7 +126,7 @@ public final class TemplateUtil {
      */
     private static String cleanJavadoc(String javadoc) {
         if (javadoc == null) {
-            return "";
+            return null;
         }
         
         // Normalize line endings to Unix style first
