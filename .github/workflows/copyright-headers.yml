@@ -43,7 +43,9 @@ jobs:
         if: github.event_name == 'pull_request'
         id: check
         run: |
-          git diff --quiet || echo "changes=true" >> $GITHUB_OUTPUT
+          if ! git diff --quiet; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Commit and push changes
         if: github.event_name == 'pull_request' && steps.check.outputs.changes == 'true'
