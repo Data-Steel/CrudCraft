@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 class ServiceGeneratorTest {
     private ModelDescriptor descriptor(List<String> rowHandlers) {
         ModelIdentity id = new ModelIdentity("User", "com.example", List.of(), "com.example");
-        ModelFlags flags = new ModelFlags(true, true, false);
+        ModelFlags flags = new ModelFlags(true, true, false, false);
         EndpointOptions ep = new EndpointOptions(nl.datasteel.crudcraft.annotations.CrudTemplate.FULL, new nl.datasteel.crudcraft.annotations.CrudEndpoint[0], new nl.datasteel.crudcraft.annotations.CrudEndpoint[0], nl.datasteel.crudcraft.annotations.CrudTemplate.class);
         ModelSecurity sec = new ModelSecurity(false, null, rowHandlers);
         return new ModelDescriptor(id, flags, ep, sec);

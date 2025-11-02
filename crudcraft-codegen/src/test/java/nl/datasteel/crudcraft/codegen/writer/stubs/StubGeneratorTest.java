@@ -32,7 +32,7 @@ class StubGeneratorTest {
 
     private ModelDescriptor validDescriptor() {
         ModelIdentity id = new ModelIdentity("Test", "com.example", List.of(), "com.example");
-        ModelFlags flags = new ModelFlags(true, true, false);
+        ModelFlags flags = new ModelFlags(true, true, false, false);
         EndpointOptions ep = new EndpointOptions(nl.datasteel.crudcraft.annotations.CrudTemplate.FULL, new nl.datasteel.crudcraft.annotations.CrudEndpoint[0], new nl.datasteel.crudcraft.annotations.CrudEndpoint[0], nl.datasteel.crudcraft.annotations.CrudTemplate.class);
         ModelSecurity sec = new ModelSecurity(false, null, List.of());
         return new ModelDescriptor(id, flags, ep, sec);

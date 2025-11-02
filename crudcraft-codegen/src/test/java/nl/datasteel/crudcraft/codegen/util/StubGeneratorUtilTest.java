@@ -30,7 +30,7 @@ class StubGeneratorUtilTest {
 
     private ModelDescriptor model(boolean editable) {
         ModelIdentity id = new ModelIdentity("User", "com.example", List.of(), "com.example");
-        ModelFlags flags = new ModelFlags(editable, true, false);
+        ModelFlags flags = new ModelFlags(editable, true, false, false);
         EndpointOptions options = new EndpointOptions(null, null, null, null);
         ModelSecurity security = new ModelSecurity(false, null, List.of());
         return new ModelDescriptor(id, flags, options, security);

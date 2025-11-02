@@ -21,12 +21,14 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import java.util.List;
 import java.util.UUID;
 import javax.lang.model.element.Modifier;
 import javax.tools.Diagnostic;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.util.JavaPoetUtils;
 import nl.datasteel.crudcraft.codegen.util.StubGeneratorUtil;
+import nl.datasteel.crudcraft.codegen.writer.Generator;
 import nl.datasteel.crudcraft.codegen.writer.WriteContext;
 
 /**
@@ -35,6 +37,24 @@ import nl.datasteel.crudcraft.codegen.writer.WriteContext;
 public class RepositoryGenerator implements StubGenerator {
 
     private static final String REPOSITORY_CAMEL = "Repository";
+
+    @Override
+    public List<JavaFile> generate(ModelDescriptor modelDescriptor, WriteContext ctx) {
+        if (!Generator.isValidModelDescriptor(modelDescriptor, ctx)) {
+            return List.of();
+        }
+        
+        // Skip repository generation for abstract classes
+        if (modelDescriptor.isAbstract()) {
+            ctx.env().getMessager().printMessage(
+                    Diagnostic.Kind.NOTE,
+                    "Skipping repository generation for abstract entity: " + modelDescriptor.getName()
+            );
+            return List.of();
+        }
+        
+        return List.of(build(modelDescriptor, ctx));
+    }
 
     /**
      * Generates the repository interface for the given model descriptor.

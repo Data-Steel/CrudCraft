@@ -25,17 +25,19 @@ class ModelFlagsTest {
 
     @Test
     void gettersReflectValues() {
-        ModelFlags flags = new ModelFlags(true, false, true);
+        ModelFlags flags = new ModelFlags(true, false, true, false);
         assertTrue(flags.isEditable());
         assertFalse(flags.isCrudCraftEntity());
         assertTrue(flags.isEmbeddable());
+        assertFalse(flags.isAbstract());
     }
 
     @Test
     void handlesAllFalse() {
-        ModelFlags flags = new ModelFlags(false, false, false);
+        ModelFlags flags = new ModelFlags(false, false, false, false);
         assertFalse(flags.isEditable());
         assertFalse(flags.isCrudCraftEntity());
         assertFalse(flags.isEmbeddable());
+        assertFalse(flags.isAbstract());
     }
 }

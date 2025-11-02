@@ -32,7 +32,7 @@ public final class TestModelDescriptorFactory {
     public static ModelDescriptor create() {
         ModelIdentity identity = new ModelIdentity(
                 "Sample", "com.example", List.of(), "com.example");
-        ModelFlags flags = new ModelFlags(true, true, false);
+        ModelFlags flags = new ModelFlags(true, true, false, false);
         EndpointOptions endpoints = new EndpointOptions(
                 CrudTemplate.FULL, new CrudEndpoint[0], new CrudEndpoint[0], null);
         ModelSecurity security = new ModelSecurity(false, null, List.of());

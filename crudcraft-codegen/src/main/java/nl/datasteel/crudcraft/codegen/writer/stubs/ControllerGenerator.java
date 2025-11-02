@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.FilerException;
@@ -51,6 +52,24 @@ import nl.datasteel.crudcraft.codegen.writer.controller.EndpointSpec;
  * Generates REST controllers directly from templates without relying on an abstract base class.
  */
 public class ControllerGenerator implements StubGenerator {
+
+    @Override
+    public List<JavaFile> generate(ModelDescriptor modelDescriptor, WriteContext ctx) {
+        if (!Generator.isValidModelDescriptor(modelDescriptor, ctx)) {
+            return List.of();
+        }
+        
+        // Skip controller generation for abstract classes
+        if (modelDescriptor.isAbstract()) {
+            ctx.env().getMessager().printMessage(
+                    Diagnostic.Kind.NOTE,
+                    "Skipping controller generation for abstract entity: " + modelDescriptor.getName()
+            );
+            return List.of();
+        }
+        
+        return List.of(build(modelDescriptor, ctx));
+    }
 
     @Override
     public JavaFile build(ModelDescriptor modelDescriptor, WriteContext ctx) {

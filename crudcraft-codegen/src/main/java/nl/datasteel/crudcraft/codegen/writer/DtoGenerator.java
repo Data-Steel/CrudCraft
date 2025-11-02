@@ -65,18 +65,30 @@ public class DtoGenerator implements Generator {
             return List.of();
         }
 
-        List<FieldDescriptor> requestFields = md.getFields().stream()
-                .filter(fd -> fd.inRequest()
-                        || (fd.inDto() && fd.getRelType() != RelationshipType.NONE
-                        && !fd.isEmbedded()))
-                .toList();
-
         List<FieldDescriptor> dtoFields = md.getFields().stream()
                 .filter(FieldDescriptor::inDto)
                 .toList();
 
         List<FieldDescriptor> refFields = dtoFields.stream()
                 .filter(fd -> fd.inRef() || "id".equalsIgnoreCase(fd.getName()))
+                .toList();
+
+        // For abstract classes, only generate Ref DTO
+        if (md.isAbstract()) {
+            ctx.env().getMessager().printMessage(
+                    javax.tools.Diagnostic.Kind.NOTE,
+                    "Skipping Request and Response DTOs for abstract entity: " + md.getName()
+                            + ". Only generating Ref DTO."
+            );
+            JavaFile ref = generateDto(DtoType.REF, md, refFields);
+            return List.of(ref);
+        }
+
+        // For non-abstract classes, generate all DTOs
+        List<FieldDescriptor> requestFields = md.getFields().stream()
+                .filter(fd -> fd.inRequest()
+                        || (fd.inDto() && fd.getRelType() != RelationshipType.NONE
+                        && !fd.isEmbedded()))
                 .toList();
 
         JavaFile req = generateDto(DtoType.REQUEST, md, requestFields);

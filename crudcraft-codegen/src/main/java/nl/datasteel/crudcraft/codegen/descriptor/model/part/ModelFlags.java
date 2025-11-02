@@ -22,8 +22,9 @@ package nl.datasteel.crudcraft.codegen.descriptor.model.part;
  * @param editable whether generated stubs are editable
  * @param crudCraftEntity whether this model is a CrudCraft entity
  * @param embeddable whether this model is marked as embeddable
+ * @param abstractClass whether this model is an abstract class
  */
-public record ModelFlags(boolean editable, boolean crudCraftEntity, boolean embeddable) {
+public record ModelFlags(boolean editable, boolean crudCraftEntity, boolean embeddable, boolean abstractClass) {
 
     /**
      * Returns true if the generated stubs are editable.
@@ -50,5 +51,14 @@ public record ModelFlags(boolean editable, boolean crudCraftEntity, boolean embe
      */
     public boolean isEmbeddable() {
         return embeddable;
+    }
+
+    /**
+     * Returns true if this model is an abstract class.
+     *
+     * @return true if abstract
+     */
+    public boolean isAbstract() {
+        return abstractClass;
     }
 }
