@@ -69,6 +69,10 @@ public class InsomniaGenerator implements Generator {
 
     @Override
     public void write(ModelDescriptor model, WriteContext ctx) {
+        if (!Generator.isValidModelDescriptor(model, ctx)) {
+            return;
+        }
+        
         allModels.add(model);
         
         // Generate the Insomnia file with all models collected so far
@@ -581,8 +585,11 @@ public class InsomniaGenerator implements Generator {
     private String generateSampleRequestBody(ModelDescriptor model) {
         StringBuilder body = new StringBuilder("{");
         
+        // Use same logic as DtoGenerator for request fields
         List<FieldDescriptor> requestFields = model.getFields().stream()
-            .filter(FieldDescriptor::inRequest)
+            .filter(fd -> fd.inRequest()
+                    || (fd.inDto() && fd.getRelType() != RelationshipType.NONE
+                    && !fd.isEmbedded()))
             .toList();
         
         for (int i = 0; i < requestFields.size(); i++) {
