@@ -72,7 +72,7 @@ public class OpenApiDocComponent implements ControllerMethodComponent {
         // Add common error responses
         if (requiresIdParameter(endpoint)) {
             responsesBuilder.addMember("value", "$L", 
-                    createErrorResponse("404", modelName + " not found", apiResponse));
+                    createErrorResponse("404", String.format("%s with the specified ID was not found", modelName), apiResponse));
         }
         
         if (isModifyingEndpoint(endpoint)) {
