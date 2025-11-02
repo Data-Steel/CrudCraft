@@ -38,7 +38,7 @@ class IdentityPartTest {
     @Test
     void gettersReturnNameAndType() {
         TypeMirror tm = stringType();
-        Identity id = new Identity("name", tm);
+        Identity id = new Identity("name", tm, null);
         assertEquals("name", id.getName());
         assertEquals(tm, id.getType());
     }

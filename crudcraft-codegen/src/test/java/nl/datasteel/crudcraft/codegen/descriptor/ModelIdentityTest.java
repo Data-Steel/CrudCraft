@@ -28,7 +28,7 @@ class ModelIdentityTest {
 
     @Test
     void fieldsAreDefensivelyCopied() {
-        FieldDescriptor fd = new FieldDescriptor(new Identity("f", null), null, null, null, null, null, null);
+        FieldDescriptor fd = new FieldDescriptor(new Identity("f", null, null), null, null, null, null, null, null);
         List<FieldDescriptor> list = new ArrayList<>();
         list.add(fd);
         ModelIdentity mi = new ModelIdentity("Name", "pkg", list, "base");

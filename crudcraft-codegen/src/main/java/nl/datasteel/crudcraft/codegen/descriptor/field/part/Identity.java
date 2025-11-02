@@ -22,8 +22,9 @@ import javax.lang.model.type.TypeMirror;
  *
  * @param name the field name
  * @param type the field type
+ * @param javadoc the JavaDoc comment for the field, if available
  */
-public record Identity(String name, TypeMirror type) {
+public record Identity(String name, TypeMirror type, String javadoc) {
 
     /**
      * Returns the name of the identity field.
@@ -41,5 +42,14 @@ public record Identity(String name, TypeMirror type) {
      */
     public TypeMirror getType() {
         return type;
+    }
+
+    /**
+     * Returns the JavaDoc comment for the field.
+     *
+     * @return the JavaDoc comment, or null if none is available
+     */
+    public String getJavadoc() {
+        return javadoc;
     }
 }

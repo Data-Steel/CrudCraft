@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test;
 class DtoGeneratorIdFieldNameTest {
 
     private FieldDescriptor field(String name, RelationshipType relType) {
-        Identity identity = new Identity(name, null);
+        Identity identity = new Identity(name, null, null);
         DtoOptions dto = new DtoOptions(true, true, true, new String[0]);
         EnumOptions en = new EnumOptions(false, null);
         Relationship rel = new Relationship(relType, "", "", false, false);

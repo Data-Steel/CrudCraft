@@ -167,15 +167,30 @@ public class DtoGenerator implements Generator {
 
                 AnnotationSpec security = fd.hasFieldSecurity()
                         ? buildFieldSecurityAnnotation(fd) : null;
-                AnnotationSpec enumSchema = fd.isEnumString()
-                        ? TemplateUtil.schemaAllowable(fd.getEnumValues())
-                        : null;
+                
+                // Build comprehensive schema annotation with description and enum values if applicable
+                AnnotationSpec schemaAnnotation;
+                String javadoc = fd.getJavadoc();
+                boolean isNullable = !typeName.isPrimitive();
+                
+                if (fd.isEnumString()) {
+                    schemaAnnotation = TemplateUtil.schemaForEnum(
+                            javadoc, 
+                            fd.getEnumValues(), 
+                            isNullable
+                    );
+                } else {
+                    schemaAnnotation = javadoc != null && !javadoc.trim().isEmpty()
+                            ? TemplateUtil.schemaForField(javadoc, isNullable)
+                            : null;
+                }
+                
                 JavaPoetUtils.addFieldWithAccessors(
                         b,
                         fieldName,
                         typeName,
                         fd.getValidations(),
-                        enumSchema,
+                        schemaAnnotation,
                         security
                 );
             }
@@ -206,9 +221,23 @@ public class DtoGenerator implements Generator {
 
                 AnnotationSpec security = fd.hasFieldSecurity()
                         ? buildFieldSecurityAnnotation(fd) : null;
-                AnnotationSpec enumSchema = fd.isEnumString()
-                        ? TemplateUtil.schemaAllowable(fd.getEnumValues())
-                        : null;
+                
+                // Build comprehensive schema annotation with description and enum values if applicable
+                AnnotationSpec schemaAnnotation;
+                String javadoc = fd.getJavadoc();
+                boolean isNullable = !typeName.isPrimitive();
+                
+                if (fd.isEnumString()) {
+                    schemaAnnotation = TemplateUtil.schemaForEnum(
+                            javadoc, 
+                            fd.getEnumValues(), 
+                            isNullable
+                    );
+                } else {
+                    schemaAnnotation = javadoc != null && !javadoc.trim().isEmpty()
+                            ? TemplateUtil.schemaForField(javadoc, isNullable)
+                            : null;
+                }
 
                 if (isSet(typeName) || isList(typeName)) {
                     JavaPoetUtils.addFieldWithAccessors(
@@ -216,7 +245,7 @@ public class DtoGenerator implements Generator {
                             fd.getName(),
                             typeName,
                             fd.getValidations(),
-                            enumSchema,
+                            schemaAnnotation,
                             security
                     );
                 } else {
@@ -225,7 +254,7 @@ public class DtoGenerator implements Generator {
                             fd.getName(),
                             typeName,
                             fd.getValidations(),
-                            enumSchema,
+                            schemaAnnotation,
                             security
                     );
                 }
@@ -298,9 +327,23 @@ public class DtoGenerator implements Generator {
 
             AnnotationSpec security = fd.hasFieldSecurity()
                     ? buildFieldSecurityAnnotation(fd) : null;
-            AnnotationSpec enumSchema = fd.isEnumString()
-                    ? TemplateUtil.schemaAllowable(fd.getEnumValues())
-                    : null;
+            
+            // Build comprehensive schema annotation with description and enum values if applicable
+            AnnotationSpec schemaAnnotation;
+            String javadoc = fd.getJavadoc();
+            boolean isNullable = !typeName.isPrimitive();
+            
+            if (fd.isEnumString()) {
+                schemaAnnotation = TemplateUtil.schemaForEnum(
+                        javadoc, 
+                        fd.getEnumValues(), 
+                        isNullable
+                );
+            } else {
+                schemaAnnotation = javadoc != null && !javadoc.trim().isEmpty()
+                        ? TemplateUtil.schemaForField(javadoc, isNullable)
+                        : null;
+            }
 
             if (isSet(typeName) || isList(typeName)) {
                 JavaPoetUtils.addFieldWithAccessors(
@@ -308,7 +351,7 @@ public class DtoGenerator implements Generator {
                         fd.getName(),
                         typeName,
                         fd.getValidations(),
-                        enumSchema,
+                        schemaAnnotation,
                         security
                 );
             } else {
@@ -317,7 +360,7 @@ public class DtoGenerator implements Generator {
                         fd.getName(),
                         typeName,
                         fd.getValidations(),
-                        enumSchema,
+                        schemaAnnotation,
                         security
                 );
             }
