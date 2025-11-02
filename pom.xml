@@ -302,10 +302,6 @@
                         <mapping>
                             <java>SLASHSTAR_STYLE</java>
                         </mapping>
-                        <properties>
-                            <year>YEAR</year>
-                            <owner>OWNER</owner>
-                        </properties>
                     </configuration>
                     <executions>
                         <execution>
