@@ -72,12 +72,12 @@ public class OpenApiDocComponent implements ControllerMethodComponent {
         // Add common error responses
         if (requiresIdParameter(endpoint)) {
             responsesBuilder.addMember("value", "$L", 
-                    createErrorResponse("404", "Not Found", modelName + " not found", apiResponse));
+                    createErrorResponse("404", modelName + " not found", apiResponse));
         }
         
         if (isModifyingEndpoint(endpoint)) {
             responsesBuilder.addMember("value", "$L", 
-                    createErrorResponse("400", "Bad Request", "Invalid request data", apiResponse));
+                    createErrorResponse("400", "Invalid request data", apiResponse));
         }
         
         ctx.builder().addAnnotation(responsesBuilder.build());
@@ -99,7 +99,7 @@ public class OpenApiDocComponent implements ControllerMethodComponent {
     /**
      * Creates an error response annotation.
      */
-    private CodeBlock createErrorResponse(String code, String shortDesc, String description, 
+    private CodeBlock createErrorResponse(String code, String description, 
                                           ClassName apiResponse) {
         return CodeBlock.builder()
                 .add("@$T(responseCode = $S, description = $S)", 
