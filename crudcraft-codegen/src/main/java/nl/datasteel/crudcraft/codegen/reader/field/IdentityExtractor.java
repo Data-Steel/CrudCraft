@@ -16,7 +16,6 @@
 package nl.datasteel.crudcraft.codegen.reader.field;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -50,7 +49,7 @@ public class IdentityExtractor implements FieldPartExtractor<Identity> {
         FieldPartExtractor.log(env.getMessager(), Diagnostic.Kind.NOTE, field,
                 "Extracting Identity field part");
         String javadoc = env.getElementUtils().getDocComment(field);
-        SchemaMetadata schemaMetadata = extractSchemaMetadata(field, env);
+        SchemaMetadata schemaMetadata = extractSchemaMetadata(field);
         return new Identity(field.getSimpleName().toString(), field.asType(), javadoc, schemaMetadata);
     }
     
@@ -58,10 +57,9 @@ public class IdentityExtractor implements FieldPartExtractor<Identity> {
      * Extracts @Schema annotation metadata from the field.
      *
      * @param field the field element
-     * @param env the processing environment
      * @return SchemaMetadata containing extracted information
      */
-    private SchemaMetadata extractSchemaMetadata(VariableElement field, ProcessingEnvironment env) {
+    private SchemaMetadata extractSchemaMetadata(VariableElement field) {
         for (AnnotationMirror mirror : field.getAnnotationMirrors()) {
             String annotationType = mirror.getAnnotationType().toString();
             if (annotationType.equals("io.swagger.v3.oas.annotations.media.Schema")) {
