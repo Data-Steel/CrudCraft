@@ -25,6 +25,7 @@ import nl.datasteel.crudcraft.codegen.descriptor.field.part.DtoOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.EnumOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Identity;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Relationship;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.SchemaMetadata;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.SearchOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Security;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Validation;
@@ -296,6 +297,15 @@ public class FieldDescriptor {
      */
     public String[] getWriteRoles() {
         return security.getWriteRoles();
+    }
+
+    /**
+     * Returns the @Schema annotation metadata from the entity field.
+     *
+     * @return the SchemaMetadata, or empty if none is available
+     */
+    public SchemaMetadata getSchemaMetadata() {
+        return identity.getSchemaMetadata();
     }
 
     /**

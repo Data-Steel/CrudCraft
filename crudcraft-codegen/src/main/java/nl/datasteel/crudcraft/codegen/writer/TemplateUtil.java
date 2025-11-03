@@ -147,4 +147,71 @@ public final class TemplateUtil {
         // Remove leading/trailing whitespace again after processing
         return cleaned.trim();
     }
+    
+    /**
+     * Creates a @Schema annotation from SchemaMetadata extracted from an entity field.
+     * Merges description from javadoc and @Schema annotation, with @Schema taking precedence.
+     *
+     * @param javadoc the javadoc description, may be null
+     * @param schemaMetadata the extracted @Schema metadata from the entity field
+     * @param nullable whether the field can be null
+     * @return an AnnotationSpec for the Schema annotation, or null if no metadata
+     */
+    public static AnnotationSpec schemaFromMetadata(String javadoc, 
+            nl.datasteel.crudcraft.codegen.descriptor.field.part.SchemaMetadata schemaMetadata,
+            boolean nullable) {
+        if (schemaMetadata.isEmpty() && (javadoc == null || javadoc.trim().isEmpty())) {
+            return null;
+        }
+        
+        AnnotationSpec.Builder builder = AnnotationSpec.builder(
+                ClassName.get("io.swagger.v3.oas.annotations.media", "Schema"));
+        
+        // Use @Schema description if available, otherwise fall back to javadoc
+        String description = schemaMetadata.description();
+        if (description == null || description.trim().isEmpty()) {
+            description = javadoc;
+        }
+        
+        if (description != null && !description.trim().isEmpty()) {
+            String cleaned = cleanJavadoc(description);
+            builder.addMember("description", "$S", cleaned);
+        }
+        
+        // Add example if available
+        if (schemaMetadata.example() != null && !schemaMetadata.example().trim().isEmpty()) {
+            builder.addMember("example", "$S", schemaMetadata.example());
+        }
+        
+        // Add additional properties from @Schema annotation
+        for (var entry : schemaMetadata.additionalProperties().entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            
+            // Handle different types of values appropriately
+            if (value instanceof String) {
+                builder.addMember(key, "$S", value);
+            } else if (value instanceof Boolean) {
+                builder.addMember(key, "$L", value);
+            } else if (value instanceof Number) {
+                builder.addMember(key, "$L", value);
+            } else if (value instanceof List) {
+                // Handle arrays like allowableValues
+                @SuppressWarnings("unchecked")
+                List<Object> list = (List<Object>) value;
+                if (!list.isEmpty()) {
+                    String joined = list.stream()
+                            .map(v -> "\"" + v.toString().replace("\"", "\\\"") + "\"")
+                            .collect(java.util.stream.Collectors.joining(", "));
+                    builder.addMember(key, "{" + joined + "}");
+                }
+            }
+        }
+        
+        if (nullable) {
+            builder.addMember("nullable", "$L", true);
+        }
+        
+        return builder.build();
+    }
 }

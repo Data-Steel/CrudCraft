@@ -21,6 +21,7 @@ import nl.datasteel.crudcraft.annotations.CrudTemplate;
 import nl.datasteel.crudcraft.annotations.security.CrudSecurityPolicy;
 import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Identity;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.SchemaMetadata;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.model.part.EndpointOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.model.part.ModelFlags;
@@ -36,7 +37,7 @@ class ModelDescriptorTest {
     }
 
     private FieldDescriptor field() {
-        return new FieldDescriptor(new Identity("f", null, null), null, null, null, null, null, null);
+        return new FieldDescriptor(new Identity("f", null, null, SchemaMetadata.empty()), null, null, null, null, null, null);
     }
 
     private ModelDescriptor sample() {

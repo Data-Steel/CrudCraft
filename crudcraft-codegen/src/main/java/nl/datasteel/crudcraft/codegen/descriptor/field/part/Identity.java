@@ -23,8 +23,9 @@ import javax.lang.model.type.TypeMirror;
  * @param name the field name
  * @param type the field type
  * @param javadoc the JavaDoc comment for the field, if available
+ * @param schemaMetadata the @Schema annotation metadata from the entity field, if available
  */
-public record Identity(String name, TypeMirror type, String javadoc) {
+public record Identity(String name, TypeMirror type, String javadoc, SchemaMetadata schemaMetadata) {
 
     /**
      * Returns the name of the identity field.
@@ -51,5 +52,14 @@ public record Identity(String name, TypeMirror type, String javadoc) {
      */
     public String getJavadoc() {
         return javadoc;
+    }
+    
+    /**
+     * Returns the @Schema annotation metadata from the entity field.
+     *
+     * @return the SchemaMetadata, or empty if none is available
+     */
+    public SchemaMetadata getSchemaMetadata() {
+        return schemaMetadata != null ? schemaMetadata : SchemaMetadata.empty();
     }
 }

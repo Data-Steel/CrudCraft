@@ -21,6 +21,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import nl.datasteel.crudcraft.codegen.CompilationTestUtils;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Identity;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.SchemaMetadata;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +39,7 @@ class IdentityPartTest {
     @Test
     void gettersReturnNameAndType() {
         TypeMirror tm = stringType();
-        Identity id = new Identity("name", tm, null);
+        Identity id = new Identity("name", tm, null, SchemaMetadata.empty());
         assertEquals("name", id.getName());
         assertEquals(tm, id.getType());
     }

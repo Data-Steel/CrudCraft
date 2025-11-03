@@ -15,10 +15,17 @@
  */
 package nl.datasteel.crudcraft.codegen.reader.field;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.tools.Diagnostic;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Identity;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.SchemaMetadata;
 
 /**
  * Singleton extractor for the Identity field part.
@@ -43,6 +50,74 @@ public class IdentityExtractor implements FieldPartExtractor<Identity> {
         FieldPartExtractor.log(env.getMessager(), Diagnostic.Kind.NOTE, field,
                 "Extracting Identity field part");
         String javadoc = env.getElementUtils().getDocComment(field);
-        return new Identity(field.getSimpleName().toString(), field.asType(), javadoc);
+        SchemaMetadata schemaMetadata = extractSchemaMetadata(field, env);
+        return new Identity(field.getSimpleName().toString(), field.asType(), javadoc, schemaMetadata);
+    }
+    
+    /**
+     * Extracts @Schema annotation metadata from the field.
+     *
+     * @param field the field element
+     * @param env the processing environment
+     * @return SchemaMetadata containing extracted information
+     */
+    private SchemaMetadata extractSchemaMetadata(VariableElement field, ProcessingEnvironment env) {
+        for (AnnotationMirror mirror : field.getAnnotationMirrors()) {
+            String annotationType = mirror.getAnnotationType().toString();
+            if (annotationType.equals("io.swagger.v3.oas.annotations.media.Schema")) {
+                return parseSchemaAnnotation(mirror);
+            }
+        }
+        return SchemaMetadata.empty();
+    }
+    
+    /**
+     * Parses a @Schema annotation mirror to extract its properties.
+     *
+     * @param mirror the annotation mirror
+     * @return SchemaMetadata with extracted properties
+     */
+    private SchemaMetadata parseSchemaAnnotation(AnnotationMirror mirror) {
+        String description = null;
+        String example = null;
+        Map<String, Object> additionalProps = new HashMap<>();
+        
+        for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry 
+                : mirror.getElementValues().entrySet()) {
+            String key = entry.getKey().getSimpleName().toString();
+            Object value = entry.getValue().getValue();
+            
+            switch (key) {
+                case "description":
+                    description = value != null ? value.toString() : null;
+                    break;
+                case "example":
+                    example = value != null ? value.toString() : null;
+                    break;
+                case "format":
+                case "defaultValue":
+                case "pattern":
+                case "minimum":
+                case "maximum":
+                case "minLength":
+                case "maxLength":
+                case "minItems":
+                case "maxItems":
+                case "deprecated":
+                case "hidden":
+                case "nullable":
+                case "accessMode":
+                case "allowableValues":
+                case "requiredMode":
+                    // Store additional properties for potential future use
+                    additionalProps.put(key, value);
+                    break;
+                default:
+                    // Ignore unknown properties
+                    break;
+            }
+        }
+        
+        return new SchemaMetadata(description, example, additionalProps);
     }
 }
