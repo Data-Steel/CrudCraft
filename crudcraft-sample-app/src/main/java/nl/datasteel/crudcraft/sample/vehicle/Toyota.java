@@ -15,7 +15,9 @@
  */
 package nl.datasteel.crudcraft.sample.vehicle;
 
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
 import nl.datasteel.crudcraft.annotations.fields.Request;
@@ -26,6 +28,8 @@ import nl.datasteel.crudcraft.annotations.fields.Request;
  */
 @Entity
 @CrudCrafted
+@DiscriminatorValue("TOYOTA")
+@Table(name = "toyota")
 public class Toyota extends Car {
 
     @Dto

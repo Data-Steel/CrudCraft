@@ -16,12 +16,14 @@
 package nl.datasteel.crudcraft.sample.vehicle;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Table;
 import java.util.UUID;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
@@ -32,7 +34,9 @@ import nl.datasteel.crudcraft.annotations.fields.Request;
  * This entity should only generate a Ref DTO, not full CRUD operations.
  */
 @Entity
+@Table(name = "car")
 @Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "brand", length = 32)
 @CrudCrafted
 public abstract class Car {
 
@@ -44,16 +48,11 @@ public abstract class Car {
 
     @Dto
     @Request
-    @Column(nullable = false)
-    private String brand;
-
-    @Dto
-    @Request
     private String model;
 
     @Dto
     @Request
-    private Integer year;
+    private Integer modelYear;
 
     @Dto
     @Request
@@ -67,14 +66,6 @@ public abstract class Car {
         this.id = id;
     }
 
-    public String getBrand() {
-        return brand;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
     public String getModel() {
         return model;
     }
@@ -83,12 +74,12 @@ public abstract class Car {
         this.model = model;
     }
 
-    public Integer getYear() {
-        return year;
+    public Integer getModelYear() {
+        return modelYear;
     }
 
-    public void setYear(Integer year) {
-        this.year = year;
+    public void setModelYear(Integer year) {
+        this.modelYear = year;
     }
 
     public String getColor() {

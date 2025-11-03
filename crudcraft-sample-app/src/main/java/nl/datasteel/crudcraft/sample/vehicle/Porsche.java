@@ -15,7 +15,10 @@
  */
 package nl.datasteel.crudcraft.sample.vehicle;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
 import nl.datasteel.crudcraft.annotations.fields.Request;
@@ -26,10 +29,16 @@ import nl.datasteel.crudcraft.annotations.fields.Request;
  */
 @Entity
 @CrudCrafted
+@Schema(description = "Concrete Porsche entity extending Car.",
+        requiredProperties = {"engineType", "horsepower", "turboCharged"})
+@DiscriminatorValue("PORSCHE")
+@Table(name = "porsche")
 public class Porsche extends Car {
 
     @Dto
     @Request
+    @Schema(description = "Type of engine used in the Porsche.",
+            example = "V8 Twin Turbo")
     private String engineType;
 
     @Dto
