@@ -180,9 +180,12 @@ public class DtoGenerator implements Generator {
                             isNullable
                     );
                 } else {
-                    schemaAnnotation = javadoc != null && !javadoc.trim().isEmpty()
-                            ? TemplateUtil.schemaForField(javadoc, isNullable)
-                            : null;
+                    // Use schemaFromMetadata to incorporate entity field @Schema annotations
+                    schemaAnnotation = TemplateUtil.schemaFromMetadata(
+                            javadoc, 
+                            fd.getSchemaMetadata(), 
+                            isNullable
+                    );
                 }
                 
                 JavaPoetUtils.addFieldWithAccessors(
@@ -234,9 +237,12 @@ public class DtoGenerator implements Generator {
                             isNullable
                     );
                 } else {
-                    schemaAnnotation = javadoc != null && !javadoc.trim().isEmpty()
-                            ? TemplateUtil.schemaForField(javadoc, isNullable)
-                            : null;
+                    // Use schemaFromMetadata to incorporate entity field @Schema annotations
+                    schemaAnnotation = TemplateUtil.schemaFromMetadata(
+                            javadoc, 
+                            fd.getSchemaMetadata(), 
+                            isNullable
+                    );
                 }
 
                 if (isSet(typeName) || isList(typeName)) {

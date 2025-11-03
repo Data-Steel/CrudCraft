@@ -28,6 +28,7 @@ import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.DtoOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.EnumOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Identity;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.SchemaMetadata;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Relationship;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.SearchOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Security;
@@ -54,7 +55,7 @@ class FieldDescriptorTest {
 
     private FieldDescriptor sample() {
         TypeMirror tm = stringType();
-        Identity id = new Identity("field", tm, null);
+        Identity id = new Identity("field", tm, null, SchemaMetadata.empty());
         DtoOptions dto = new DtoOptions(true, true, false, new String[]{"X"});
         EnumOptions eo = new EnumOptions(false, List.of());
         Relationship rel = new Relationship(RelationshipType.NONE, "", "java.lang.String", false, false);
@@ -100,7 +101,7 @@ class FieldDescriptorTest {
     void notEqualWhenIdentityDiffers() {
         FieldDescriptor a = sample();
         TypeMirror tm = stringType();
-        Identity otherId = new Identity("other", tm, null);
+        Identity otherId = new Identity("other", tm, null, SchemaMetadata.empty());
         DtoOptions dto = new DtoOptions(true, true, false, new String[]{"X"});
         EnumOptions eo = new EnumOptions(false, List.of());
         Relationship rel = new Relationship(RelationshipType.NONE, "", "java.lang.String", false, false);

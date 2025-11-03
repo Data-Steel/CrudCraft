@@ -24,6 +24,7 @@ import nl.datasteel.crudcraft.codegen.descriptor.field.part.DtoOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.EnumOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Identity;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Relationship;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.SchemaMetadata;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.SearchOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Security;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Validation;
@@ -40,7 +41,7 @@ class MapperGeneratorTest {
 
     private FieldDescriptor parentField(TypeMirror type) {
         return new FieldDescriptor(
-                new Identity("parent", type, null),
+                new Identity("parent", type, null, SchemaMetadata.empty()),
                 new DtoOptions(true, true, true, new String[0]),
                 new EnumOptions(false, List.of()),
                 new Relationship(RelationshipType.MANY_TO_ONE, "", "nl.other.Parent", true, false),
@@ -52,7 +53,7 @@ class MapperGeneratorTest {
 
     private FieldDescriptor childrenField(TypeMirror type) {
         return new FieldDescriptor(
-                new Identity("children", type, null),
+                new Identity("children", type, null, SchemaMetadata.empty()),
                 new DtoOptions(true, true, true, new String[0]),
                 new EnumOptions(false, List.of()),
                 new Relationship(RelationshipType.ONE_TO_MANY, "", "nl.other.Child", true, false),
@@ -64,7 +65,7 @@ class MapperGeneratorTest {
 
     private FieldDescriptor simpleField(TypeMirror type) {
         return new FieldDescriptor(
-                new Identity("name", type, null),
+                new Identity("name", type, null, SchemaMetadata.empty()),
                 new DtoOptions(true, true, true, new String[0]),
                 new EnumOptions(false, List.of()),
                 new Relationship(RelationshipType.NONE, "", null, false, false),

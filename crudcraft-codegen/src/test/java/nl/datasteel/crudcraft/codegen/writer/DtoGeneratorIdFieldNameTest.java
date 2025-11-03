@@ -27,6 +27,7 @@ import nl.datasteel.crudcraft.codegen.descriptor.field.part.DtoOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.EnumOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Identity;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Relationship;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.SchemaMetadata;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.SearchOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Security;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Validation;
@@ -39,7 +40,7 @@ import org.junit.jupiter.api.Test;
 class DtoGeneratorIdFieldNameTest {
 
     private FieldDescriptor field(String name, RelationshipType relType) {
-        Identity identity = new Identity(name, null, null);
+        Identity identity = new Identity(name, null, null, SchemaMetadata.empty());
         DtoOptions dto = new DtoOptions(true, true, true, new String[0]);
         EnumOptions en = new EnumOptions(false, null);
         Relationship rel = new Relationship(relType, "", "", false, false);

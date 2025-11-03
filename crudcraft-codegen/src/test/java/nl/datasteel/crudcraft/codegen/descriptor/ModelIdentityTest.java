@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.field.part.Identity;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.SchemaMetadata;
 import nl.datasteel.crudcraft.codegen.descriptor.model.part.ModelIdentity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,7 +29,7 @@ class ModelIdentityTest {
 
     @Test
     void fieldsAreDefensivelyCopied() {
-        FieldDescriptor fd = new FieldDescriptor(new Identity("f", null, null), null, null, null, null, null, null);
+        FieldDescriptor fd = new FieldDescriptor(new Identity("f", null, null, SchemaMetadata.empty()), null, null, null, null, null, null);
         List<FieldDescriptor> list = new ArrayList<>();
         list.add(fd);
         ModelIdentity mi = new ModelIdentity("Name", "pkg", list, "base");
