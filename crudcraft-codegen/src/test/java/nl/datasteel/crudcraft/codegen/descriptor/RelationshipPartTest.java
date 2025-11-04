@@ -23,7 +23,7 @@ class RelationshipPartTest {
 
     @Test
     void gettersWork() {
-        Relationship rel = new Relationship(RelationshipType.MANY_TO_ONE, "mapped", "Target", true, false);
+        Relationship rel = new Relationship(RelationshipType.MANY_TO_ONE, "mapped", "Target", true, false, false);
         assertEquals(RelationshipType.MANY_TO_ONE, rel.getRelationshipType());
         assertEquals("mapped", rel.getMappedBy());
         assertEquals("Target", rel.getTargetType());
@@ -33,7 +33,7 @@ class RelationshipPartTest {
 
     @Test
     void embeddedRelationship() {
-        Relationship rel = new Relationship(RelationshipType.NONE, "", "T", false, true);
+        Relationship rel = new Relationship(RelationshipType.NONE, "", "T", false, true, false);
         assertTrue(rel.isEmbedded());
         assertEquals(RelationshipType.NONE, rel.getRelationshipType());
     }

@@ -43,7 +43,7 @@ class DtoGeneratorIdFieldNameTest {
         Identity identity = new Identity(name, null, null, SchemaMetadata.empty());
         DtoOptions dto = new DtoOptions(true, true, true, new String[0]);
         EnumOptions en = new EnumOptions(false, null);
-        Relationship rel = new Relationship(relType, "", "", false, false);
+        Relationship rel = new Relationship(relType, "", "", false, false, false);
         Validation val = new Validation(null);
         SearchOptions search = new SearchOptions(false, null, 0);
         Security sec = new Security(false, null, null);

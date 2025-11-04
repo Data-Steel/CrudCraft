@@ -115,10 +115,11 @@ public class MapperGenerator implements StubGenerator {
         // Methods
         List<FieldDescriptor> manyToOne = manyToOneFields(modelDescriptor);
         List<FieldDescriptor> relFields = relationFields(modelDescriptor);
-        MethodSpec fromRequest = fromRequest(modelName, entity, requestDto, mapping, relFields);
-        MethodSpec update = update(modelName, entity, requestDto, mappingTarget, mapping, relFields);
-        MethodSpec patch = patch(modelName, entity, requestDto, mappingTarget, beanMapping, nvStrategy, mapping, relFields);
-        MethodSpec toResponse = toResponse(modelName, entity, responseDto, mapping, manyToOne);
+        List<FieldDescriptor> abstractRelFields = abstractRelationFields(modelDescriptor);
+        MethodSpec fromRequest = fromRequest(modelName, entity, requestDto, mapping, relFields, abstractRelFields);
+        MethodSpec update = update(modelName, entity, requestDto, mappingTarget, mapping, relFields, abstractRelFields);
+        MethodSpec patch = patch(modelName, entity, requestDto, mappingTarget, beanMapping, nvStrategy, mapping, relFields, abstractRelFields);
+        MethodSpec toResponse = toResponse(modelName, entity, responseDto, mapping, manyToOne, abstractRelFields);
         MethodSpec toRef = toRef(entity, refDto);
         MethodSpec getIdFromRequest = getIdFromRequest(requestDto, beanWrapper, uuidClass, exceptionCls);
         List<MethodSpec> refHelpers = manyToOneRefHelpers(modelName, manyToOne);
@@ -167,7 +168,9 @@ public class MapperGenerator implements StubGenerator {
     private List<FieldDescriptor> manyToOneFields(ModelDescriptor modelDescriptor) {
         List<FieldDescriptor> fields = new ArrayList<>();
         for (FieldDescriptor fd : modelDescriptor.getFields()) {
-            if (fd.isTargetCrud() && fd.getRelType() == RelationshipType.MANY_TO_ONE) {
+            // Skip abstract target types - they cannot be used in ref mappings
+            if (fd.isTargetCrud() && fd.getRelType() == RelationshipType.MANY_TO_ONE
+                    && !fd.isTargetAbstract()) {
                 fields.add(fd);
             }
         }
@@ -177,7 +180,21 @@ public class MapperGenerator implements StubGenerator {
     private List<FieldDescriptor> relationFields(ModelDescriptor modelDescriptor) {
         List<FieldDescriptor> fields = new ArrayList<>();
         for (FieldDescriptor fd : modelDescriptor.getFields()) {
-            if (fd.isTargetCrud() && fd.getRelType() != RelationshipType.NONE && !fd.isEmbedded()) {
+            // Skip abstract target types - they cannot be instantiated in mappers
+            if (fd.isTargetCrud() && fd.getRelType() != RelationshipType.NONE
+                    && !fd.isEmbedded() && !fd.isTargetAbstract()) {
+                fields.add(fd);
+            }
+        }
+        return fields;
+    }
+
+    private List<FieldDescriptor> abstractRelationFields(ModelDescriptor modelDescriptor) {
+        List<FieldDescriptor> fields = new ArrayList<>();
+        for (FieldDescriptor fd : modelDescriptor.getFields()) {
+            // Find all abstract relation fields that need to be ignored in mappings
+            if (fd.isTargetCrud() && fd.getRelType() != RelationshipType.NONE
+                    && !fd.isEmbedded() && fd.isTargetAbstract()) {
                 fields.add(fd);
             }
         }
@@ -185,7 +202,7 @@ public class MapperGenerator implements StubGenerator {
     }
 
     private MethodSpec fromRequest(String modelName, ClassName entity, ClassName requestDto, ClassName mapping,
-                                   List<FieldDescriptor> relFields) {
+                                   List<FieldDescriptor> relFields, List<FieldDescriptor> abstractRelFields) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("fromRequest")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -204,11 +221,18 @@ public class MapperGenerator implements StubGenerator {
                     .addMember("qualifiedByName", "$S", qualifier)
                     .build());
         }
+        // Add ignore mappings for abstract relation fields
+        for (FieldDescriptor fd : abstractRelFields) {
+            builder.addAnnotation(AnnotationSpec.builder(mapping)
+                    .addMember("target", "$S", fd.getName())
+                    .addMember("ignore", "$L", true)
+                    .build());
+        }
         return builder.build();
     }
 
     private MethodSpec update(String modelName, ClassName entity, ClassName requestDto, ClassName mappingTarget,
-                              ClassName mapping, List<FieldDescriptor> relFields) {
+                              ClassName mapping, List<FieldDescriptor> relFields, List<FieldDescriptor> abstractRelFields) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("update")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -228,12 +252,19 @@ public class MapperGenerator implements StubGenerator {
                     .addMember("qualifiedByName", "$S", qualifier)
                     .build());
         }
+        // Add ignore mappings for abstract relation fields
+        for (FieldDescriptor fd : abstractRelFields) {
+            builder.addAnnotation(AnnotationSpec.builder(mapping)
+                    .addMember("target", "$S", fd.getName())
+                    .addMember("ignore", "$L", true)
+                    .build());
+        }
         return builder.build();
     }
 
     private MethodSpec patch(String modelName, ClassName entity, ClassName requestDto, ClassName mappingTarget,
                              ClassName beanMapping, ClassName nvStrategy, ClassName mapping,
-                             List<FieldDescriptor> relFields) {
+                             List<FieldDescriptor> relFields, List<FieldDescriptor> abstractRelFields) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("patch")
                 .addAnnotation(Override.class)
                 .addAnnotation(AnnotationSpec.builder(beanMapping)
@@ -256,11 +287,18 @@ public class MapperGenerator implements StubGenerator {
                     .addMember("qualifiedByName", "$S", qualifier)
                     .build());
         }
+        // Add ignore mappings for abstract relation fields
+        for (FieldDescriptor fd : abstractRelFields) {
+            builder.addAnnotation(AnnotationSpec.builder(mapping)
+                    .addMember("target", "$S", fd.getName())
+                    .addMember("ignore", "$L", true)
+                    .build());
+        }
         return builder.build();
     }
 
     private MethodSpec toResponse(String modelName, ClassName entity, ClassName responseDto, ClassName mapping,
-                                  List<FieldDescriptor> manyToOne) {
+                                  List<FieldDescriptor> manyToOne, List<FieldDescriptor> abstractRelFields) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("toResponse")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -272,6 +310,13 @@ public class MapperGenerator implements StubGenerator {
             builder.addAnnotation(AnnotationSpec.builder(mapping)
                     .addMember("target", "$S", fd.getName())
                     .addMember("qualifiedByName", "$S", modelName + "To" + simple + "Ref")
+                    .build());
+        }
+        // Add ignore mappings for abstract relation fields in response
+        for (FieldDescriptor fd : abstractRelFields) {
+            builder.addAnnotation(AnnotationSpec.builder(mapping)
+                    .addMember("target", "$S", fd.getName())
+                    .addMember("ignore", "$L", true)
                     .build());
         }
         return builder.build();

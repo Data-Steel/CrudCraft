@@ -44,7 +44,7 @@ class MapperGeneratorTest {
                 new Identity("parent", type, null, SchemaMetadata.empty()),
                 new DtoOptions(true, true, true, new String[0]),
                 new EnumOptions(false, List.of()),
-                new Relationship(RelationshipType.MANY_TO_ONE, "", "nl.other.Parent", true, false),
+                new Relationship(RelationshipType.MANY_TO_ONE, "", "nl.other.Parent", true, false, false),
                 new Validation(List.of()),
                 new SearchOptions(false, List.of(), 0),
                 new Security(false, null, null)
@@ -56,7 +56,7 @@ class MapperGeneratorTest {
                 new Identity("children", type, null, SchemaMetadata.empty()),
                 new DtoOptions(true, true, true, new String[0]),
                 new EnumOptions(false, List.of()),
-                new Relationship(RelationshipType.ONE_TO_MANY, "", "nl.other.Child", true, false),
+                new Relationship(RelationshipType.ONE_TO_MANY, "", "nl.other.Child", true, false, false),
                 new Validation(List.of()),
                 new SearchOptions(false, List.of(), 0),
                 new Security(false, null, null)
@@ -68,7 +68,7 @@ class MapperGeneratorTest {
                 new Identity("name", type, null, SchemaMetadata.empty()),
                 new DtoOptions(true, true, true, new String[0]),
                 new EnumOptions(false, List.of()),
-                new Relationship(RelationshipType.NONE, "", null, false, false),
+                new Relationship(RelationshipType.NONE, "", null, false, false, false),
                 new Validation(List.of()),
                 new SearchOptions(false, List.of(), 0),
                 new Security(false, null, null)

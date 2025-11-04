@@ -26,9 +26,10 @@ import nl.datasteel.crudcraft.codegen.descriptor.RelationshipType;
  * @param mappedBy the mappedBy field for the relationship
  * @param targetType the target type of the relationship
  * @param targetCrud true if the target is a CRUD entity
+ * @param targetAbstract true if the target is an abstract class
  */
 public record Relationship(RelationshipType relationshipType, String mappedBy, String targetType,
-                           boolean targetCrud, boolean embedded) {
+                           boolean targetCrud, boolean embedded, boolean targetAbstract) {
 
     /**
      * Returns the type of the relationship.
@@ -73,5 +74,14 @@ public record Relationship(RelationshipType relationshipType, String mappedBy, S
      */
     public boolean isEmbedded() {
         return embedded;
+    }
+
+    /**
+     * Returns true if the target is an abstract class.
+     *
+     * @return true if target is an abstract class
+     */
+    public boolean isTargetAbstract() {
+        return targetAbstract;
     }
 }
