@@ -168,9 +168,9 @@ public class MapperGenerator implements StubGenerator {
     private List<FieldDescriptor> manyToOneFields(ModelDescriptor modelDescriptor) {
         List<FieldDescriptor> fields = new ArrayList<>();
         for (FieldDescriptor fd : modelDescriptor.getFields()) {
-            // Skip abstract target types - they cannot be used in ref mappings
+            // Only include if field is in Response DTO and target is not abstract
             if (fd.isTargetCrud() && fd.getRelType() == RelationshipType.MANY_TO_ONE
-                    && !fd.isTargetAbstract()) {
+                    && !fd.isTargetAbstract() && fd.inDto()) {
                 fields.add(fd);
             }
         }
@@ -180,9 +180,9 @@ public class MapperGenerator implements StubGenerator {
     private List<FieldDescriptor> relationFields(ModelDescriptor modelDescriptor) {
         List<FieldDescriptor> fields = new ArrayList<>();
         for (FieldDescriptor fd : modelDescriptor.getFields()) {
-            // Skip abstract target types - they cannot be instantiated in mappers
+            // Only include if field is in Request DTO and target is not abstract
             if (fd.isTargetCrud() && fd.getRelType() != RelationshipType.NONE
-                    && !fd.isEmbedded() && !fd.isTargetAbstract()) {
+                    && !fd.isEmbedded() && !fd.isTargetAbstract() && isInRequestDto(fd)) {
                 fields.add(fd);
             }
         }
@@ -477,6 +477,14 @@ public class MapperGenerator implements StubGenerator {
             mapperAnnotation.addMember("uses", "{$L}", cb.build());
         }
         return mapperAnnotation.build();
+    }
+
+    /**
+     * Determines if a field should be included in the Request DTO.
+     * This matches the logic in DtoGenerator for consistency.
+     */
+    private boolean isInRequestDto(FieldDescriptor fd) {
+        return fd.inRequest() || (fd.inDto() && fd.getRelType() != RelationshipType.NONE && !fd.isEmbedded());
     }
 
     @Override public boolean requiresCrudEntity() { return true; }
