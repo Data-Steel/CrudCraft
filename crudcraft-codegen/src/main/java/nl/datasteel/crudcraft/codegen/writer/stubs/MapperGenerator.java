@@ -169,7 +169,7 @@ public class MapperGenerator implements StubGenerator {
         List<FieldDescriptor> fields = new ArrayList<>();
         for (FieldDescriptor fd : modelDescriptor.getFields()) {
             // Skip abstract target types - they cannot be used in ref mappings
-            if (fd.isTargetCrud() && fd.getRelType() == RelationshipType.MANY_TO_ONE 
+            if (fd.isTargetCrud() && fd.getRelType() == RelationshipType.MANY_TO_ONE
                     && !fd.isTargetAbstract()) {
                 fields.add(fd);
             }
@@ -181,7 +181,7 @@ public class MapperGenerator implements StubGenerator {
         List<FieldDescriptor> fields = new ArrayList<>();
         for (FieldDescriptor fd : modelDescriptor.getFields()) {
             // Skip abstract target types - they cannot be instantiated in mappers
-            if (fd.isTargetCrud() && fd.getRelType() != RelationshipType.NONE 
+            if (fd.isTargetCrud() && fd.getRelType() != RelationshipType.NONE
                     && !fd.isEmbedded() && !fd.isTargetAbstract()) {
                 fields.add(fd);
             }
@@ -193,7 +193,7 @@ public class MapperGenerator implements StubGenerator {
         List<FieldDescriptor> fields = new ArrayList<>();
         for (FieldDescriptor fd : modelDescriptor.getFields()) {
             // Find all abstract relation fields that need to be ignored in mappings
-            if (fd.isTargetCrud() && fd.getRelType() != RelationshipType.NONE 
+            if (fd.isTargetCrud() && fd.getRelType() != RelationshipType.NONE
                     && !fd.isEmbedded() && fd.isTargetAbstract()) {
                 fields.add(fd);
             }
