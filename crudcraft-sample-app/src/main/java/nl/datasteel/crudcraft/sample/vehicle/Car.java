@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.UUID;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
+import nl.datasteel.crudcraft.annotations.fields.Request;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -48,7 +49,8 @@ public abstract class Car {
     @Schema(description = "Exterior color of the car.", example = "Guards Red")
     private String color;
 
-    // ✅ One-to-many to Inspection (shared for all car types)
+    @Dto
+    @Request
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Schema(description = "All inspections performed on this car.")
     @JsonIgnore

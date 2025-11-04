@@ -19,15 +19,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.UUID;
+import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 
+@CrudCrafted
 @Entity
 @Table(name = "porsche_option")
 @Schema(description = "Represents a configuration option or package specific to Porsche cars.")
 public class PorscheOption {
 
     @Id
+    @Dto(ref = true)
     @GeneratedValue
     private UUID id;
 
@@ -36,7 +39,7 @@ public class PorscheOption {
     @Schema(description = "The Porsche associated with this option.")
     private Porsche porsche;
 
-    @Dto
+    @Dto(ref = true)
     @Request
     @Schema(description = "Unique code for the option.", example = "X50")
     @Column(length = 64, nullable = false)
@@ -48,7 +51,7 @@ public class PorscheOption {
     @Column(length = 1000)
     private String description;
 
-    @Dto
+    @Dto(ref = true)
     @Request
     @Schema(description = "Price of the option.", example = "12950.00", format = "decimal")
     @Column(precision = 10, scale = 2)

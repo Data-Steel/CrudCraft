@@ -30,6 +30,7 @@ import nl.datasteel.crudcraft.annotations.fields.Request;
 public class Inspection {
 
     @Id
+    @Dto(ref = true)
     @GeneratedValue
     private UUID id;
 
@@ -40,7 +41,7 @@ public class Inspection {
     @Schema(description = "The car that this inspection belongs to.")
     private Car car;
 
-    @Dto
+    @Dto(ref = true)
     @Request
     @Schema(description = "Date of inspection.", example = "2025-11-03")
     private LocalDate performedOn;

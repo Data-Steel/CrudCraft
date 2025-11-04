@@ -47,7 +47,8 @@ public class Porsche extends Car {
     @Schema(description = "Whether this Porsche is turbocharged.", example = "true")
     private Boolean turboCharged;
 
-    // ✅ One-to-many to PorscheOption (specific for Porsche)
+    @Dto
+    @Request
     @OneToMany(mappedBy = "porsche", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Schema(description = "List of option packages available for this Porsche.")
     @JsonIgnore
