@@ -58,7 +58,7 @@ class FieldDescriptorTest {
         Identity id = new Identity("field", tm, null, SchemaMetadata.empty());
         DtoOptions dto = new DtoOptions(true, true, false, new String[]{"X"});
         EnumOptions eo = new EnumOptions(false, List.of());
-        Relationship rel = new Relationship(RelationshipType.NONE, "", "java.lang.String", false, false);
+        Relationship rel = new Relationship(RelationshipType.NONE, "", "java.lang.String", false, false, false);
         Validation val = new Validation(List.of(AnnotationSpec.builder(Deprecated.class).build()));
         SearchOptions so = new SearchOptions(true, List.of(SearchOperator.EQUALS), 2);
         Security sec = new Security(false, new String[0], new String[0]);
@@ -104,7 +104,7 @@ class FieldDescriptorTest {
         Identity otherId = new Identity("other", tm, null, SchemaMetadata.empty());
         DtoOptions dto = new DtoOptions(true, true, false, new String[]{"X"});
         EnumOptions eo = new EnumOptions(false, List.of());
-        Relationship rel = new Relationship(RelationshipType.NONE, "", "java.lang.String", false, false);
+        Relationship rel = new Relationship(RelationshipType.NONE, "", "java.lang.String", false, false, false);
         Validation val = new Validation(List.of(AnnotationSpec.builder(Deprecated.class).build()));
         SearchOptions so = new SearchOptions(true, List.of(SearchOperator.EQUALS), 2);
         Security sec = new Security(false, new String[0], new String[0]);
