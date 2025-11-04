@@ -235,6 +235,16 @@ public class FieldDescriptor {
     }
 
     /**
+     * Returns whether the target type is abstract.
+     * An abstract target cannot be instantiated directly in mappers.
+     *
+     * @return true if the target type is abstract, false otherwise
+     */
+    public boolean isTargetAbstract() {
+        return relationship.isTargetAbstract();
+    }
+
+    /**
      * Returns the validation rules for the field.
      * This includes constraints and annotations that apply to the field.
      *

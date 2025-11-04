@@ -62,7 +62,7 @@ public class RelationshipExtractor implements FieldPartExtractor<Relationship> {
         if (fieldType == null) {
             FieldPartExtractor.log(messager, Kind.ERROR, field, "Has null type.");
             return new Relationship(RelationshipType.NONE, "",
-                    "java.lang.Object", false, isEmbedded);
+                    "java.lang.Object", false, isEmbedded, false);
         }
 
         try {
@@ -106,12 +106,12 @@ public class RelationshipExtractor implements FieldPartExtractor<Relationship> {
             FieldPartExtractor.log(messager, Kind.NOTE, field,
                     "No relationship annotations found. Defaulting to NONE.");
             return new Relationship(RelationshipType.NONE, "",
-                    fieldType.toString(), false, isEmbedded);
+                    fieldType.toString(), false, isEmbedded, false);
         } catch (Exception e) {
             messager.printMessage(Kind.ERROR, "Error extracting relationship from field: "
                     + e.getMessage());
             return new Relationship(RelationshipType.NONE, "",
-                    "java.lang.Object", false, isEmbedded);
+                    "java.lang.Object", false, isEmbedded, false);
         }
     }
 
@@ -130,7 +130,9 @@ public class RelationshipExtractor implements FieldPartExtractor<Relationship> {
         // Check if the target type is a managed CRUD entity
         TypeElement te = env.getElementUtils().getTypeElement(targetType);
         boolean isCrud = te != null && te.getAnnotation(CrudCrafted.class) != null;
-        return new Relationship(relType, mappedBy, targetType, isCrud, isEmbedded);
+        // Check if the target type is abstract
+        boolean isAbstract = te != null && te.getModifiers().contains(javax.lang.model.element.Modifier.ABSTRACT);
+        return new Relationship(relType, mappedBy, targetType, isCrud, isEmbedded, isAbstract);
     }
 
     /**
