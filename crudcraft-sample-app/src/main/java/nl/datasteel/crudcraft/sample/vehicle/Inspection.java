@@ -4,11 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.UUID;
+import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 
 @Entity
 @Table(name = "inspection")
+@CrudCrafted
 @Schema(description = "Represents an inspection or maintenance record for a car.")
 public class Inspection {
 
@@ -18,6 +20,8 @@ public class Inspection {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "car_id", nullable = false)
+    @Dto
+    @Request
     @Schema(description = "The car that this inspection belongs to.")
     private Car car;
 
