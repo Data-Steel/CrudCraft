@@ -518,14 +518,17 @@ public class MapperGenerator implements StubGenerator {
                     .returns(specializedDto)
                     .addParameter(entity, "entity");
             
-            // Add mappings for ManyToOne relations (same as toResponse)
+            // Only add mappings for ManyToOne relations that are in this specialized DTO
             for (FieldDescriptor fd : manyToOne) {
-                String fq = fd.getTargetType();
-                String simple = fq.substring(fq.lastIndexOf('.') + 1);
-                builder.addAnnotation(AnnotationSpec.builder(mapping)
-                        .addMember("target", "$S", fd.getName())
-                        .addMember("qualifiedByName", "$S", modelName + "To" + simple + "Ref")
-                        .build());
+                // Check if this field is in the specialized DTO
+                if (Arrays.asList(fd.getResponseDtos()).contains(dtoName)) {
+                    String fq = fd.getTargetType();
+                    String simple = fq.substring(fq.lastIndexOf('.') + 1);
+                    builder.addAnnotation(AnnotationSpec.builder(mapping)
+                            .addMember("target", "$S", fd.getName())
+                            .addMember("qualifiedByName", "$S", modelName + "To" + simple + "Ref")
+                            .build());
+                }
             }
             
             // Add ignore mappings for abstract relation fields
