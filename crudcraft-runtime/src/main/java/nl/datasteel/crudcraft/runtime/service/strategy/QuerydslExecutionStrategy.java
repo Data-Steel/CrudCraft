@@ -17,9 +17,13 @@ package nl.datasteel.crudcraft.runtime.service.strategy;
 
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.Expressions;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import nl.datasteel.crudcraft.runtime.mapper.EntityMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -61,6 +65,12 @@ public class QuerydslExecutionStrategy<T, R, F> implements QueryExecutionStrateg
     private final Class<F> refClass;
 
     /**
+     * Cache of mapper methods by return type for specialized DTOs.
+     * Key: projection class, Value: mapper method
+     */
+    private final Map<Class<?>, Method> mapperMethodCache = new ConcurrentHashMap<>();
+
+    /**
      * Constructs a new execution strategy using the provided repository.
      *
      * @param repository the QueryDSL predicate executor to use for query execution
@@ -91,6 +101,65 @@ public class QuerydslExecutionStrategy<T, R, F> implements QueryExecutionStrateg
      */
     private Predicate nonNullPredicate(Predicate predicate) {
         return predicate == null ? Expressions.asBoolean(true).isTrue() : predicate;
+    }
+
+    /**
+     * Finds a mapper method that returns the specified projection type.
+     * This method uses reflection to find mapper methods for specialized DTOs.
+     * Results are cached for performance.
+     *
+     * @param projectionClass the projection class to find a mapper for
+     * @return a Function that maps entities to the projection type
+     * @throws UnsupportedOperationException if no suitable mapper method is found
+     */
+    @SuppressWarnings("unchecked")
+    private <P> Function<T, P> findMapperMethod(Class<P> projectionClass) {
+        // Check standard mappings first
+        if (projectionClass.equals(responseClass)) {
+            return entity -> (P) mapper.toResponse(entity);
+        }
+        if (projectionClass.equals(refClass)) {
+            return entity -> (P) mapper.toRef(entity);
+        }
+
+        // Try to find cached method
+        Method cachedMethod = mapperMethodCache.get(projectionClass);
+        if (cachedMethod != null) {
+            return entity -> {
+                try {
+                    return (P) cachedMethod.invoke(mapper, entity);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to invoke mapper method: " + cachedMethod.getName(), e);
+                }
+            };
+        }
+
+        // Search for a method that returns the projection type
+        Method foundMethod = null;
+        for (Method method : mapper.getClass().getMethods()) {
+            // Look for public methods with single entity parameter that return projection type
+            if (method.getReturnType().equals(projectionClass)
+                    && method.getParameterCount() == 1
+                    && !method.getName().equals("getIdFromRequest")) {
+                foundMethod = method;
+                mapperMethodCache.put(projectionClass, method);
+                break;
+            }
+        }
+
+        if (foundMethod != null) {
+            Method finalFoundMethod = foundMethod;
+            return entity -> {
+                try {
+                    return (P) finalFoundMethod.invoke(mapper, entity);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to invoke mapper method: " + finalFoundMethod.getName(), e);
+                }
+            };
+        }
+
+        throw new UnsupportedOperationException(
+                "Projection type not supported: " + projectionClass.getName());
     }
 
     /**
@@ -145,28 +214,16 @@ public class QuerydslExecutionStrategy<T, R, F> implements QueryExecutionStrateg
                 return specRepository.findBy(spec, q -> q.as(projection).page(pageable));
             }
             Page<T> entities = specRepository.findAll(spec, pageable);
-            if (projection.equals(responseClass)) {
-                return (Page<P>) entities.map(mapper::toResponse);
-            }
-            if (projection.equals(refClass)) {
-                return (Page<P>) entities.map(mapper::toRef);
-            }
-            throw new UnsupportedOperationException(
-                    "Projection type not supported: " + projection.getName());
+            Function<T, P> mapperFn = findMapperMethod(projection);
+            return entities.map(mapperFn::apply);
         }
         Predicate nonNullPredicate = nonNullPredicate(predicate);
         if (projection.isInterface()) {
             return repository.findBy(nonNullPredicate, q -> q.as(projection).page(pageable));
         }
         Page<T> entities = repository.findAll(nonNullPredicate, pageable);
-        if (projection.equals(responseClass)) {
-            return (Page<P>) entities.map(mapper::toResponse);
-        }
-        if (projection.equals(refClass)) {
-            return (Page<P>) entities.map(mapper::toRef);
-        }
-        throw new UnsupportedOperationException(
-                "Projection type not supported: " + projection.getName());
+        Function<T, P> mapperFn = findMapperMethod(projection);
+        return entities.map(mapperFn::apply);
     }
 
     /**
@@ -185,17 +242,8 @@ public class QuerydslExecutionStrategy<T, R, F> implements QueryExecutionStrateg
                 return specRepository.findBy(spec, q -> q.as(projection).all());
             }
             List<T> entities = specRepository.findAll(spec);
-            List<P> result = new ArrayList<>();
-            if (projection.equals(responseClass)) {
-                entities.forEach(entity -> result.add((P) mapper.toResponse(entity)));
-                return result;
-            }
-            if (projection.equals(refClass)) {
-                entities.forEach(entity -> result.add((P) mapper.toRef(entity)));
-                return result;
-            }
-            throw new UnsupportedOperationException(
-                    "Projection type not supported: " + projection.getName());
+            Function<T, P> mapperFn = findMapperMethod(projection);
+            return entities.stream().map(mapperFn).toList();
         }
         Predicate nonNullPredicate = nonNullPredicate(predicate);
         if (projection.isInterface()) {
@@ -203,16 +251,9 @@ public class QuerydslExecutionStrategy<T, R, F> implements QueryExecutionStrateg
         }
         Iterable<T> iterable = repository.findAll(nonNullPredicate);
         List<P> result = new ArrayList<>();
-        if (projection.equals(responseClass)) {
-            iterable.forEach(entity -> result.add((P) mapper.toResponse(entity)));
-            return result;
-        }
-        if (projection.equals(refClass)) {
-            iterable.forEach(entity -> result.add((P) mapper.toRef(entity)));
-            return result;
-        }
-        throw new UnsupportedOperationException(
-                "Projection type not supported: " + projection.getName());
+        Function<T, P> mapperFn = findMapperMethod(projection);
+        iterable.forEach(entity -> result.add(mapperFn.apply(entity)));
+        return result;
     }
 
     /**
@@ -250,15 +291,8 @@ public class QuerydslExecutionStrategy<T, R, F> implements QueryExecutionStrateg
             if (entity.isEmpty()) {
                 return Optional.empty();
             }
-            T e = entity.get();
-            if (projection.equals(responseClass)) {
-                return Optional.of((P) mapper.toResponse(e));
-            }
-            if (projection.equals(refClass)) {
-                return Optional.of((P) mapper.toRef(e));
-            }
-            throw new UnsupportedOperationException(
-                    "Projection type not supported: " + projection.getName());
+            Function<T, P> mapperFn = findMapperMethod(projection);
+            return Optional.of(mapperFn.apply(entity.get()));
         }
         Predicate nonNullPredicate = nonNullPredicate(predicate);
         if (projection.isInterface()) {
@@ -268,15 +302,8 @@ public class QuerydslExecutionStrategy<T, R, F> implements QueryExecutionStrateg
         if (entity.isEmpty()) {
             return Optional.empty();
         }
-        T e = entity.get();
-        if (projection.equals(responseClass)) {
-            return Optional.of((P) mapper.toResponse(e));
-        }
-        if (projection.equals(refClass)) {
-            return Optional.of((P) mapper.toRef(e));
-        }
-        throw new UnsupportedOperationException(
-                "Projection type not supported: " + projection.getName());
+        Function<T, P> mapperFn = findMapperMethod(projection);
+        return Optional.of(mapperFn.apply(entity.get()));
     }
 
     /**

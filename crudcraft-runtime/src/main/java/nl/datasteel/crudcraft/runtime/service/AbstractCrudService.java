@@ -361,6 +361,47 @@ public abstract class AbstractCrudService<T, U, R, F, ID> implements CrudService
     }
 
     /**
+     * Find an entity by ID and return it as a specific projection type.
+     *
+     * @param id identifier
+     * @param projection the projection class to use
+     * @param <P> the projection type
+     * @return found entity as projection
+     * @throws ResourceNotFoundException if not found
+     */
+    @Transactional
+    public <P> P findById(ID id, Class<P> projection) {
+        Predicate idPred = idPredicate(id);
+        BooleanBuilder builder = new BooleanBuilder().and(idPred);
+        Predicate rowPred = rowSecurityPredicate();
+        if (rowPred != null) {
+            builder.and(rowPred);
+        }
+        Predicate finalPred = builder.hasValue() ? builder : null;
+        Specification<T> spec = byId(id).and(rowSecurityFilter());
+
+        return queryExecutor.findOne(finalPred, spec, projection)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("%s with ID '%s' could not be found",
+                                entityClass.getSimpleName(), id)));
+    }
+
+    /**
+     * Find all entities with pagination and return as a specific projection type.
+     *
+     * @param pageable pagination information
+     * @param projectionClass the projection class to use
+     * @param <P> the projection type
+     * @return page of entities as projection
+     */
+    @Transactional
+    public <P> Page<P> findAllProjected(Pageable pageable, Class<P> projectionClass) {
+        Predicate rowPred = rowSecurityPredicate();
+        Specification<T> spec = rowSecurityFilter();
+        return queryExecutor.findAll(rowPred, spec, pageable, projectionClass);
+    }
+
+    /**
      * Return a reference proxy to the entity without hitting the database immediately.
      *
      * @param id identifier
