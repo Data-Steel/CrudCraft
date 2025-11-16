@@ -36,7 +36,7 @@ public class EqualsPredicateGenerator
                         SearchOperator.class
                 )
                 .addStatement(
-                        "p = cb.and(p, cb.equal($L, request.get$L()))",
+                        "p = cb.and(p, $L.in(request.get$L()))",
                         f.path(),
                         m
                 )

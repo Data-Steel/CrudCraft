@@ -36,7 +36,7 @@ public class NotEqualsPredicateGenerator
                         SearchOperator.class
                 )
                 .addStatement(
-                        "p = cb.and(p, cb.notEqual($L, request.get$L()))",
+                        "p = cb.and(p, cb.not($L.in(request.get$L())))",
                         f.path(),
                         m
                 )
