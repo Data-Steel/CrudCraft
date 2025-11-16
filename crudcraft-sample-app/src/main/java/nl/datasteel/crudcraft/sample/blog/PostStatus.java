@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.datasteel.crudcraft.sample.enums;
+package nl.datasteel.crudcraft.sample.blog;
 
-/** Booking state of a transaction. */
-public enum TransactionStatus {
-    BOOKED,
-    REJECTED,
-    PENDING_EXTERNAL
+/**
+ * Enum representing the status of a blog post.
+ */
+public enum PostStatus {
+    DRAFT,
+    PUBLISHED,
+    ARCHIVED
 }

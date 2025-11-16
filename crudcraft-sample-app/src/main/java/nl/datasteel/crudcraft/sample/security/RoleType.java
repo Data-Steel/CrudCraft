@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.datasteel.crudcraft.sample.enums;
+package nl.datasteel.crudcraft.sample.security;
 
-/** Status of a bank account. */
-public enum AccountStatus {
-    ACTIVE,
-    FROZEN,
-    CLOSED
+/**
+ * User roles for security demonstrations.
+ */
+public enum RoleType {
+    ADMIN,
+    EDITOR,
+    VIEWER
 }

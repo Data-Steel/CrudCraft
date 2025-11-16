@@ -11,27 +11,27 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package nl.datasteel.crudcraft.sample.user.service;
+package nl.datasteel.crudcraft.sample.blog.service;
 
 import java.util.UUID;
 import nl.datasteel.crudcraft.runtime.service.AbstractCrudService;
 import nl.datasteel.crudcraft.runtime.util.RelationshipUtils;
-import nl.datasteel.crudcraft.sample.user.User;
-import nl.datasteel.crudcraft.sample.user.dto.ref.UserRef;
-import nl.datasteel.crudcraft.sample.user.dto.request.UserRequestDto;
-import nl.datasteel.crudcraft.sample.user.dto.response.UserResponseDto;
-import nl.datasteel.crudcraft.sample.user.mapper.UserMapper;
-import nl.datasteel.crudcraft.sample.user.repository.UserRepository;
+import nl.datasteel.crudcraft.sample.blog.Post;
+import nl.datasteel.crudcraft.sample.blog.dto.ref.PostRef;
+import nl.datasteel.crudcraft.sample.blog.dto.request.PostRequestDto;
+import nl.datasteel.crudcraft.sample.blog.dto.response.PostResponseDto;
+import nl.datasteel.crudcraft.sample.blog.mapper.PostMapper;
+import nl.datasteel.crudcraft.sample.blog.repository.PostRepository;
 import org.springframework.stereotype.Service;
 
 /**
- * Generated Service layer stub for User.
+ * Generated Service layer stub for Post.
  * @CrudCraft:generated
  * @CrudCraft:editable
  *
  * This Service stub extends CrudCraft's base implementation. Override methods to customise behaviour.
  *
- * You are allowed to modify this file. It extends CrudCraft's abstract base (UserServiceBase)
+ * You are allowed to modify this file. It extends CrudCraft's abstract base (PostServiceBase)
  * which already implements full CRUD logic.
  *
  * This file was generated only once. CrudCraft will not overwrite it in future
@@ -42,8 +42,8 @@ import org.springframework.stereotype.Service;
  * - DTO mapping and repository calls wired up
  *
  * Generation context:
- * - Source model: User
- * - Package: nl.datasteel.crudcraft.sample.user.service
+ * - Source model: Post
+ * - Package: nl.datasteel.crudcraft.sample.blog.service
  * - Generator: ServiceGenerator
  * - Generation time: 2025-11-16T21:29:13.682623464Z
  * - CrudCraft version: null
@@ -57,18 +57,18 @@ import org.springframework.stereotype.Service;
  * https://github.com/Data-Steel/CrudCraft/issues.
  */
 @Service
-public class UserService extends AbstractCrudService<User, UserRequestDto, UserResponseDto, UserRef, UUID> {
-    public UserService(UserRepository repository, UserMapper mapper) {
-        super(repository, mapper, User.class, UserResponseDto.class, UserRef.class);
+public class PostService extends AbstractCrudService<Post, PostRequestDto, PostResponseDto, PostRef, UUID> {
+    public PostService(PostRepository repository, PostMapper mapper) {
+        super(repository, mapper, Post.class, PostResponseDto.class, PostRef.class);
     }
 
     @Override
-    protected void postSave(User entity) {
+    protected void postSave(Post entity) {
         RelationshipUtils.fixBidirectional(entity);
     }
 
     @Override
-    protected void preDelete(User entity) {
+    protected void preDelete(Post entity) {
         RelationshipUtils.clearBidirectional(entity);
     }
 }
