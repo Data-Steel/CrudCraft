@@ -392,11 +392,10 @@ public class ControllerGenerator implements StubGenerator {
                             .build())
                     .addAnnotation(AnnotationSpec.builder(
                             JavaPoetUtils.getClassName("io.swagger.v3.oas.annotations.responses", "ApiResponses"))
-                            .addMember("value", "@$T(responseCode = $S, description = $S)",
+                            .addMember("value", "{@$T(responseCode = $S, description = $S), @$T(responseCode = $S, description = $S)}",
                                     JavaPoetUtils.getClassName("io.swagger.v3.oas.annotations.responses", "ApiResponse"),
                                     "200",
-                                    modelDescriptor.getName() + " retrieved successfully")
-                            .addMember("value", "@$T(responseCode = $S, description = $S)",
+                                    modelDescriptor.getName() + " retrieved successfully",
                                     JavaPoetUtils.getClassName("io.swagger.v3.oas.annotations.responses", "ApiResponse"),
                                     "404",
                                     modelDescriptor.getName() + " with the specified ID was not found")

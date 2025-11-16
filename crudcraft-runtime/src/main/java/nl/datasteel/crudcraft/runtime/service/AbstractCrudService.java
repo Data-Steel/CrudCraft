@@ -166,6 +166,7 @@ public abstract class AbstractCrudService<T, U, R, F, ID> implements CrudService
      */
     @Transactional
     @Override
+    @SuppressWarnings("unchecked")
     public <P> Page<P> search(SearchRequest<T> request, Pageable pageable, Class<P> projection) {
         Predicate searchPredicate = request == null ? null : request.toPredicate();
         Predicate rowPred = rowSecurityPredicate();
@@ -343,6 +344,7 @@ public abstract class AbstractCrudService<T, U, R, F, ID> implements CrudService
      */
     @Override
     @Transactional
+    @SuppressWarnings("unchecked")
     public <P> P findById(ID id, Class<P> projection) {
         Predicate idPred = idPredicate(id);
         BooleanBuilder builder = new BooleanBuilder().and(idPred);
