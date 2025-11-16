@@ -45,7 +45,7 @@ public class Category {
 
     @NotBlank
     @Size(min = 2, max = 50)
-    @Dto({"List", "Map"})
+    @Dto({"List"})
     @Request
     @Searchable
     @ProjectionField("category.name")

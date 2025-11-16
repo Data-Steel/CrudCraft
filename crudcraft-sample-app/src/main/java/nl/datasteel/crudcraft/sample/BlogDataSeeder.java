@@ -20,6 +20,7 @@ import jakarta.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.util.*;
 import nl.datasteel.crudcraft.sample.blog.*;
+import nl.datasteel.crudcraft.sample.blog.content.*;
 import nl.datasteel.crudcraft.sample.security.RoleType;
 import nl.datasteel.crudcraft.sample.user.User;
 import org.springframework.boot.CommandLineRunner;
@@ -122,6 +123,14 @@ public class BlogDataSeeder implements CommandLineRunner {
         // Create posts with stats
         List<Post> posts = createPosts(300, authors, categories, tags);
         System.out.println("Created " + posts.size() + " posts");
+
+        // Create articles (concrete class extending Content)
+        int articleCount = createArticles(100, authors);
+        System.out.println("Created " + articleCount + " articles");
+
+        // Create tutorials (concrete class extending Content)
+        int tutorialCount = createTutorials(50, authors);
+        System.out.println("Created " + tutorialCount + " tutorials");
 
         // Create comments
         int commentCount = createComments(500, posts);
@@ -315,6 +324,79 @@ public class BlogDataSeeder implements CommandLineRunner {
             comment.setApproved(random.nextDouble() > 0.2); // 80% approved
             
             entityManager.persist(comment);
+        }
+        
+        return count;
+    }
+
+    private int createArticles(int count, List<Author> authors) {
+        OffsetDateTime now = OffsetDateTime.now();
+        
+        String[] articleSubtitles = {
+            "A deep dive into the topic",
+            "Everything you need to know",
+            "Practical insights and examples",
+            "Expert analysis and recommendations",
+            "Real-world applications explained"
+        };
+
+        for (int i = 0; i < count; i++) {
+            Article article = new Article();
+            
+            article.setTitle("Article: " + TITLE_TEMPLATES[random.nextInt(TITLE_TEMPLATES.length)]
+                    .replace("%s", CATEGORY_NAMES[random.nextInt(CATEGORY_NAMES.length)]));
+            article.setBody(generateContent());
+            article.setSubtitle(articleSubtitles[random.nextInt(articleSubtitles.length)]);
+            article.setAuthor(authors.get(random.nextInt(authors.size())));
+            article.setReadingTimeMinutes(5 + random.nextInt(20));
+            article.setFeatured(random.nextDouble() > 0.8); // 20% featured
+            article.setAllowComments(random.nextDouble() > 0.1); // 90% allow comments
+            
+            ContentStatus status = ContentStatus.values()[random.nextInt(ContentStatus.values().length)];
+            article.setStatus(status);
+            if (status == ContentStatus.PUBLISHED) {
+                article.setPublishedAt(now.minusDays(random.nextInt(365)));
+            }
+            
+            entityManager.persist(article);
+        }
+        
+        return count;
+    }
+
+    private int createTutorials(int count, List<Author> authors) {
+        OffsetDateTime now = OffsetDateTime.now();
+        
+        String[] prerequisites = {
+            "Basic understanding of the topic",
+            "Familiarity with core concepts",
+            "No prior experience required",
+            "Intermediate knowledge recommended",
+            "Advanced understanding assumed"
+        };
+
+        for (int i = 0; i < count; i++) {
+            Tutorial tutorial = new Tutorial();
+            
+            tutorial.setTitle("Tutorial: " + TITLE_TEMPLATES[random.nextInt(TITLE_TEMPLATES.length)]
+                    .replace("%s", CATEGORY_NAMES[random.nextInt(CATEGORY_NAMES.length)]));
+            tutorial.setBody(generateContent());
+            tutorial.setAuthor(authors.get(random.nextInt(authors.size())));
+            tutorial.setDifficultyLevel(DifficultyLevel.values()[random.nextInt(DifficultyLevel.values().length)]);
+            tutorial.setEstimatedDurationMinutes(30 + random.nextInt(180));
+            tutorial.setPrerequisites(prerequisites[random.nextInt(prerequisites.length)]);
+            
+            if (random.nextDouble() > 0.5) {
+                tutorial.setGithubRepoUrl("https://github.com/example/tutorial-" + (i + 1));
+            }
+            
+            ContentStatus status = ContentStatus.values()[random.nextInt(ContentStatus.values().length)];
+            tutorial.setStatus(status);
+            if (status == ContentStatus.PUBLISHED) {
+                tutorial.setPublishedAt(now.minusDays(random.nextInt(365)));
+            }
+            
+            entityManager.persist(tutorial);
         }
         
         return count;

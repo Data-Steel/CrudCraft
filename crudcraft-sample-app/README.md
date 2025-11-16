@@ -14,6 +14,20 @@ The sample app demonstrates a blog/content management system with the following 
 - **Comment** - User comments on posts (NO_DELETE template - validation, ManyToOne)
 - **User** - Application users with role-based security (demonstrates field-level security with hidden password hash)
 
+### Inheritance Demonstration
+
+The sample app also demonstrates **abstract base classes with inheritance**:
+
+- **Content** (abstract) - Base class for all content items with common fields (title, body, author, publishedAt, status)
+  - CrudCraft skips generating stubs for abstract classes
+  - Child classes inherit all parent fields in their DTOs
+- **Article** (extends Content) - Adds subtitle, readingTimeMinutes, featured, allowComments
+  - Generated DTOs include both Article fields AND all Content fields
+  - Full CRUD endpoints generated
+- **Tutorial** (extends Content) - Adds difficultyLevel, estimatedDurationMinutes, prerequisites, githubRepoUrl
+  - Generated DTOs include both Tutorial fields AND all Content fields
+  - Full CRUD endpoints generated
+
 ## Features Demonstrated
 
 ### Core Features
@@ -25,21 +39,26 @@ The sample app demonstrates a blog/content management system with the following 
 - **Validation** - Bean validation constraints on all entity fields
 
 ### Advanced Features
-- **Value DTOs** - List and Map response DTO variants
+- **Value DTOs** - List response DTO variants (not Map - List is more appropriate)
   - `AuthorListResponseDto` - List view with name and email only
-  - `CategoryListResponseDto` and `CategoryMapResponseDto` - Both List and Map variants
+  - `CategoryListResponseDto` - List view for categories
   - `PostListResponseDto` - List view with title and summary
   - `TagListResponseDto`, `CommentListResponseDto`, `PostStatsListResponseDto`, `UserListResponseDto`
+  - `ArticleListResponseDto`, `TutorialListResponseDto` - List views for inherited entities
 - **Projection support** - ProjectionField annotations for custom query paths
-  - Author, Category, Tag, Post, Comment, PostStats, and User all have projection metadata
+  - Author, Category, Tag, Post, Comment, PostStats, User, Article, Tutorial all have projection metadata
+- **Inheritance with abstract classes** - Demonstrates CrudCraft's handling of class hierarchies
+  - Abstract `Content` class marked @CrudCrafted (no stubs generated)
+  - Concrete `Article` and `Tutorial` classes extend Content
+  - Child class DTOs automatically include all parent fields (title, body, author, etc.)
+  - Full CRUD endpoints generated for child classes only
 - **CrudTemplate variations** - Different endpoint configurations per entity:
   - `Author` - FULL template (all endpoints enabled)
   - `Category` - READ_ONLY template (no create/update/delete)
   - `Tag` - IMMUTABLE_WRITE template (create only, no updates)
   - `PostStats` - PATCH_ONLY template (only partial updates allowed)
   - `Comment` - NO_DELETE template (can't be deleted for audit purposes)
-  - `Post` - Default template (full CRUD)
-  - `User` - Default template with AdminOnly security
+  - `Post`, `Article`, `Tutorial`, `User` - Default template (full CRUD)
 - **Security policies** - AdminOnlySecurityPolicy on User endpoints
 - **Field-level security** - User password hash is write-only (never returned in responses)
 - **Editable stubs** - Post and User demonstrate customizable generated code
@@ -53,10 +72,12 @@ The application automatically seeds the database with:
 - 18 categories
 - 23 tags  
 - 300 blog posts with statistics
+- 100 articles (extending Content base class)
+- 50 tutorials (extending Content base class)
 - 500 comments
 - 3 demo users (admin/password, editor/password, viewer/password)
 
-Total: **850+ records** to thoroughly test pagination, search, and other features.
+Total: **1000+ records** to thoroughly test pagination, search, inheritance, and other features.
 
 ## Running the App
 
