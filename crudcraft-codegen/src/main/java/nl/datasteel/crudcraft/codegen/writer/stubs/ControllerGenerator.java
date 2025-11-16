@@ -338,13 +338,25 @@ public class ControllerGenerator implements StubGenerator {
                             JavaPoetUtils.getClassName("org.springframework.web.bind.annotation", "GetMapping"))
                             .addMember("value", "$S", "/" + pathSegment)
                             .build())
+                    .addAnnotation(AnnotationSpec.builder(
+                            JavaPoetUtils.getClassName("io.swagger.v3.oas.annotations", "Operation"))
+                            .addMember("summary", "$S", "Get all " + modelDescriptor.getName() + " entities as " + dtoName + " projection")
+                            .addMember("description", "$S", "Retrieves all " + modelDescriptor.getName() + " entities with support for pagination, projected to " + dtoName + " DTO.")
+                            .build())
+                    .addAnnotation(AnnotationSpec.builder(
+                            JavaPoetUtils.getClassName("io.swagger.v3.oas.annotations.responses", "ApiResponses"))
+                            .addMember("value", "@$T(responseCode = $S, description = $S)",
+                                    JavaPoetUtils.getClassName("io.swagger.v3.oas.annotations.responses", "ApiResponse"),
+                                    "200",
+                                    "Paginated list of " + modelDescriptor.getName() + " entities")
+                            .build())
                     .addParameter(com.squareup.javapoet.ParameterSpec.builder(
                             JavaPoetUtils.getClassName("org.springframework.data.domain", "Pageable"),
                             "pageable")
                             .build())
                     .addCode("$T clamped = clampPageable(pageable);\n",
                             JavaPoetUtils.getClassName("org.springframework.data.domain", "Pageable"))
-                    .addCode("$T<$T> page = service.findAllProjected(clamped, $T.class);\n",
+                    .addCode("$T<$T> page = service.search(null, clamped, $T.class);\n",
                             JavaPoetUtils.getClassName("org.springframework.data.domain", "Page"),
                             specializedDto,
                             specializedDto)
@@ -372,6 +384,21 @@ public class ControllerGenerator implements StubGenerator {
                     .addAnnotation(AnnotationSpec.builder(
                             JavaPoetUtils.getClassName("org.springframework.web.bind.annotation", "GetMapping"))
                             .addMember("value", "$S", "/" + pathSegment + "/{id}")
+                            .build())
+                    .addAnnotation(AnnotationSpec.builder(
+                            JavaPoetUtils.getClassName("io.swagger.v3.oas.annotations", "Operation"))
+                            .addMember("summary", "$S", "Get a single " + modelDescriptor.getName() + " by ID as " + dtoName + " projection")
+                            .addMember("description", "$S", "Retrieves a single " + modelDescriptor.getName() + " entity by its unique identifier, projected to " + dtoName + " DTO.")
+                            .build())
+                    .addAnnotation(AnnotationSpec.builder(
+                            JavaPoetUtils.getClassName("io.swagger.v3.oas.annotations.responses", "ApiResponses"))
+                            .addMember("value", "{@$T(responseCode = $S, description = $S), @$T(responseCode = $S, description = $S)}",
+                                    JavaPoetUtils.getClassName("io.swagger.v3.oas.annotations.responses", "ApiResponse"),
+                                    "200",
+                                    modelDescriptor.getName() + " retrieved successfully",
+                                    JavaPoetUtils.getClassName("io.swagger.v3.oas.annotations.responses", "ApiResponse"),
+                                    "404",
+                                    modelDescriptor.getName() + " with the specified ID was not found")
                             .build())
                     .addParameter(com.squareup.javapoet.ParameterSpec.builder(
                             JavaPoetUtils.getClassName("java.util", "UUID"),

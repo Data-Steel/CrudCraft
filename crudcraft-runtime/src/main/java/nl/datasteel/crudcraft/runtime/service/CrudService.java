@@ -36,17 +36,36 @@ import org.springframework.data.domain.Pageable;
 public interface CrudService<T, U, R, F, ID> {
 
     /**
-     * Retrieve a page of entities, optionally filtered by a search query.
+     * Execute a typed search using a generated search request object,
+     * with optional projection to a specific DTO type.
+     * When projection is null, returns the default response DTO (R).
+     * When search request is null, no filtering is applied.
+     *
+     * @param request the search request containing criteria (can be null)
+     * @param pageable pagination information
+     * @param projection the projection class to use (can be null for default response DTO)
+     * @param <P> the projection type
+     * @return page of entities matching criteria, projected to the specified type
      */
-    Page<R> findAll(Pageable pageable, String searchQuery);
+    <P> Page<P> search(SearchRequest<T> request, Pageable pageable, Class<P> projection);
 
     /**
      * Execute a typed search using a generated search request object.
+     * Returns the default response DTO type.
+     *
+     * @param request the search request containing criteria (can be null)
+     * @param pageable pagination information
+     * @return page of DTOs matching criteria
      */
     Page<R> search(SearchRequest<T> request, Pageable pageable);
 
     /**
      * Execute a typed search returning reference DTOs.
+     * This is a convenience method that delegates to search(request, pageable, refClass).
+     *
+     * @param request the search request containing criteria (can be null)
+     * @param pageable pagination information
+     * @return page of reference DTOs matching criteria
      */
     Page<F> searchRef(SearchRequest<T> request, Pageable pageable);
 
@@ -62,8 +81,23 @@ public interface CrudService<T, U, R, F, ID> {
 
     /**
      * Find by ID or throw ResourceNotFoundException.
+     * Returns the default response DTO type.
+     *
+     * @param id identifier
+     * @return found entity as response DTO
      */
     R findById(ID id);
+
+    /**
+     * Find an entity by ID and return it as a specific projection type.
+     * When projection is null, returns the default response DTO (R).
+     *
+     * @param id identifier
+     * @param projection the projection class to use (can be null for default response DTO)
+     * @param <P> the projection type
+     * @return found entity as projection
+     */
+    <P> P findById(ID id, Class<P> projection);
 
     /**
      * Get a reference proxy to the entity (no immediate DB hit).
