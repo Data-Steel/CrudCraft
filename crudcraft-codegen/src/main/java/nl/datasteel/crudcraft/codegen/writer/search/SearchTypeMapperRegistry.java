@@ -18,7 +18,6 @@ package nl.datasteel.crudcraft.codegen.writer.search;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;

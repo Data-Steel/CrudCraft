@@ -27,6 +27,16 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadata;
 import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 import nl.datasteel.crudcraft.projection.api.ProjectionExecutor;
@@ -34,9 +44,6 @@ import nl.datasteel.crudcraft.projection.api.ProjectionQuery;
 import nl.datasteel.crudcraft.projection.api.ProjectionResult;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
-import java.lang.reflect.Field;
-import java.util.*;
 
 /**
  * QueryDSL-based implementation of {@link ProjectionExecutor}.

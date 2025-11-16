@@ -15,8 +15,6 @@
  */
 package nl.datasteel.crudcraft.annotations.classes;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -24,6 +22,8 @@ import java.lang.annotation.Target;
 import nl.datasteel.crudcraft.annotations.CrudEndpoint;
 import nl.datasteel.crudcraft.annotations.CrudTemplate;
 import nl.datasteel.crudcraft.annotations.security.policy.PermitAllSecurityPolicy;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 class CrudCraftedTest {

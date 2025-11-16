@@ -16,15 +16,14 @@
 package nl.datasteel.crudcraft.projection.impl.jpa;
 
 import jakarta.persistence.EntityManager;
+import java.util.Optional;
 import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 import nl.datasteel.crudcraft.projection.api.ProjectionQuery;
-import org.junit.jupiter.api.Test;
-import org.springframework.data.jpa.domain.Specification;
-
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import org.springframework.data.jpa.domain.Specification;
 
 class JpaProjectionExecutorProviderTest {
 

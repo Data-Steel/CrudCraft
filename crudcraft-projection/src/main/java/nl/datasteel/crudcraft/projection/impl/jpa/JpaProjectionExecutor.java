@@ -32,12 +32,12 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadata;
+import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 import nl.datasteel.crudcraft.projection.api.ProjectionExecutor;
 import nl.datasteel.crudcraft.projection.api.ProjectionQuery;
 import nl.datasteel.crudcraft.projection.api.ProjectionResult;
 import nl.datasteel.crudcraft.projection.impl.CollectionHydrator;
-import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadata;
-import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 

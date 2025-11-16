@@ -35,12 +35,12 @@ import nl.datasteel.crudcraft.annotations.SearchOperator;
 import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.fileheader.SearchStrictHeader;
+import nl.datasteel.crudcraft.codegen.util.StubGeneratorUtil;
 import nl.datasteel.crudcraft.codegen.writer.search.PredicateGeneratorRegistry;
 import nl.datasteel.crudcraft.codegen.writer.search.PropertySpec;
 import nl.datasteel.crudcraft.codegen.writer.search.SearchField;
 import nl.datasteel.crudcraft.codegen.writer.search.SearchFieldCollector;
 import nl.datasteel.crudcraft.runtime.config.CrudCraftSearchProperties;
-import nl.datasteel.crudcraft.codegen.util.StubGeneratorUtil;
 
 /**
  * Generates a SearchRequest DTO and Specification implementation for

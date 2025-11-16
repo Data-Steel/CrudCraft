@@ -16,10 +16,10 @@
 package nl.datasteel.crudcraft.projection.impl.jpa;
 
 import jakarta.persistence.EntityManager;
+import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 import nl.datasteel.crudcraft.projection.api.ProjectionExecutor;
 import nl.datasteel.crudcraft.projection.api.ProjectionExecutorProvider;
 import nl.datasteel.crudcraft.projection.api.ProjectionQuery;
-import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 
 /**
  * Provider for the JPA based {@link ProjectionExecutor}.

@@ -16,10 +16,10 @@
 package nl.datasteel.crudcraft.projection.api;
 
 import com.querydsl.core.types.Predicate;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.mock;
 import org.springframework.data.jpa.domain.Specification;
-import static org.junit.jupiter.api.Assertions.*;
 
 class FilterCriteriaTest {
 

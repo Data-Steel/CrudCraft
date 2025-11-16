@@ -15,10 +15,9 @@
  */
 package nl.datasteel.crudcraft.annotations.security;
 
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class RowSecurityHandlerTest {
 

@@ -29,26 +29,24 @@ import jakarta.persistence.metamodel.SingularAttribute;
 import jakarta.persistence.metamodel.Type;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadata;
-import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
-import nl.datasteel.crudcraft.projection.api.ProjectionQuery;
-import nl.datasteel.crudcraft.projection.api.ProjectionResult;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-
+import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadata;
+import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
+import nl.datasteel.crudcraft.projection.api.ProjectionQuery;
+import nl.datasteel.crudcraft.projection.api.ProjectionResult;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
+import org.mockito.Mockito;
 import static org.mockito.Mockito.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 class QuerydslProjectionExecutorTest {
 

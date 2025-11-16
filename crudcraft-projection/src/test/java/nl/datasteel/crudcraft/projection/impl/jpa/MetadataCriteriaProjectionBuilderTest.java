@@ -15,16 +15,24 @@
  */
 package nl.datasteel.crudcraft.projection.impl.jpa;
 
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.CompoundSelection;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Selection;
 import java.util.List;
 import java.util.function.BiConsumer;
 import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadata;
 import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 import nl.datasteel.crudcraft.projection.api.ProjectionQuery;
 import nl.datasteel.crudcraft.projection.mapping.ProjectionMapper;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertSame;
+import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 

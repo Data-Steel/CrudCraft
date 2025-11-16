@@ -27,10 +27,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import nl.datasteel.crudcraft.projection.api.ProjectionQuery;
-import nl.datasteel.crudcraft.projection.mapping.ProjectionMapper;
 import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadata;
 import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
+import nl.datasteel.crudcraft.projection.api.ProjectionQuery;
+import nl.datasteel.crudcraft.projection.mapping.ProjectionMapper;
 
 /**
  * {@link CriteriaProjectionBuilder} that relies on pre-generated

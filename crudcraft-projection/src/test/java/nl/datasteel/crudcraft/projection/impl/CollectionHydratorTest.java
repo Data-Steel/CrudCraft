@@ -15,15 +15,16 @@
  */
 package nl.datasteel.crudcraft.projection.impl;
 
-import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadata;
-import org.junit.jupiter.api.Test;
-
-import java.util.*;
-import java.util.function.BiConsumer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadata;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class CollectionHydratorTest {
 

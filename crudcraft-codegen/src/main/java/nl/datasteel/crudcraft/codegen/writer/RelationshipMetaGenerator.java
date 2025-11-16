@@ -29,10 +29,10 @@ import nl.datasteel.crudcraft.codegen.descriptor.RelationshipType;
 import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.fileheader.ModelStrictHeader;
+import nl.datasteel.crudcraft.codegen.util.StubGeneratorUtil;
 import nl.datasteel.crudcraft.codegen.writer.relationship.OneToManyHandler;
 import nl.datasteel.crudcraft.codegen.writer.relationship.OneToOneHandler;
 import nl.datasteel.crudcraft.codegen.writer.relationship.RelationshipHandler;
-import nl.datasteel.crudcraft.codegen.util.StubGeneratorUtil;
 
 /**
  * Generates a compile-time “RelationshipMeta” class with

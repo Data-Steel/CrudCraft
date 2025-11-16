@@ -17,7 +17,8 @@ package nl.datasteel.crudcraft.projection.mapping;
 
 import java.util.List;
 import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadata;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 
 class SimpleProjectionMetadataRegistryTest {

@@ -15,7 +15,10 @@
  */
 package nl.datasteel.crudcraft.sample.blog.content;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
 import nl.datasteel.crudcraft.annotations.fields.ProjectionField;

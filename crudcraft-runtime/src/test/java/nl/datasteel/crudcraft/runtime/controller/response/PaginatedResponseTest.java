@@ -17,8 +17,8 @@ package nl.datasteel.crudcraft.runtime.controller.response;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class PaginatedResponseTest {
 

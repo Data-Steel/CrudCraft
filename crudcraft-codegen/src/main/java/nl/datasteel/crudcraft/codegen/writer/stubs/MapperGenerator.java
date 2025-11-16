@@ -41,8 +41,8 @@ import nl.datasteel.crudcraft.codegen.descriptor.RelationshipType;
 import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.util.JavaPoetUtils;
-import nl.datasteel.crudcraft.codegen.util.StubGeneratorUtil;
 import nl.datasteel.crudcraft.codegen.util.StringCase;
+import nl.datasteel.crudcraft.codegen.util.StubGeneratorUtil;
 import nl.datasteel.crudcraft.codegen.writer.Generator;
 import nl.datasteel.crudcraft.codegen.writer.WriteContext;
 

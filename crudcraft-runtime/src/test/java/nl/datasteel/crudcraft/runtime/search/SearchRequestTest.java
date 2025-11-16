@@ -15,9 +15,8 @@
  */
 package nl.datasteel.crudcraft.runtime.search;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import com.querydsl.core.types.Predicate;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.jpa.domain.Specification;
 

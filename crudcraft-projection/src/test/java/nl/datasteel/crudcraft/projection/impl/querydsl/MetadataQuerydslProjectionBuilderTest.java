@@ -27,10 +27,10 @@ import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadata;
 import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 import nl.datasteel.crudcraft.projection.api.ProjectionQuery;
 import nl.datasteel.crudcraft.projection.mapping.ProjectionMapper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 

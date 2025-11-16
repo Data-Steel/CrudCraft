@@ -16,14 +16,22 @@
 package nl.datasteel.crudcraft.runtime.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import nl.datasteel.crudcraft.runtime.exception.*;
+import java.util.List;
+import nl.datasteel.crudcraft.runtime.exception.BadRequestException;
+import nl.datasteel.crudcraft.runtime.exception.BulkOperationException;
+import nl.datasteel.crudcraft.runtime.exception.DuplicateResourceException;
+import nl.datasteel.crudcraft.runtime.exception.ForbiddenException;
+import nl.datasteel.crudcraft.runtime.exception.MapperException;
+import nl.datasteel.crudcraft.runtime.exception.NotImplementedException;
+import nl.datasteel.crudcraft.runtime.exception.OperationNotAllowedException;
+import nl.datasteel.crudcraft.runtime.exception.PreconditionFailedException;
+import nl.datasteel.crudcraft.runtime.exception.ResourceNotFoundException;
+import nl.datasteel.crudcraft.runtime.exception.TooManyRequestsException;
+import nl.datasteel.crudcraft.runtime.exception.UnauthorizedException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class CrudCraftExceptionHandlerTest {
 

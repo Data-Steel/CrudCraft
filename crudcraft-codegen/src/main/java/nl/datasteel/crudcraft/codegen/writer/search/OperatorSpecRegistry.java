@@ -20,12 +20,10 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-
-import javax.lang.model.element.Modifier;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
-
+import javax.lang.model.element.Modifier;
 import nl.datasteel.crudcraft.annotations.SearchOperator;
 
 /**

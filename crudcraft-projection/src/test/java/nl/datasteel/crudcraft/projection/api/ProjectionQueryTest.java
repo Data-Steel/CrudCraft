@@ -16,9 +16,9 @@
 package nl.datasteel.crudcraft.projection.api;
 
 import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ProjectionQueryTest {
 

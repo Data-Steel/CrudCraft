@@ -15,18 +15,15 @@
  */
 package nl.datasteel.crudcraft.runtime.security.row;
 
-import java.util.UUID;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-
+import java.util.UUID;
 import nl.datasteel.crudcraft.runtime.security.AccessDeniedException;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
 
 class OwnerBasedRowSecurityTest {

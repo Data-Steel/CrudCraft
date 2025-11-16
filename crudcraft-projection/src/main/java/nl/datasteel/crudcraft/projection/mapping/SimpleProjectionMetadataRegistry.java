@@ -17,7 +17,6 @@ package nl.datasteel.crudcraft.projection.mapping;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadata;
 import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 

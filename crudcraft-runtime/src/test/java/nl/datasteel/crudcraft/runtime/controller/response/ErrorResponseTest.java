@@ -16,8 +16,8 @@
 package nl.datasteel.crudcraft.runtime.controller.response;
 
 import java.time.Instant;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ErrorResponseTest {
 

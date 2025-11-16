@@ -17,10 +17,10 @@ package nl.datasteel.crudcraft.projection.impl.querydsl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.metamodel.Metamodel;
+import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 import nl.datasteel.crudcraft.projection.api.ProjectionExecutor;
 import nl.datasteel.crudcraft.projection.api.ProjectionExecutorProvider;
 import nl.datasteel.crudcraft.projection.api.ProjectionQuery;
-import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 
 /**
  * Provider for the Querydsl based {@link ProjectionExecutor}.

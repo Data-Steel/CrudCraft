@@ -15,10 +15,9 @@
  */
 package nl.datasteel.crudcraft.annotations;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.EnumSet;
 import java.util.Set;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class CrudTemplateTest {

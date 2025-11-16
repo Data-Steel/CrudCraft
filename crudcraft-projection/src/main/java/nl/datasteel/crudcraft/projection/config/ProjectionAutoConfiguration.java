@@ -18,6 +18,7 @@ package nl.datasteel.crudcraft.projection.config;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 import nl.datasteel.crudcraft.projection.api.ProjectionExecutor;
 import nl.datasteel.crudcraft.projection.api.ProjectionExecutorProvider;
 import nl.datasteel.crudcraft.projection.impl.RoutingProjectionExecutor;
@@ -27,7 +28,6 @@ import nl.datasteel.crudcraft.projection.impl.jpa.MetadataCriteriaProjectionBuil
 import nl.datasteel.crudcraft.projection.impl.querydsl.MetadataQuerydslProjectionBuilder;
 import nl.datasteel.crudcraft.projection.impl.querydsl.QuerydslProjectionBuilder;
 import nl.datasteel.crudcraft.projection.impl.querydsl.QuerydslProjectionExecutorProvider;
-import nl.datasteel.crudcraft.codegen.projection.ProjectionMetadataRegistry;
 import nl.datasteel.crudcraft.projection.mapping.SimpleProjectionMetadataRegistry;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

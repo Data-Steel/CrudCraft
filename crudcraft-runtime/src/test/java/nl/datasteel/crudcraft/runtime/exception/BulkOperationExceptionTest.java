@@ -15,11 +15,9 @@
  */
 package nl.datasteel.crudcraft.runtime.exception;
 
-import org.junit.jupiter.api.Test;
-
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class BulkOperationExceptionTest {
 

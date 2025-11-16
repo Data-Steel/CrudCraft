@@ -19,8 +19,8 @@ import java.util.List;
 import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.projection.mapping.dto.AddressDto;
 import nl.datasteel.crudcraft.projection.mapping.dto.UserDto;
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class ProjectionFieldResolverTest {
 

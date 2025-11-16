@@ -15,11 +15,20 @@
  */
 package nl.datasteel.crudcraft.sample.blog;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 import nl.datasteel.crudcraft.annotations.CrudTemplate;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
@@ -27,7 +36,6 @@ import nl.datasteel.crudcraft.annotations.fields.Dto;
 import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 import nl.datasteel.crudcraft.annotations.fields.Searchable;
-import nl.datasteel.crudcraft.runtime.extensions.AuditableExtension;
 
 /**
  * Represents a comment on a blog post.

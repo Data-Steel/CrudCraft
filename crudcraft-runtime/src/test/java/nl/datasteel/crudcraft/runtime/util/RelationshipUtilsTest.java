@@ -16,9 +16,9 @@
 package nl.datasteel.crudcraft.runtime.util;
 
 import nl.datasteel.crudcraft.runtime.exception.RelationshipException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class RelationshipUtilsTest {
 

@@ -15,15 +15,13 @@
  */
 package nl.datasteel.crudcraft.annotations.security;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.data.jpa.domain.Specification;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.jpa.domain.Specification;
 
 class RowSecurityTest {
 

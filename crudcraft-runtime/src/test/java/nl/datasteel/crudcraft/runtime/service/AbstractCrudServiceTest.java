@@ -15,25 +15,23 @@
  */
 package nl.datasteel.crudcraft.runtime.service;
 
-import nl.datasteel.crudcraft.runtime.Identified;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.*;
-
 import com.querydsl.core.types.Predicate;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
-import nl.datasteel.crudcraft.runtime.search.SearchRequest;
 import nl.datasteel.crudcraft.annotations.security.RowSecurityHandler;
+import nl.datasteel.crudcraft.runtime.Identified;
 import nl.datasteel.crudcraft.runtime.exception.ResourceNotFoundException;
 import nl.datasteel.crudcraft.runtime.mapper.EntityMapper;
+import nl.datasteel.crudcraft.runtime.search.SearchRequest;
 import nl.datasteel.crudcraft.runtime.service.strategy.QueryExecutionStrategy;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.*;
 import org.mockito.MockedStatic;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.*;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;

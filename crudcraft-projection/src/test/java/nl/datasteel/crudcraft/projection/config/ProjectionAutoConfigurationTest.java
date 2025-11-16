@@ -27,7 +27,6 @@ import nl.datasteel.crudcraft.projection.impl.jpa.CriteriaProjectionBuilder;
 import nl.datasteel.crudcraft.projection.impl.jpa.JpaProjectionExecutorProvider;
 import nl.datasteel.crudcraft.projection.impl.querydsl.QuerydslProjectionBuilder;
 import nl.datasteel.crudcraft.projection.impl.querydsl.QuerydslProjectionExecutorProvider;
-import nl.datasteel.crudcraft.projection.mapping.SimpleProjectionMetadataRegistry;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

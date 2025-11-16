@@ -15,14 +15,12 @@
  */
 package nl.datasteel.crudcraft.runtime.controller;
 
-import org.junit.jupiter.api.Test;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
-
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class DisabledEndpointTest {
 

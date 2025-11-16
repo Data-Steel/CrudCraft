@@ -16,9 +16,8 @@
 package nl.datasteel.crudcraft.annotations.security;
 
 import nl.datasteel.crudcraft.annotations.CrudEndpoint;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class CrudSecurityPolicyTest {
 
