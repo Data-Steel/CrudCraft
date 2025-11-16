@@ -17,16 +17,19 @@ package nl.datasteel.crudcraft.sample.blog;
 
 import jakarta.persistence.*;
 import java.util.UUID;
+import nl.datasteel.crudcraft.annotations.CrudTemplate;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
+import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 
 /**
  * Represents statistics for a blog post.
- * Demonstrates one-to-one relationships.
+ * Demonstrates one-to-one relationships and PATCH_ONLY template
+ * (stats can only be modified via PATCH, not full replacement).
  */
 @Entity
-@CrudCrafted(editable = false)
+@CrudCrafted(editable = false, template = CrudTemplate.PATCH_ONLY)
 @Table(name = "post_stats")
 public class PostStats {
 
@@ -39,18 +42,21 @@ public class PostStats {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @Dto
+    @Dto({"List"})
     @Request
+    @ProjectionField("stats.viewCount")
     @Column(nullable = false)
     private Integer viewCount = 0;
 
-    @Dto
+    @Dto({"List"})
     @Request
+    @ProjectionField("stats.likeCount")
     @Column(nullable = false)
     private Integer likeCount = 0;
 
-    @Dto
+    @Dto({"List"})
     @Request
+    @ProjectionField("stats.shareCount")
     @Column(nullable = false)
     private Integer shareCount = 0;
 

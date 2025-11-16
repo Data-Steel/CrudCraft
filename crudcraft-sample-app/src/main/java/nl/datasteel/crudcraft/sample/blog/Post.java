@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.UUID;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
+import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 import nl.datasteel.crudcraft.annotations.fields.Searchable;
 import nl.datasteel.crudcraft.runtime.extensions.AuditableExtension;
@@ -32,7 +33,8 @@ import nl.datasteel.crudcraft.runtime.extensions.SoftDeleteExtension;
 
 /**
  * Represents a blog post.
- * Demonstrates soft deletes, auditing, relationships, searchable fields, and validation.
+ * Demonstrates soft deletes, auditing, relationships, searchable fields, validation,
+ * editable stubs, List DTOs, and projection fields.
  */
 @Entity
 @CrudCrafted(editable = true)
@@ -49,6 +51,7 @@ public class Post {
     @Dto({"List"})
     @Request
     @Searchable
+    @ProjectionField("post.title")
     @Column(nullable = false, length = 200)
     private String title;
 
@@ -57,12 +60,14 @@ public class Post {
     @Dto
     @Request
     @Searchable
+    @ProjectionField("post.content")
     @Column(nullable = false, length = 10000)
     private String content;
 
-    @Dto
+    @Dto({"List"})
     @Request
     @Size(max = 500)
+    @ProjectionField("post.summary")
     @Column(length = 500)
     private String summary;
 

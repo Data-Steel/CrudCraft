@@ -21,18 +21,21 @@ import jakarta.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import nl.datasteel.crudcraft.annotations.CrudTemplate;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
+import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 import nl.datasteel.crudcraft.annotations.fields.Searchable;
 import nl.datasteel.crudcraft.runtime.extensions.AuditableExtension;
 
 /**
  * Represents a blog author who can write multiple posts.
- * Demonstrates basic CRUD operations, searchable fields, and one-to-many relationships.
+ * Demonstrates basic CRUD operations, searchable fields, one-to-many relationships,
+ * List DTOs, and CrudTemplate.FULL with all endpoints enabled.
  */
 @Entity
-@CrudCrafted(editable = false)
+@CrudCrafted(editable = false, template = CrudTemplate.FULL)
 @Table(name = "authors")
 public class Author {
 
@@ -43,17 +46,19 @@ public class Author {
 
     @NotBlank
     @Size(min = 2, max = 100)
-    @Dto
+    @Dto({"List"})
     @Request
     @Searchable
+    @ProjectionField("author.name")
     @Column(nullable = false, length = 100)
     private String name;
 
     @NotBlank
     @Size(min = 5, max = 255)
-    @Dto
+    @Dto({"List"})
     @Request
     @Searchable
+    @ProjectionField("author.email")
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 

@@ -20,18 +20,21 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import nl.datasteel.crudcraft.annotations.CrudTemplate;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
+import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 import nl.datasteel.crudcraft.annotations.fields.Searchable;
 import nl.datasteel.crudcraft.runtime.extensions.AuditableExtension;
 
 /**
  * Represents a comment on a blog post.
- * Demonstrates many-to-one relationships and validation.
+ * Demonstrates many-to-one relationships, validation, and NO_DELETE template
+ * (comments can be created and modified but not deleted for audit purposes).
  */
 @Entity
-@CrudCrafted(editable = false)
+@CrudCrafted(editable = false, template = CrudTemplate.NO_DELETE)
 @Table(name = "comments")
 public class Comment {
 
@@ -47,9 +50,10 @@ public class Comment {
 
     @NotBlank
     @Size(min = 2, max = 100)
-    @Dto
+    @Dto({"List"})
     @Request
     @Searchable
+    @ProjectionField("comment.authorName")
     @Column(nullable = false, length = 100)
     private String authorName;
 
@@ -57,6 +61,7 @@ public class Comment {
     @Size(min = 5, max = 255)
     @Dto
     @Request
+    @ProjectionField("comment.authorEmail")
     @Column(nullable = false, length = 255)
     private String authorEmail;
 
@@ -65,6 +70,7 @@ public class Comment {
     @Dto
     @Request
     @Searchable
+    @ProjectionField("comment.content")
     @Column(nullable = false, length = 2000)
     private String content;
 

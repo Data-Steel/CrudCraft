@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
+import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 import nl.datasteel.crudcraft.annotations.fields.Searchable;
 import nl.datasteel.crudcraft.annotations.security.FieldSecurity;
@@ -30,7 +31,7 @@ import nl.datasteel.crudcraft.sample.security.RoleType;
 
 /**
  * Application user with roles.
- * Demonstrates field-level security and AdminOnly security policy.
+ * Demonstrates field-level security, AdminOnly security policy, and projection fields.
  */
 @CrudCrafted(editable = true, securityPolicy = AdminOnlySecurityPolicy.class)
 @Entity
@@ -43,9 +44,10 @@ public class User {
     @Column(nullable = false, updatable = false)
     private UUID id;
 
-    @Dto
+    @Dto({"List"})
     @Request
     @Searchable
+    @ProjectionField("user.username")
     @Column(nullable = false, unique = true)
     private String username;
 

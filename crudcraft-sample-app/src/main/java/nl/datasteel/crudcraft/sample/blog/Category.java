@@ -21,18 +21,20 @@ import jakarta.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import nl.datasteel.crudcraft.annotations.CrudTemplate;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
+import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 import nl.datasteel.crudcraft.annotations.fields.Searchable;
 import nl.datasteel.crudcraft.runtime.extensions.AuditableExtension;
 
 /**
  * Represents a category for organizing blog posts.
- * Demonstrates simple CRUD operations and one-to-many relationships.
+ * Demonstrates READ_ONLY template (no create/update/delete), projections, and List DTOs.
  */
 @Entity
-@CrudCrafted(editable = false)
+@CrudCrafted(editable = false, template = CrudTemplate.READ_ONLY)
 @Table(name = "categories")
 public class Category {
 
@@ -43,9 +45,10 @@ public class Category {
 
     @NotBlank
     @Size(min = 2, max = 50)
-    @Dto
+    @Dto({"List", "Map"})
     @Request
     @Searchable
+    @ProjectionField("category.name")
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 

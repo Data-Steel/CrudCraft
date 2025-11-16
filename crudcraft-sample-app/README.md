@@ -6,24 +6,45 @@ A demonstration Spring Boot application that showcases CrudCraft's generated CRU
 
 The sample app demonstrates a blog/content management system with the following entities:
 
-- **Author** - Blog authors with name, email, and bio
-- **Category** - Post categories for organization
-- **Tag** - Tags for post classification (ManyToMany relationship)
-- **Post** - Blog posts with title, content, and metadata (demonstrates soft deletes, auditing, and editable stubs)
-- **PostStats** - View/like/share statistics (OneToOne relationship)
-- **Comment** - User comments on posts (demonstrates validation)
+- **Author** - Blog authors with name, email, and bio (FULL template - all endpoints)
+- **Category** - Post categories for organization (READ_ONLY template - no modifications)
+- **Tag** - Tags for post classification (IMMUTABLE_WRITE template - create only, ManyToMany relationship)
+- **Post** - Blog posts with title, content, and metadata (demonstrates soft deletes, auditing, editable stubs, and all relationship types)
+- **PostStats** - View/like/share statistics (PATCH_ONLY template - OneToOne relationship)
+- **Comment** - User comments on posts (NO_DELETE template - validation, ManyToOne)
 - **User** - Application users with role-based security (demonstrates field-level security with hidden password hash)
 
 ## Features Demonstrated
 
-- **Basic CRUD operations** - All entities have full CRUD endpoints
+### Core Features
+- **Basic CRUD operations** - All entities have endpoints for create, read, update, delete
 - **Relationships** - OneToMany, ManyToOne, OneToOne, and ManyToMany
-- **Search and filtering** - @Searchable fields enable API filtering
-- **Soft deletes** - Posts use soft delete functionality
-- **Auditing** - Automatic creation/update timestamps
-- **Security** - AdminOnly security policy on User endpoints, field-level security on password
-- **Validation** - Bean validation on all entity fields
-- **Editable stubs** - Post and User entities demonstrate customizable generated code
+- **Search and filtering** - @Searchable fields enable API filtering and sorting
+- **Soft deletes** - Posts use soft delete functionality (can be restored)
+- **Auditing** - Automatic creation/update timestamps on all entities
+- **Validation** - Bean validation constraints on all entity fields
+
+### Advanced Features
+- **Value DTOs** - List and Map response DTO variants
+  - `AuthorListResponseDto` - List view with name and email only
+  - `CategoryListResponseDto` and `CategoryMapResponseDto` - Both List and Map variants
+  - `PostListResponseDto` - List view with title and summary
+  - `TagListResponseDto`, `CommentListResponseDto`, `PostStatsListResponseDto`, `UserListResponseDto`
+- **Projection support** - ProjectionField annotations for custom query paths
+  - Author, Category, Tag, Post, Comment, PostStats, and User all have projection metadata
+- **CrudTemplate variations** - Different endpoint configurations per entity:
+  - `Author` - FULL template (all endpoints enabled)
+  - `Category` - READ_ONLY template (no create/update/delete)
+  - `Tag` - IMMUTABLE_WRITE template (create only, no updates)
+  - `PostStats` - PATCH_ONLY template (only partial updates allowed)
+  - `Comment` - NO_DELETE template (can't be deleted for audit purposes)
+  - `Post` - Default template (full CRUD)
+  - `User` - Default template with AdminOnly security
+- **Security policies** - AdminOnlySecurityPolicy on User endpoints
+- **Field-level security** - User password hash is write-only (never returned in responses)
+- **Editable stubs** - Post and User demonstrate customizable generated code
+- **Bulk operations** - Bulk create, update, patch, upsert, and delete on applicable entities
+- **Export functionality** - Available on entities with SEARCH endpoints
 
 ## Sample Data
 

@@ -21,17 +21,20 @@ import jakarta.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import nl.datasteel.crudcraft.annotations.CrudTemplate;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
+import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 import nl.datasteel.crudcraft.annotations.fields.Searchable;
 
 /**
  * Represents a tag that can be applied to multiple posts.
- * Demonstrates many-to-many relationships.
+ * Demonstrates many-to-many relationships and IMMUTABLE_WRITE template
+ * (tags can be created but not modified after creation).
  */
 @Entity
-@CrudCrafted(editable = false)
+@CrudCrafted(editable = false, template = CrudTemplate.IMMUTABLE_WRITE)
 @Table(name = "tags")
 public class Tag {
 
@@ -42,9 +45,10 @@ public class Tag {
 
     @NotBlank
     @Size(min = 2, max = 30)
-    @Dto
+    @Dto({"List"})
     @Request
     @Searchable
+    @ProjectionField("tag.name")
     @Column(nullable = false, unique = true, length = 30)
     private String name;
 
