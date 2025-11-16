@@ -165,6 +165,7 @@ public abstract class AbstractCrudService<T, U, R, F, ID> implements CrudService
      * @return page of entities matching criteria, projected to the specified type
      */
     @Transactional
+    @Override
     public <P> Page<P> search(SearchRequest<T> request, Pageable pageable, Class<P> projection) {
         Predicate searchPredicate = request == null ? null : request.toPredicate();
         Predicate rowPred = rowSecurityPredicate();
