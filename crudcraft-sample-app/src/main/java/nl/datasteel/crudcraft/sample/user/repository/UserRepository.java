@@ -24,42 +24,13 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 
 /**
- * Generated Repository layer stub for User.
- * @CrudCraft:generated
  * @CrudCraft:editable
- *
- * This Repository stub extends CrudCraft's base implementation. Override methods to customise behaviour.
- *
- * You are allowed to modify this file. It extends CrudCraft's abstract base (UserRepositoryBase)
- * which already implements full CRUD logic.
- *
- * This file was generated only once. CrudCraft will not overwrite it in future
- * builds. If you delete it, it will be regenerated.
- *
- * Features provided by CrudCraft:
- * - Standard CRUD workflow already implemented
- * - DTO mapping and repository calls wired up
- *
- * Generation context:
- * - Source model: User
- * - Package: nl.datasteel.crudcraft.sample.user.repository
- * - Generator: RepositoryGenerator
- * - Generation time: 2025-09-02T08:39:31.6823785+02:00
- * - CrudCraft version: 0.1.0
- *
- * Recommendations:
- * - You may customize method behavior, add validation, or extend with additional endpoints.
- * - Signature changes are allowed, but may desync from service or mapper layer—proceed with care.
- * - Do not manually copy or paste other CrudCraft stubs into this class.
- *
- * Support: For file generation bugs or feedback, open an issue at
- * https://github.com/Data-Steel/CrudCraft/issues.
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User>, QuerydslPredicateExecutor<User> {
-
+    
     /**
-     * Like a normal JPA Repository, you can add custom query methods here.
+     * Find a user by their username.
      */
     Optional<User> findByUsername(String username);
 }

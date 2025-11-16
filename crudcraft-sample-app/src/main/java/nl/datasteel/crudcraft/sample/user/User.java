@@ -15,96 +15,45 @@
  */
 package nl.datasteel.crudcraft.sample.user;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import java.time.Instant;
+import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;
 import nl.datasteel.crudcraft.annotations.fields.Dto;
+import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 import nl.datasteel.crudcraft.annotations.fields.Searchable;
 import nl.datasteel.crudcraft.annotations.security.FieldSecurity;
 import nl.datasteel.crudcraft.annotations.security.policy.AdminOnlySecurityPolicy;
-import nl.datasteel.crudcraft.annotations.security.RowSecurity;
 import nl.datasteel.crudcraft.runtime.extensions.AuditableExtension;
-import nl.datasteel.crudcraft.sample.branch.Branch;
-import nl.datasteel.crudcraft.sample.enums.RoleType;
-import nl.datasteel.crudcraft.sample.tenant.Tenant;
-import nl.datasteel.crudcraft.sample.security.OwnTenantRowSecurityHandler;
+import nl.datasteel.crudcraft.sample.security.RoleType;
 
 /**
  * Application user with roles.
- * Demonstrates field-level security and DTO generation.
- * Generated DTOs can be built fluently:
- * {@code UserRequestDto.builder().username("alice").build();}
+ * Demonstrates field-level security, AdminOnly security policy, and projection fields.
  */
 @CrudCrafted(editable = true, securityPolicy = AdminOnlySecurityPolicy.class)
-@RowSecurity(handlers = OwnTenantRowSecurityHandler.class)
 @Entity
 @Table(name = "app_users")
 public class User {
 
-    /**
-     * Identifier exposed through the generated DTO. Because it is marked as
-     * {@link jakarta.persistence.Id} and not included in {@link Request},
-     * clients cannot overwrite it.
-     */
     @Dto
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, updatable = false)
     private UUID id;
 
-    /**
-     * Owning tenant reference. Security policies can use this relationship to
-     * scope queries so users only see data from their own tenant.
-     */
-    @Dto
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tenant_id", nullable = false)
-    private Tenant tenant;
-
-    /**
-     * Optional branch link. Included in the DTO so API clients know in which
-     * branch the user operates.
-     */
-    @Dto
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "branch_id")
-    private Branch branch;
-
-    /**
-     * Login name for the user. Marked as {@link Request} to allow creation and
-     * update via the REST API and {@link Searchable} so queries can filter by
-     * username.
-     */
-    @Dto
+    @Dto({"List"})
     @Request
     @Searchable
+    @ProjectionField("user.username")
     @Column(nullable = false, unique = true)
     private String username;
 
     /**
-     * Password hash is write-only, so while it is in the dto (so it gets projected, and we can
-     * use it to validate the hash), it will always be set to {@code null} by
-     * {@link nl.datasteel.crudcraft.runtime.security.FieldSecurityUtil#filterRead(Object)}
-     * before responses are sent, keeping the value hidden from API consumers.
-     * You can try this by performing a GET request on the /users endpoint, while logged in
-     * as Alice or Carol (ADMIN)
+     * Password hash is write-only. It can be set via the API but will never
+     * be returned in responses due to {@link FieldSecurity} with empty readRoles.
      */
     @Dto
     @FieldSecurity(readRoles = {})
@@ -114,50 +63,22 @@ public class User {
 
     @Dto
     @Request
-    @Searchable
-    private Set<Instant> test;
-
-    /**
-     * Roles assigned to the user. CrudCraft maps this element collection to a
-     * separate table and ensures the set is copied to prevent external
-     * modification of the entity's internal state.
-     */
-    @Dto
-    @Request
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Set<RoleType> roles = new HashSet<>();
 
-    /**
-     * Embedded audit information (created/updated timestamps and actor). The
-     * {@link AuditableExtension} is filled automatically by CrudCraft hooks.
-     */
     @Embedded
     private AuditableExtension audit = new AuditableExtension();
+
+    // Getters and Setters
     public UUID getId() {
         return id;
     }
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public Tenant getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-    }
-
-    public Branch getBranch() {
-        return branch;
-    }
-
-    public void setBranch(Branch branch) {
-        this.branch = branch;
     }
 
     public String getUsername() {
