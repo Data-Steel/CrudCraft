@@ -27,6 +27,7 @@ import com.squareup.javapoet.TypeSpec;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Id;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,6 +42,7 @@ import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.util.JavaPoetUtils;
 import nl.datasteel.crudcraft.codegen.util.StubGeneratorUtil;
+import nl.datasteel.crudcraft.codegen.util.StringCase;
 import nl.datasteel.crudcraft.codegen.writer.Generator;
 import nl.datasteel.crudcraft.codegen.writer.WriteContext;
 
@@ -124,6 +126,10 @@ public class MapperGenerator implements StubGenerator {
         MethodSpec getIdFromRequest = getIdFromRequest(requestDto, beanWrapper, uuidClass, exceptionCls);
         List<MethodSpec> refHelpers = manyToOneRefHelpers(modelName, manyToOne);
         List<MethodSpec> idMappers = relationIdHelpers(modelName, relFields, uuidClass, ctx);
+        
+        // Generate specialized DTO mapper methods
+        List<MethodSpec> specializedMappers = generateSpecializedMappers(
+                modelDescriptor, entity, entityPackage, modelName, mapping, manyToOne, abstractRelFields);
 
         // Determine child mappers we need — include ALL relations (incl. MANY_TO_ONE)
         List<ClassName> uses = determineUses(modelDescriptor);
@@ -141,6 +147,7 @@ public class MapperGenerator implements StubGenerator {
                 .addMethods(List.of(fromRequest, update, patch, toResponse, toRef, getIdFromRequest));
         refHelpers.forEach(mapperBuilder::addMethod);
         idMappers.forEach(mapperBuilder::addMethod);
+        specializedMappers.forEach(mapperBuilder::addMethod);
 
         return JavaFile.builder(mapperPackage, mapperBuilder.build())
                 .addFileComment(StubGeneratorUtil.licenseHeader())
@@ -477,6 +484,65 @@ public class MapperGenerator implements StubGenerator {
             mapperAnnotation.addMember("uses", "{$L}", cb.build());
         }
         return mapperAnnotation.build();
+    }
+
+    /**
+     * Generates mapper methods for specialized DTOs (e.g., toListResponse, toMapResponse).
+     * These DTOs are created when fields use @Dto(value = {"List", "Map", ...}).
+     */
+    private List<MethodSpec> generateSpecializedMappers(
+            ModelDescriptor modelDescriptor,
+            ClassName entity,
+            String entityPackage,
+            String modelName,
+            ClassName mapping,
+            List<FieldDescriptor> manyToOne,
+            List<FieldDescriptor> abstractRelFields) {
+        
+        // Collect all unique specialized DTO names
+        Set<String> specializedDtoNames = modelDescriptor.getFields().stream()
+                .flatMap(fd -> Arrays.stream(fd.getResponseDtos()))
+                .collect(Collectors.toSet());
+        
+        List<MethodSpec> methods = new ArrayList<>();
+        
+        for (String dtoName : specializedDtoNames) {
+            String className = modelName + StringCase.PASCAL.apply(dtoName) + "ResponseDto";
+            ClassName specializedDto = JavaPoetUtils.getClassName(
+                    entityPackage + ".dto.response", className);
+            
+            String methodName = "to" + StringCase.PASCAL.apply(dtoName) + "Response";
+            
+            MethodSpec.Builder builder = MethodSpec.methodBuilder(methodName)
+                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                    .returns(specializedDto)
+                    .addParameter(entity, "entity");
+            
+            // Only add mappings for ManyToOne relations that are in this specialized DTO
+            for (FieldDescriptor fd : manyToOne) {
+                // Check if this field is in the specialized DTO
+                if (Arrays.asList(fd.getResponseDtos()).contains(dtoName)) {
+                    String fq = fd.getTargetType();
+                    String simple = fq.substring(fq.lastIndexOf('.') + 1);
+                    builder.addAnnotation(AnnotationSpec.builder(mapping)
+                            .addMember("target", "$S", fd.getName())
+                            .addMember("qualifiedByName", "$S", modelName + "To" + simple + "Ref")
+                            .build());
+                }
+            }
+            
+            // Add ignore mappings for abstract relation fields
+            for (FieldDescriptor fd : abstractRelFields) {
+                builder.addAnnotation(AnnotationSpec.builder(mapping)
+                        .addMember("target", "$S", fd.getName())
+                        .addMember("ignore", "$L", true)
+                        .build());
+            }
+            
+            methods.add(builder.build());
+        }
+        
+        return methods;
     }
 
     /**

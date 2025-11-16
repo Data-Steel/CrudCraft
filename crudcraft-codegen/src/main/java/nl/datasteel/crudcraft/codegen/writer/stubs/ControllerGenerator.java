@@ -23,6 +23,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -169,6 +170,10 @@ public class ControllerGenerator implements StubGenerator {
             }
         }
 
+        // Generate specialized DTO endpoints (e.g., /list, /map)
+        List<MethodSpec> specializedEndpoints = generateSpecializedEndpoints(modelDescriptor);
+        specializedEndpoints.forEach(builder::addMethod);
+
         TypeSpec controller = builder.build();
         return JavaFile.builder(controllerPackage, controller)
                 .addFileComment(StubGeneratorUtil.licenseHeader())
@@ -300,6 +305,90 @@ public class ControllerGenerator implements StubGenerator {
     @Override
     public boolean requiresCrudEntity() {
         return true;
+    }
+
+    /**
+     * Generates specialized DTO endpoints for each @Dto(value = {...}) variant.
+     * For example, if fields have @Dto(value = {"List"}), this generates:
+     * - GET /{entity}/list - paginated list with ListResponseDto
+     * - GET /{entity}/list/{id} - single item as ListResponseDto
+     */
+    private List<MethodSpec> generateSpecializedEndpoints(ModelDescriptor modelDescriptor) {
+        // Collect all unique specialized DTO names
+        Set<String> specializedDtoNames = modelDescriptor.getFields().stream()
+                .flatMap(fd -> Arrays.stream(fd.getResponseDtos()))
+                .collect(java.util.stream.Collectors.toSet());
+
+        List<MethodSpec> methods = new ArrayList<>();
+        String pkg = modelDescriptor.getPackageName();
+        String name = modelDescriptor.getName();
+
+        for (String dtoName : specializedDtoNames) {
+            String className = name + StringCase.PASCAL.apply(dtoName) + "ResponseDto";
+            ClassName specializedDto = JavaPoetUtils.getClassName(pkg + ".dto.response", className);
+            
+            // Pluralized path segment (e.g., "list", "map")
+            String pathSegment = StringCase.CAMEL.apply(dtoName).toLowerCase();
+            
+            // Generate GET /{entity}/{dtoName} - paginated list
+            MethodSpec getAllMethod = MethodSpec.methodBuilder("getAll" + StringCase.PASCAL.apply(dtoName))
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(JavaPoetUtils.getClassName("org.springframework.http", "ResponseEntity"))
+                    .addAnnotation(AnnotationSpec.builder(
+                            JavaPoetUtils.getClassName("org.springframework.web.bind.annotation", "GetMapping"))
+                            .addMember("value", "$S", "/" + pathSegment)
+                            .build())
+                    .addParameter(com.squareup.javapoet.ParameterSpec.builder(
+                            JavaPoetUtils.getClassName("org.springframework.data.domain", "Pageable"),
+                            "pageable")
+                            .build())
+                    .addCode("$T clamped = clampPageable(pageable);\n",
+                            JavaPoetUtils.getClassName("org.springframework.data.domain", "Pageable"))
+                    .addCode("$T<$T> page = service.findAllProjected(clamped, $T.class);\n",
+                            JavaPoetUtils.getClassName("org.springframework.data.domain", "Page"),
+                            specializedDto,
+                            specializedDto)
+                    .addCode("$T<$T> response = new $T<>(\n" +
+                            "    page.getContent(),\n" +
+                            "    page.getNumber(),\n" +
+                            "    page.getSize(),\n" +
+                            "    page.getTotalPages(),\n" +
+                            "    page.getTotalElements(),\n" +
+                            "    page.isFirst(),\n" +
+                            "    page.isLast()\n" +
+                            ");\n",
+                            JavaPoetUtils.getClassName("nl.datasteel.crudcraft.runtime.controller.response", "PaginatedResponse"),
+                            specializedDto,
+                            JavaPoetUtils.getClassName("nl.datasteel.crudcraft.runtime.controller.response", "PaginatedResponse"))
+                    .addCode("return $T.ok(response);\n",
+                            JavaPoetUtils.getClassName("org.springframework.http", "ResponseEntity"))
+                    .build();
+            methods.add(getAllMethod);
+            
+            // Generate GET /{entity}/{dtoName}/{id} - single item
+            MethodSpec getOneMethod = MethodSpec.methodBuilder("get" + StringCase.PASCAL.apply(dtoName) + "ById")
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(JavaPoetUtils.getClassName("org.springframework.http", "ResponseEntity"))
+                    .addAnnotation(AnnotationSpec.builder(
+                            JavaPoetUtils.getClassName("org.springframework.web.bind.annotation", "GetMapping"))
+                            .addMember("value", "$S", "/" + pathSegment + "/{id}")
+                            .build())
+                    .addParameter(com.squareup.javapoet.ParameterSpec.builder(
+                            JavaPoetUtils.getClassName("java.util", "UUID"),
+                            "id")
+                            .addAnnotation(JavaPoetUtils.getClassName("org.springframework.web.bind.annotation", "PathVariable"))
+                            .build())
+                    .addCode("$T dto = service.findById(id, $T.class);\n",
+                            specializedDto,
+                            specializedDto)
+                    .addCode("return $T.ok($T.filterRead(dto));\n",
+                            JavaPoetUtils.getClassName("org.springframework.http", "ResponseEntity"),
+                            JavaPoetUtils.getClassName("nl.datasteel.crudcraft.runtime.security", "FieldSecurityUtil"))
+                    .build();
+            methods.add(getOneMethod);
+        }
+
+        return methods;
     }
 
     @Override

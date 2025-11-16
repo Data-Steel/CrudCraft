@@ -145,4 +145,33 @@ class MapperGeneratorTest {
         gen.write(descriptor(List.of(parent)), ctx);
         assertFalse(env.messager.errors.isEmpty());
     }
+
+    @Test
+    void buildGeneratesSpecializedDtoMappers() {
+        MapperGenerator gen = new MapperGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+        
+        // Create a field with specialized DTO annotations
+        FieldDescriptor fieldWithSpecializedDto = new FieldDescriptor(
+                new Identity("name", tf.type(String.class), null, SchemaMetadata.empty()),
+                new DtoOptions(true, true, true, new String[]{"List", "Map"}),
+                new EnumOptions(false, List.of()),
+                new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                new Validation(List.of()),
+                new SearchOptions(false, List.of(), 0),
+                new Security(false, null, null)
+        );
+        
+        ModelDescriptor md = descriptor(List.of(fieldWithSpecializedDto));
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+        
+        // Verify specialized mapper methods are generated
+        assertTrue(code.contains("SampleListResponseDto toListResponse(Sample entity)"), 
+                "Should generate toListResponse method");
+        assertTrue(code.contains("SampleMapResponseDto toMapResponse(Sample entity)"), 
+                "Should generate toMapResponse method");
+    }
 }
