@@ -21,6 +21,7 @@ import nl.datasteel.crudcraft.annotations.fields.Dto;
 import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 import nl.datasteel.crudcraft.annotations.fields.Searchable;
+import nl.datasteel.crudcraft.runtime.extensions.AuditableExtension;
 
 /**
  * Concrete Tutorial entity extending Content.
@@ -56,6 +57,9 @@ public class Tutorial extends Content {
     @Column(name = "github_repo_url", length = 255)
     private String githubRepoUrl;
 
+    @Embedded
+    private AuditableExtension audit = new AuditableExtension();
+
     // Getters and Setters
     public DifficultyLevel getDifficultyLevel() {
         return difficultyLevel;
@@ -87,5 +91,13 @@ public class Tutorial extends Content {
 
     public void setGithubRepoUrl(String githubRepoUrl) {
         this.githubRepoUrl = githubRepoUrl;
+    }
+
+    public AuditableExtension getAudit() {
+        return audit;
+    }
+
+    public void setAudit(AuditableExtension audit) {
+        this.audit = audit;
     }
 }

@@ -17,6 +17,7 @@ package nl.datasteel.crudcraft.sample;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 import nl.datasteel.crudcraft.sample.blog.*;
@@ -305,7 +306,7 @@ public class BlogDataSeeder implements CommandLineRunner {
             return 0;
         }
 
-        OffsetDateTime now = OffsetDateTime.now();
+        Instant now = Instant.now();
         
         for (int i = 0; i < count; i++) {
             Comment comment = new Comment();
@@ -320,7 +321,7 @@ public class BlogDataSeeder implements CommandLineRunner {
                                   "@example.com");
             
             comment.setContent(generateCommentContent());
-            comment.setCreatedAt(now.minusDays(random.nextInt(365)));
+            comment.setCreatedAt(now.minusSeconds(random.nextInt(31556926)));
             comment.setApproved(random.nextDouble() > 0.2); // 80% approved
             
             entityManager.persist(comment);

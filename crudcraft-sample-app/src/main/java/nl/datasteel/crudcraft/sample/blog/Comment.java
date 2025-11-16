@@ -18,6 +18,7 @@ package nl.datasteel.crudcraft.sample.blog;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import nl.datasteel.crudcraft.annotations.CrudTemplate;
@@ -76,14 +77,37 @@ public class Comment {
 
     @Dto
     @Column(nullable = false)
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    private Instant createdAt = Instant.now();
 
     @Dto
     @Column(nullable = false)
     private Boolean approved = false;
 
-    @Embedded
-    private AuditableExtension audit = new AuditableExtension();
+    /**
+     * The timestamp when the entity was last updated.
+     */
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    /**
+     * Hooks into the JPA lifecycle to set the createdAt and updatedAt timestamps
+     * when the entity is first persisted.
+     */
+    @PrePersist
+    protected void onCreate() {
+        Instant now = Instant.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    /**
+     * Hooks into the JPA lifecycle to update the updatedAt timestamp
+     * whenever the entity is updated.
+     */
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
 
     // Getters and Setters
     public UUID getId() {
@@ -126,11 +150,11 @@ public class Comment {
         this.content = content;
     }
 
-    public OffsetDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(OffsetDateTime createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -141,12 +165,7 @@ public class Comment {
     public void setApproved(Boolean approved) {
         this.approved = approved;
     }
-
-    public AuditableExtension getAudit() {
-        return audit;
-    }
-
-    public void setAudit(AuditableExtension audit) {
-        this.audit = audit;
+    public Instant getUpdatedAt() {
+        return updatedAt;
     }
 }

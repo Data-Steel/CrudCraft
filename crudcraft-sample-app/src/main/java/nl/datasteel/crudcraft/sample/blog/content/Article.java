@@ -21,6 +21,7 @@ import nl.datasteel.crudcraft.annotations.fields.Dto;
 import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 import nl.datasteel.crudcraft.annotations.fields.Searchable;
+import nl.datasteel.crudcraft.runtime.extensions.AuditableExtension;
 
 /**
  * Concrete Article entity extending Content.
@@ -55,6 +56,9 @@ public class Article extends Content {
     @Column(name = "allow_comments")
     private Boolean allowComments = true;
 
+    @Embedded
+    private AuditableExtension audit = new AuditableExtension();
+
     // Getters and Setters
     public String getSubtitle() {
         return subtitle;
@@ -86,5 +90,13 @@ public class Article extends Content {
 
     public void setAllowComments(Boolean allowComments) {
         this.allowComments = allowComments;
+    }
+
+    public AuditableExtension getAudit() {
+        return audit;
+    }
+
+    public void setAudit(AuditableExtension audit) {
+        this.audit = audit;
     }
 }

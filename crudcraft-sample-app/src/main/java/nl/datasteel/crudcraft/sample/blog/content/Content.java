@@ -77,9 +77,6 @@ public abstract class Content {
     @Column(nullable = false, length = 20)
     private ContentStatus status = ContentStatus.DRAFT;
 
-    @Embedded
-    private AuditableExtension audit = new AuditableExtension();
-
     // Getters and Setters
     public UUID getId() {
         return id;
@@ -127,13 +124,5 @@ public abstract class Content {
 
     public void setStatus(ContentStatus status) {
         this.status = status;
-    }
-
-    public AuditableExtension getAudit() {
-        return audit;
-    }
-
-    public void setAudit(AuditableExtension audit) {
-        this.audit = audit;
     }
 }
