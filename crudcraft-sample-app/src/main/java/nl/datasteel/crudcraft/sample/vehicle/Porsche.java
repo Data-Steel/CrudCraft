@@ -32,7 +32,7 @@ import nl.datasteel.crudcraft.annotations.fields.Request;
 @Table(name = "porsche")
 public class Porsche extends Car {
 
-    @Dto
+    @Dto(value = {"List"})
     @Request
     @Schema(description = "Type of engine used in the Porsche.", example = "V8 Twin Turbo")
     private String engineType;

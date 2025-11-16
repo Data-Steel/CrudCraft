@@ -36,7 +36,7 @@ public abstract class Car {
     @GeneratedValue
     private UUID id;
 
-    @Dto
+    @Dto(value = {"List"})
     @Schema(description = "Model name of the car.", example = "911")
     private String model;
 
@@ -49,7 +49,7 @@ public abstract class Car {
     @Schema(description = "Exterior color of the car.", example = "Guards Red")
     private String color;
 
-    @Dto
+    @Dto(value = {"List"})
     @Request
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Schema(description = "All inspections performed on this car.")

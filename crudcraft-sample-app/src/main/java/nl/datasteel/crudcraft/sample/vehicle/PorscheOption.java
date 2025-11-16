@@ -34,6 +34,7 @@ public class PorscheOption {
     @GeneratedValue
     private UUID id;
 
+    @Dto(value = {"List"})
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "porsche_id", nullable = false)
     @Schema(description = "The Porsche associated with this option.")
