@@ -153,83 +153,69 @@ public abstract class AbstractCrudService<T, U, R, F, ID> implements CrudService
     }
 
     /**
-     * Retrieve a paginated list of DTO projections,
-     * optionally filtered by a search query.
+     * Execute a typed search using a generated search request object,
+     * with optional projection to a specific DTO type.
+     * When projection is null, returns the default response DTO (R).
+     * When search request is null, no filtering is applied.
      *
-     * @param pageable    pagination information
-     * @param searchQuery optional search string
-     * @return page of DTOs matching criteria
+     * @param request the search request containing criteria (can be null)
+     * @param pageable pagination information
+     * @param projection the projection class to use (can be null for default response DTO)
+     * @param <P> the projection type
+     * @return page of entities matching criteria, projected to the specified type
      */
-    @Override
     @Transactional
-    public Page<R> findAll(Pageable pageable, String searchQuery) {
-        Predicate predicate = rowSecurityPredicate();
-        Specification<T> spec = rowSecurityFilter();
-        return queryExecutor.findAll(predicate, spec, pageable, responseClass);
+    public <P> Page<P> search(SearchRequest<T> request, Pageable pageable, Class<P> projection) {
+        Predicate searchPredicate = request == null ? null : request.toPredicate();
+        Predicate rowPred = rowSecurityPredicate();
+        Predicate finalPred;
+
+        if (searchPredicate != null && rowPred != null) {
+            finalPred = com.querydsl.core.types.ExpressionUtils.allOf(searchPredicate, rowPred);
+        } else {
+            finalPred = searchPredicate != null ? searchPredicate : rowPred;
+        }
+
+        Specification<T> searchSpec = request == null ? null : request.toSpecification();
+        Specification<T> rowSpec = rowSecurityFilter();
+        Specification<T> spec;
+        if (searchSpec != null && rowSpec != null) {
+            spec = searchSpec.and(rowSpec);
+        } else {
+            spec = searchSpec != null ? searchSpec : rowSpec;
+        }
+
+        // Use responseClass if projection is null
+        Class<P> effectiveProjection = projection != null ? projection : (Class<P>) responseClass;
+        return queryExecutor.findAll(finalPred, spec, pageable, effectiveProjection);
     }
 
     /**
-     * Retrieve a paginated list of DTO projections,
-     * optionally filtered by a search request.
+     * Execute a typed search using a generated search request object.
+     * Returns the default response DTO type.
      *
-     * @param request  the search request containing criteria
+     * @param request the search request containing criteria (can be null)
      * @param pageable pagination information
      * @return page of DTOs matching criteria
      */
     @Override
     @Transactional
     public Page<R> search(SearchRequest<T> request, Pageable pageable) {
-        Predicate searchPredicate = request == null ? null : request.toPredicate();
-        Predicate rowPred = rowSecurityPredicate();
-        Predicate finalPred;
-
-        if (searchPredicate != null && rowPred != null) {
-            finalPred = com.querydsl.core.types.ExpressionUtils.allOf(searchPredicate, rowPred);
-        } else {
-            finalPred = searchPredicate != null ? searchPredicate : rowPred;
-        }
-
-        Specification<T> searchSpec = request == null ? null : request.toSpecification();
-        Specification<T> rowSpec = rowSecurityFilter();
-        Specification<T> spec;
-        if (searchSpec != null && rowSpec != null) {
-            spec = searchSpec.and(rowSpec);
-        } else {
-            spec = searchSpec != null ? searchSpec : rowSpec;
-        }
-
-        return queryExecutor.findAll(finalPred, spec, pageable, responseClass);
+        return search(request, pageable, responseClass);
     }
 
     /**
-     * Retrieve a paginated list of reference DTO projections,
-     * optionally filtered by a search request.
+     * Execute a typed search returning reference DTOs.
+     * This is a convenience method that delegates to search(request, pageable, refClass).
      *
-     * @param request  the search request containing criteria
+     * @param request the search request containing criteria (can be null)
      * @param pageable pagination information
      * @return page of reference DTOs matching criteria
      */
     @Override
     @Transactional
     public Page<F> searchRef(SearchRequest<T> request, Pageable pageable) {
-        Predicate searchPredicate = request == null ? null : request.toPredicate();
-        Predicate rowPred = rowSecurityPredicate();
-
-        Predicate finalPred;
-        if (searchPredicate != null && rowPred != null) {
-            finalPred = com.querydsl.core.types.ExpressionUtils.allOf(searchPredicate, rowPred);
-        } else {
-            finalPred = searchPredicate != null ? searchPredicate : rowPred;
-        }
-        Specification<T> searchSpec = request == null ? null : request.toSpecification();
-        Specification<T> rowSpec = rowSecurityFilter();
-        Specification<T> spec;
-        if (searchSpec != null && rowSpec != null) {
-            spec = searchSpec.and(rowSpec);
-        } else {
-            spec = searchSpec != null ? searchSpec : rowSpec;
-        }
-        return queryExecutor.findAll(finalPred, spec, pageable, refClass);
+        return search(request, pageable, refClass);
     }
 
     /**
@@ -345,30 +331,16 @@ public abstract class AbstractCrudService<T, U, R, F, ID> implements CrudService
     }
 
     /**
-     * Find an entity by ID or throw ResourceNotFoundException.
-     *
-     * @param id identifier
-     * @return found entity
-     * @throws ResourceNotFoundException if not found
-     */
-    @Override
-    @Transactional
-    public R findById(ID id) {
-        return findByIdOptional(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("%s with ID '%s' could not be found",
-                                entityClass.getSimpleName(), id)));
-    }
-
-    /**
      * Find an entity by ID and return it as a specific projection type.
+     * When projection is null, returns the default response DTO (R).
      *
      * @param id identifier
-     * @param projection the projection class to use
+     * @param projection the projection class to use (can be null for default response DTO)
      * @param <P> the projection type
      * @return found entity as projection
      * @throws ResourceNotFoundException if not found
      */
+    @Override
     @Transactional
     public <P> P findById(ID id, Class<P> projection) {
         Predicate idPred = idPredicate(id);
@@ -380,25 +352,27 @@ public abstract class AbstractCrudService<T, U, R, F, ID> implements CrudService
         Predicate finalPred = builder.hasValue() ? builder : null;
         Specification<T> spec = byId(id).and(rowSecurityFilter());
 
-        return queryExecutor.findOne(finalPred, spec, projection)
+        // Use responseClass if projection is null
+        Class<P> effectiveProjection = projection != null ? projection : (Class<P>) responseClass;
+
+        return queryExecutor.findOne(finalPred, spec, effectiveProjection)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         String.format("%s with ID '%s' could not be found",
                                 entityClass.getSimpleName(), id)));
     }
 
     /**
-     * Find all entities with pagination and return as a specific projection type.
+     * Find by ID or throw ResourceNotFoundException.
+     * Returns the default response DTO type.
      *
-     * @param pageable pagination information
-     * @param projectionClass the projection class to use
-     * @param <P> the projection type
-     * @return page of entities as projection
+     * @param id identifier
+     * @return found entity as response DTO
+     * @throws ResourceNotFoundException if not found
      */
+    @Override
     @Transactional
-    public <P> Page<P> findAllProjected(Pageable pageable, Class<P> projectionClass) {
-        Predicate rowPred = rowSecurityPredicate();
-        Specification<T> spec = rowSecurityFilter();
-        return queryExecutor.findAll(rowPred, spec, pageable, projectionClass);
+    public R findById(ID id) {
+        return findById(id, responseClass);
     }
 
     /**

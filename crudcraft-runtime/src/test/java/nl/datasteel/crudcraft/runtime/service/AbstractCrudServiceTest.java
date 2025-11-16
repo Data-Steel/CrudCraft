@@ -110,7 +110,7 @@ class AbstractCrudServiceTest {
         service.handlers = List.of(handler);
         when(executor.findAll(eq(pred), eq(spec), eq(PageRequest.of(0,1)), eq(Resp.class)))
                 .thenReturn(new PageImpl<>(List.of(new Resp())));
-        service.findAll(PageRequest.of(0,1), null);
+        service.search(null, PageRequest.of(0,1));
         verify(executor).findAll(eq(pred), eq(spec), any(PageRequest.class), eq(Resp.class));
     }
 
@@ -218,7 +218,7 @@ class AbstractCrudServiceTest {
     void findAllWithoutSecurityUsesNulls() {
         when(executor.findAll(isNull(), any(), any(PageRequest.class), eq(Resp.class)))
                 .thenReturn(new PageImpl<>(List.of()));
-        service.findAll(PageRequest.of(0, 1), null);
+        service.search(null, PageRequest.of(0, 1));
         verify(executor).findAll(isNull(), any(), any(PageRequest.class), eq(Resp.class));
     }
 
