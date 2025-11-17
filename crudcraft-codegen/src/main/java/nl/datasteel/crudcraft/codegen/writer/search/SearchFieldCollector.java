@@ -93,28 +93,35 @@ public class SearchFieldCollector {
                     }
                     var te = ctx.findTypeElement(candidateFqcn);
                     boolean willRecurse = false;
-                    if (remaining > 1 && te != null) {
-                        ModelDescriptor child = AnnotationModelReader.parse(te, ctx.env());
-                        int next = Math.min(fd.getSearchDepth() > 0 ? fd.getSearchDepth() : remaining - 1,
-                                remaining - 1
-                        );
-                        if (next > 0) {
-                            willRecurse = true;
-                            ctx.env().getMessager().printMessage(
-                                    Diagnostic.Kind.NOTE,
-                                    "Collecting search fields for " + child.getName() + " at depth " + next
-                            );
-                            stack.push(new Node(child, path, next));
+                    boolean isEntity = false;
+                    if (te != null) {
+                        try {
+                            ModelDescriptor child = AnnotationModelReader.parse(te, ctx.env());
+                            // If we got here, it's an entity that could be recursed into
+                            isEntity = true;
+                            if (remaining > 1) {
+                                int next = Math.min(fd.getSearchDepth() > 0 ? fd.getSearchDepth() : remaining - 1,
+                                        remaining - 1
+                                );
+                                if (next > 0) {
+                                    willRecurse = true;
+                                    ctx.env().getMessager().printMessage(
+                                            Diagnostic.Kind.NOTE,
+                                            "Collecting search fields for " + child.getName() + " at depth " + next
+                                    );
+                                    stack.push(new Node(child, path, next));
+                                }
+                            }
+                        } catch (Exception e) {
+                            // Not a valid entity, treat as regular type
+                            isEntity = false;
                         }
                     }
 
                     // Only add the parent entity field itself if we're NOT recursing into it
-                    // This avoids exposing full entity types in the search request.
-                    // Also skip entity type fields when not recursing, as they would expose
-                    // all fields (not just @Searchable ones) and create circular references.
-                    if (!willRecurse && te == null) {
-                        // Only add non-entity fields (primitives, strings, dates, etc.)
-                        // Entity fields are only useful when flattened via recursion
+                    // AND it's not an entity type (to avoid exposing full entity schemas)
+                    // When we recurse, we only want the flattened nested fields, not the parent entity
+                    if (!willRecurse && !isEntity) {
                         result.add(new SearchField(
                                 fd,
                                 property,
