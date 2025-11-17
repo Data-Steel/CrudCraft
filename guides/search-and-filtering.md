@@ -28,6 +28,18 @@ Collections use repeated parameters: `?author=Craig&author=Josh`.
 
 Multiple operators on the same field are combined.
 
+## Nested Searches
+
+When a relationship field is marked as `@Searchable`, you can filter by nested properties using bracket notation:
+
+```
+GET /posts?author[name]=John&author[nameOp]=EQUALS
+```
+
+This allows searching for posts by author properties. The `[nameOp]` parameter specifies the search operator (EQUALS, CONTAINS, etc.).
+
+**Note**: CrudCraft automatically configures Tomcat to accept square brackets in URLs, which are required for nested search parameters.
+
 ## Paging and Sorting
 
 Pagination uses `page` and `size` parameters. Sorting uses `sort=property,asc|desc` and can be repeated.
@@ -54,6 +66,12 @@ GET /books?author=Craig&author=Joshua&page=1&size=10
 
 ```
 GET /books?pageCount.between=100,400
+```
+
+4. Search for posts by nested author name:
+
+```
+GET /posts?author[name]=John%20Doe&author[nameOp]=EQUALS&limit=10
 ```
 
 ## Tips
