@@ -56,7 +56,8 @@ public class SearchOptionsExtractor implements FieldPartExtractor<SearchOptions>
                 : List.of();
 
         if (isSearchable && operators.isEmpty()) {
-            operators = getDefaultOperatorsFor(fieldType);
+            boolean isRelationship = isRelationshipField(field);
+            operators = getDefaultOperatorsFor(fieldType, isRelationship);
         }
 
         int depth = isSearchable ? annotation.depth() : 0;
@@ -72,7 +73,7 @@ public class SearchOptionsExtractor implements FieldPartExtractor<SearchOptions>
     /**
      * Returns default operators for a field type if none are explicitly declared.
      */
-    private static List<SearchOperator> getDefaultOperatorsFor(TypeMirror type) {
+    private static List<SearchOperator> getDefaultOperatorsFor(TypeMirror type, boolean isRelationship) {
         final String t = type.toString();
 
         if (isString(t)) {
@@ -93,6 +94,9 @@ public class SearchOptionsExtractor implements FieldPartExtractor<SearchOptions>
         if (isEnum(type)) {
             return DEFAULT_ENUM_OPERATORS;
         }
+        if (isRelationship) {
+            return DEFAULT_RELATIONSHIP_OPERATORS;
+        }
         if (isCollection(t)) {
             return DEFAULT_COLLECTION_OPERATORS;
         }
@@ -101,6 +105,17 @@ public class SearchOptionsExtractor implements FieldPartExtractor<SearchOptions>
         }
 
         return DEFAULT_FALLBACK_OPERATORS;
+    }
+
+    /**
+     * Checks if the field is a JPA relationship (OneToOne, OneToMany, ManyToOne, ManyToMany, or Embedded).
+     */
+    private static boolean isRelationshipField(VariableElement field) {
+        return field.getAnnotation(jakarta.persistence.OneToOne.class) != null
+                || field.getAnnotation(jakarta.persistence.OneToMany.class) != null
+                || field.getAnnotation(jakarta.persistence.ManyToOne.class) != null
+                || field.getAnnotation(jakarta.persistence.ManyToMany.class) != null
+                || field.getAnnotation(jakarta.persistence.Embedded.class) != null;
     }
 
     /**
@@ -223,6 +238,14 @@ public class SearchOptionsExtractor implements FieldPartExtractor<SearchOptions>
             SearchOperator.CONTAINS, SearchOperator.IS_EMPTY, SearchOperator.NOT_EMPTY,
             SearchOperator.SIZE_EQUALS, SearchOperator.SIZE_GT,
             SearchOperator.SIZE_LT, SearchOperator.CONTAINS_ALL
+    );
+
+    /**
+     * Default operators for relationship fields (OneToOne, OneToMany, ManyToOne, ManyToMany).
+     * Relationships should use EQUALS for matching by ID/reference.
+     */
+    private static final List<SearchOperator> DEFAULT_RELATIONSHIP_OPERATORS = List.of(
+            SearchOperator.EQUALS
     );
 
     /**

@@ -58,6 +58,7 @@ public class Tag {
     @Column(nullable = false, unique = true, length = 30)
     private String name;
 
+    @Searchable(depth = 2)
     @ManyToMany(mappedBy = "tags")
     private Set<Post> posts = new HashSet<>();
 

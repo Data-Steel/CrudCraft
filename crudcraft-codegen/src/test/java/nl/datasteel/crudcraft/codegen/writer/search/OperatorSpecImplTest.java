@@ -20,6 +20,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
@@ -57,6 +58,42 @@ class OperatorSpecImplTest {
         assertTrue(code.contains("public void setAgeStart(Integer ageStart)"));
         assertTrue(code.contains("public Integer getAgeEnd()"));
         assertTrue(code.contains("public void setAgeEnd(Integer ageEnd)"));
+    }
+
+    @Test
+    void valueOperatorDoesNotDoubleWrapCollections() {
+        TypeSpec.Builder builder = TypeSpec.classBuilder("Test");
+        
+        // When element type is already a Set, don't wrap it again
+        ClassName searchRequest = ClassName.get("nl.datasteel.test", "TagSearchRequest");
+        ClassName setRaw = ClassName.get(java.util.Set.class);
+        TypeName alreadyWrapped = ParameterizedTypeName.get(setRaw, searchRequest);
+        
+        OperatorSpecRegistry.value().addFields(builder, "tags", alreadyWrapped);
+        String code = builder.build().toString();
+        
+        // Should be Set<TagSearchRequest>, NOT Set<Set<TagSearchRequest>>
+        assertTrue(code.contains("java.util.Set<nl.datasteel.test.TagSearchRequest> tags"),
+                "Should not double-wrap collections - expected Set<TagSearchRequest>, got: " + code);
+        assertFalse(code.contains("Set<Set<"),
+                "Should not have double-wrapped Set<Set<...>>");
+    }
+
+    @Test
+    void valueOperatorWrapsSimpleTypes() {
+        TypeSpec.Builder builder = TypeSpec.classBuilder("Test");
+        
+        // Simple types should still be wrapped in Set
+        OperatorSpecRegistry.value().addFields(builder, "name", ClassName.get(String.class));
+        String code = builder.build().toString();
+        
+        // Check that the type was wrapped in Set
+        assertTrue(code.contains("private java.util.Set<java.lang.String> name"),
+                "Simple types should be wrapped in Set, but got: " + code);
+        assertTrue(code.contains("public java.util.Set<java.lang.String> getName()"),
+                "Getter should return Set<String>");
+        assertTrue(code.contains("public void setName(java.util.Set<java.lang.String> name)"),
+                "Setter should accept Set<String>");
     }
 }
 

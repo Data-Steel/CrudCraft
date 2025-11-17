@@ -76,6 +76,7 @@ public class Author {
     @Column(length = 500)
     private String bio;
 
+    @Searchable(depth = 2)
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Post> posts = new HashSet<>();
 
