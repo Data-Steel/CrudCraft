@@ -38,7 +38,7 @@ GET /posts?author[name]=John&author[nameOp]=EQUALS
 
 This allows searching for posts by author properties. The `[nameOp]` parameter specifies the search operator (EQUALS, CONTAINS, etc.).
 
-**Note**: CrudCraft automatically configures Tomcat to accept square brackets in URLs, which are required for nested search parameters.
+**Note**: CrudCraft automatically configures Tomcat to accept square brackets in query parameter names for nested searches. Only square brackets are allowed for security - query parameters are safely bound to SearchRequest DTOs and used in parameterized queries.
 
 ## Paging and Sorting
 

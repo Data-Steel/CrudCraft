@@ -21,24 +21,33 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Configuration for Tomcat server to relax URL validation.
- * This is necessary to allow square brackets and other special characters
- * in query parameters, which are used for nested search request objects.
+ * Configuration for Tomcat server to allow square brackets in query parameters.
+ * This is necessary for nested search request objects, where Swagger/OpenAPI
+ * generates URLs like "author[name]=value" for nested parameters.
+ * <p>
+ * Note: This configuration only relaxes validation for square brackets, which are
+ * required for array and nested object parameters. It does not allow other special
+ * characters that could pose security risks.
  */
 @Configuration
 public class CrudCraftTomcatConfiguration {
 
     /**
-     * Creates a Tomcat connector customizer that allows square brackets and other
-     * special characters in URLs. This is required for search requests with nested
-     * relationships, where Swagger/OpenAPI generates URLs like "author[name]=value".
+     * Creates a Tomcat connector customizer that allows square brackets in URLs.
+     * This is required for search requests with nested relationships, where
+     * Swagger/OpenAPI generates URLs like "author[name]=value".
+     * <p>
+     * Security Note: Only square brackets are allowed. Query parameters are safely
+     * bound to SearchRequest DTOs and used in parameterized JPA/QueryDSL queries,
+     * preventing injection attacks.
      *
-     * @return a TomcatConnectorCustomizer that relaxes URL validation
+     * @return a TomcatConnectorCustomizer that allows square brackets in query parameters
      */
     @Bean
     public TomcatConnectorCustomizer tomcatConnectorCustomizer() {
         return (Connector connector) -> {
-            connector.setProperty("relaxedQueryChars", "[]|{}^&#x5c;&#x60;&quot;&lt;&gt;");
+            // Only allow square brackets - the minimum needed for nested search parameters
+            connector.setProperty("relaxedQueryChars", "[]");
         };
     }
 }

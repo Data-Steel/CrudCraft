@@ -48,7 +48,7 @@ class CrudCraftTomcatConfigurationTest {
         // Verify the relaxedQueryChars property is set
         String relaxedQueryChars = (String) connector.getProperty("relaxedQueryChars");
         assertNotNull(relaxedQueryChars, "relaxedQueryChars property should be set");
-        assertEquals("[]|{}^&#x5c;&#x60;&quot;&lt;&gt;", relaxedQueryChars, 
-                "relaxedQueryChars should allow square brackets and other special characters");
+        assertEquals("[]", relaxedQueryChars, 
+                "relaxedQueryChars should only allow square brackets for security");
     }
 }
