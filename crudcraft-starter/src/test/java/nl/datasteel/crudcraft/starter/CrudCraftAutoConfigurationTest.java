@@ -16,6 +16,7 @@
 package nl.datasteel.crudcraft.starter;
 
 import nl.datasteel.crudcraft.runtime.config.CrudCraftSearchProperties;
+import nl.datasteel.crudcraft.runtime.config.CrudCraftTomcatConfiguration;
 import nl.datasteel.crudcraft.runtime.controller.CrudCraftExceptionHandler;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.test.context.runner.ReactiveWebApplicationContextRunner;
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
+import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer;
 
 class CrudCraftAutoConfigurationTest {
 
@@ -51,6 +53,8 @@ class CrudCraftAutoConfigurationTest {
         webRunner.run(context -> {
             assertNotNull(context.getBean(CrudCraftExceptionHandler.class));
             assertNotNull(context.getBean(CrudCraftSearchProperties.class));
+            assertNotNull(context.getBean(CrudCraftTomcatConfiguration.class));
+            assertNotNull(context.getBean(TomcatConnectorCustomizer.class));
         });
     }
 
