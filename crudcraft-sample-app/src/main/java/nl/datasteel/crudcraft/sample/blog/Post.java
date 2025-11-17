@@ -72,6 +72,7 @@ public class Post {
     private String summary;
 
     @Dto
+    @Searchable
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private Author author;
@@ -92,6 +93,7 @@ public class Post {
     private PostStatus status = PostStatus.DRAFT;
 
     @Dto
+    @Searchable
     @Request
     @ManyToMany
     @JoinTable(

@@ -53,6 +53,7 @@ public class Comment {
     private UUID id;
 
     @Dto
+    @Searchable
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
