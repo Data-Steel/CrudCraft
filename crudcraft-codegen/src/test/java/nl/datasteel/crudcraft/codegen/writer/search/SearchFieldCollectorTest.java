@@ -61,8 +61,9 @@ class SearchFieldCollectorTest {
                 "import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;"+
                 "import nl.datasteel.crudcraft.annotations.fields.Searchable;"+
                 "import nl.datasteel.crudcraft.annotations.SearchOperator;"+
+                "import jakarta.persistence.ManyToOne;"+
                 "@CrudCrafted class Root {"+
-                "  @Searchable(depth=2) Child child;"+
+                "  @Searchable(depth=2) @ManyToOne Child child;"+
                 "  @Searchable(operators={SearchOperator.SIZE_GT}) java.util.List<String> tags;"+
                 "  int ignored;"+
                 "}";
@@ -87,10 +88,84 @@ class SearchFieldCollectorTest {
     void collectsNestedFieldsUpToDepth() {
         Fixture fx = fixture();
         List<SearchField> fields = fx.collector.collect(fx.root, 2);
-        assertEquals(3, fields.size());
-        assertTrue(fields.stream().anyMatch(f -> f.property().equals("child") && f.path().equals("root.get(\"child\")")));
+        // Should have 2 fields: childValue (flattened from child.value) and tagsSize
+        // The "child" field itself should NOT be included since it's a relationship
+        // that will recurse into nested searchable fields
+        assertEquals(2, fields.size());
         assertTrue(fields.stream().anyMatch(f -> f.property().equals("childValue") && f.path().equals("root.join(\"child\").get(\"value\")")));
         assertTrue(fields.stream().anyMatch(f -> f.property().equals("tagsSize") && f.operator() == SearchOperator.SIZE_GT));
+        // Verify that "child" relationship field itself is NOT included
+        assertFalse(fields.stream().anyMatch(f -> f.property().equals("child")));
+    }
+
+    @Test
+    void relationshipFieldWithoutNestedSearchableFieldsIsIncluded() {
+        // Test case where a relationship field has no nested searchable fields
+        // In this case, the relationship field itself should be included
+        String rootSrc = "package t;"+
+                "import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;"+
+                "import nl.datasteel.crudcraft.annotations.fields.Searchable;"+
+                "import jakarta.persistence.ManyToOne;"+
+                "@CrudCrafted class Parent {"+
+                "  @Searchable @ManyToOne ChildWithoutSearchable child;"+
+                "}";
+        String childSrc = "package t;"+
+                "import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;"+
+                "@CrudCrafted class ChildWithoutSearchable {"+
+                "  String value;"+
+                "}";
+        Elements elements = CompilationTestUtils.elements(
+                JavaFileObjects.forSourceString("t.Parent", rootSrc),
+                JavaFileObjects.forSourceString("t.ChildWithoutSearchable", childSrc)
+        );
+        ProcessingEnvironment env = new EnvStub(elements);
+        WriteContext ctx = new WriteContext(env);
+        var rootEl = elements.getTypeElement("t.Parent");
+        ModelDescriptor root = AnnotationModelReader.parse(rootEl, env);
+        SearchFieldCollector collector = new SearchFieldCollector(ctx);
+
+        List<SearchField> fields = collector.collect(root, 2);
+        // The child field should be included since it has no nested searchable fields
+        assertEquals(1, fields.size());
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("child")));
+    }
+
+    @Test
+    void postAuthorScenarioFlattenedCorrectly() {
+        // Mimic the exact Post/Author scenario from the sample app
+        String postSrc = "package t;"+
+                "import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;"+
+                "import nl.datasteel.crudcraft.annotations.fields.Searchable;"+
+                "import jakarta.persistence.ManyToOne;"+
+                "@CrudCrafted class BlogPost {"+
+                "  @Searchable String title;"+
+                "  @Searchable(depth=2) @ManyToOne BlogAuthor author;"+
+                "}";
+        String authorSrc = "package t;"+
+                "import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;"+
+                "import nl.datasteel.crudcraft.annotations.fields.Searchable;"+
+                "@CrudCrafted class BlogAuthor {"+
+                "  @Searchable String name;"+
+                "  @Searchable String email;"+
+                "}";
+        Elements elements = CompilationTestUtils.elements(
+                JavaFileObjects.forSourceString("t.BlogPost", postSrc),
+                JavaFileObjects.forSourceString("t.BlogAuthor", authorSrc)
+        );
+        ProcessingEnvironment env = new EnvStub(elements);
+        WriteContext ctx = new WriteContext(env);
+        var rootEl = elements.getTypeElement("t.BlogPost");
+        ModelDescriptor root = AnnotationModelReader.parse(rootEl, env);
+        SearchFieldCollector collector = new SearchFieldCollector(ctx);
+
+        List<SearchField> fields = collector.collect(root, 2);
+        // Should have: title, authorName, authorEmail (NOT the author field itself)
+        assertEquals(3, fields.size());
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("title")));
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("authorName")));
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("authorEmail")));
+        // The "author" relationship field itself should NOT be included
+        assertFalse(fields.stream().anyMatch(f -> f.property().equals("author")));
     }
 
     @Test

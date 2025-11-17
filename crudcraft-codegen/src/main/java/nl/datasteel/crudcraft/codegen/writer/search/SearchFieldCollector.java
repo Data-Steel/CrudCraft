@@ -22,8 +22,8 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.tools.Diagnostic;
 import nl.datasteel.crudcraft.annotations.SearchOperator;
+import nl.datasteel.crudcraft.codegen.descriptor.RelationshipType;
 import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.reader.AnnotationModelReader;
@@ -86,33 +86,62 @@ public class SearchFieldCollector {
                         default -> prop;
                     };
 
-                    result.add(new SearchField(
-                            fd,
-                            property,
-                            SearchPathUtil.buildPath(path),
-                            op
-                    ));
-
-                    // Recurse into CRUD-target children if we can still go deeper
-                    if (remaining > 1) {
+                    // Check if this field will recurse into nested searchable fields
+                    boolean willRecurse = false;
+                    boolean hasExplicitDepth = fd.getSearchDepth() > 1;
+                    
+                    // Calculate current path depth (number of dots in prefix + 1)
+                    int pathDepth = prefix.isEmpty() ? 0 : prefix.split("\\.").length;
+                    // Limit total path depth to prevent infinite recursion in circular references
+                    int MAX_PATH_DEPTH = 2;
+                    
+                    // Only recurse if we have depth budget remaining AND path isn't too deep
+                    // OR if the field has explicit depth annotation (which we honor up to MAX_PATH_DEPTH)
+                    if (pathDepth < MAX_PATH_DEPTH && (remaining > 1 || (hasExplicitDepth && remaining > 0))) {
                         String candidateFqcn = fd.getTargetType();
                         if (candidateFqcn == null) {
                             candidateFqcn = TypeName.get(fd.getType()).toString();
                         }
+                        
                         var te = ctx.findTypeElement(candidateFqcn);
+                        
                         if (te != null) {
                             ModelDescriptor child = AnnotationModelReader.parse(te, ctx.env());
-                            int next = Math.min(fd.getSearchDepth() > 0 ? fd.getSearchDepth() : remaining - 1,
-                                    remaining - 1
-                            );
-                            if (next > 0) {
-                                ctx.env().getMessager().printMessage(
-                                        Diagnostic.Kind.NOTE,
-                                        "Collecting search fields for " + child.getName() + " at depth " + next
-                                );
+                            
+                            // Calculate next depth:
+                            // - If field has explicit depth > 1, use it - 1 (going one level deeper)
+                            // - Otherwise use remaining - 1 (normal depth budget)
+                            int next;
+                            if (hasExplicitDepth) {
+                                next = fd.getSearchDepth() - 1;
+                            } else {
+                                next = Math.max(0, remaining - 1);
+                            }
+                            
+                            // Check if the child entity has any searchable fields
+                            boolean hasSearchableFields = child.getFields().stream()
+                                    .anyMatch(FieldDescriptor::isSearchable);
+                            
+                            if (next > 0 && hasSearchableFields) {
+                                willRecurse = true;
                                 stack.push(new Node(child, path, next));
                             }
                         }
+                    }
+
+                    // Only add the field itself if:
+                    // 1. It's NOT a relationship field (e.g., primitive, String, enum), OR
+                    // 2. It's a relationship field but won't recurse into nested fields
+                    // This prevents generating Set<Author>, Set<Tag> in SearchRequest when
+                    // we're going to flatten author.name -> authorName instead.
+                    boolean isRelationship = fd.getRelType() != RelationshipType.NONE;
+                    if (!isRelationship || !willRecurse) {
+                        result.add(new SearchField(
+                                fd,
+                                property,
+                                SearchPathUtil.buildPath(path),
+                                op
+                        ));
                     }
                 }
             }
