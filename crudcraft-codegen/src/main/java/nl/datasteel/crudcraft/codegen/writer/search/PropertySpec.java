@@ -17,14 +17,12 @@ package nl.datasteel.crudcraft.codegen.writer.search;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.lang.model.element.Modifier;
 import nl.datasteel.crudcraft.annotations.SearchOperator;
-import nl.datasteel.crudcraft.codegen.descriptor.RelationshipType;
 import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 
 /**
@@ -42,12 +40,14 @@ public record PropertySpec(FieldDescriptor descriptor, String name, Set<SearchOp
         TypeName raw = TypeName.get(descriptor.getType());
         TypeName type = raw.isPrimitive() ? raw.box() : raw;
 
-        // ── NEW: map the type early so imports get generated consistently
+        // Map the type early so imports get generated consistently
         type = SearchTypeMapperRegistry.map(type);
 
-        if (descriptor.getRelType() != RelationshipType.NONE || descriptor.isEmbedded()) {
-            type = resolveSearchType(type, descriptor.getTargetType());
-        }
+        // Note: We do NOT create nested SearchRequest types for relationships.
+        // The SearchFieldCollector already flattens nested fields (e.g., "author.name" 
+        // becomes "authorName"), so we use the actual field types directly. This avoids
+        // Swagger generating bracket notation like "author[name]=value" which requires
+        // relaxing Tomcat's security settings.
 
         // Operators decide which fields are generated; we pass fully mapped TypeName
         if (operators.stream().anyMatch(OperatorSpecRegistry::isValueOperator)) {
@@ -88,24 +88,5 @@ public record PropertySpec(FieldDescriptor descriptor, String name, Set<SearchOp
         }
         names.add(name + "Op");
         return names;
-    }
-
-    /**
-     * For relations/embedded: replace element type by <Target>SearchRequest (and keep raw type).
-     * We still pass the result through the registry to guarantee imports for collections.
-     */
-    private TypeName resolveSearchType(TypeName original, String targetFqn) {
-        String simple = targetFqn.substring(targetFqn.lastIndexOf('.') + 1);
-        String pkgBase = targetFqn.substring(0, targetFqn.lastIndexOf('.'));
-        ClassName searchClass =
-                ClassName.get(pkgBase + ".search", simple + "SearchRequest");
-
-        TypeName mapped;
-        if (original instanceof ParameterizedTypeName ptn) {
-            mapped = ParameterizedTypeName.get(ptn.rawType, searchClass);
-        } else {
-            mapped = searchClass;
-        }
-        return SearchTypeMapperRegistry.map(mapped);
     }
 }
