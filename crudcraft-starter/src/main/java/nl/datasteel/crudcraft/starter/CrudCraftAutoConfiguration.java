@@ -16,6 +16,7 @@
 package nl.datasteel.crudcraft.starter;
 
 import nl.datasteel.crudcraft.runtime.config.CrudCraftSearchProperties;
+import nl.datasteel.crudcraft.runtime.config.CrudCraftTomcatConfiguration;
 import nl.datasteel.crudcraft.runtime.controller.CrudCraftExceptionHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,12 +24,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * Autoconfiguration for CrudCraft, enabling the exception handler and search properties.
+ * Autoconfiguration for CrudCraft, enabling the exception handler, search properties,
+ * and Tomcat configuration for relaxed URL validation.
  * This configuration is only active when the application is a web application (servlet type).
  */
 @Configuration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-@Import({CrudCraftExceptionHandler.class})
+@Import({CrudCraftExceptionHandler.class, CrudCraftTomcatConfiguration.class})
 @EnableConfigurationProperties(CrudCraftSearchProperties.class)
 public class CrudCraftAutoConfiguration {
     // No beans needed here — importing the advice is enough
