@@ -97,4 +97,52 @@ class SearchOptionsExtractorTest {
         assertTrue(so.getOperators().isEmpty());
         assertEquals(0, so.getDepth());
     }
+
+    @Test
+    void relationshipFieldsGetEqualsOperator() {
+        String src = "package t;" +
+                "import nl.datasteel.crudcraft.annotations.fields.Searchable;" +
+                "import jakarta.persistence.*;" +
+                "class Related {}" +
+                "class C {" +
+                "@Searchable @ManyToOne Related manyToOne;" +
+                "@Searchable @OneToOne Related oneToOne;" +
+                "@Searchable @ManyToMany java.util.Set<Related> manyToMany;" +
+                "@Searchable @OneToMany java.util.Set<Related> oneToMany;" +
+                "}";
+        Elements elements = CompilationTestUtils.elements("t.C", src);
+        TypeElement type = elements.getTypeElement("t.C");
+        
+        // ManyToOne should get EQUALS, not collection operators
+        VariableElement manyToOne = (VariableElement) type.getEnclosedElements().stream()
+                .filter(e -> e.getSimpleName().contentEquals("manyToOne"))
+                .findFirst().orElseThrow();
+        SearchOptions soManyToOne = SearchOptionsExtractor.INSTANCE.extract(manyToOne, new TestUtils.ProcessingEnvStub(elements));
+        assertEquals(List.of(SearchOperator.EQUALS), soManyToOne.getOperators(),
+                "ManyToOne relationships should use EQUALS operator");
+        
+        // OneToOne should get EQUALS
+        VariableElement oneToOne = (VariableElement) type.getEnclosedElements().stream()
+                .filter(e -> e.getSimpleName().contentEquals("oneToOne"))
+                .findFirst().orElseThrow();
+        SearchOptions soOneToOne = SearchOptionsExtractor.INSTANCE.extract(oneToOne, new TestUtils.ProcessingEnvStub(elements));
+        assertEquals(List.of(SearchOperator.EQUALS), soOneToOne.getOperators(),
+                "OneToOne relationships should use EQUALS operator");
+        
+        // ManyToMany should get EQUALS, NOT CONTAINS
+        VariableElement manyToMany = (VariableElement) type.getEnclosedElements().stream()
+                .filter(e -> e.getSimpleName().contentEquals("manyToMany"))
+                .findFirst().orElseThrow();
+        SearchOptions soManyToMany = SearchOptionsExtractor.INSTANCE.extract(manyToMany, new TestUtils.ProcessingEnvStub(elements));
+        assertEquals(List.of(SearchOperator.EQUALS), soManyToMany.getOperators(),
+                "ManyToMany relationships should use EQUALS operator, not CONTAINS");
+        
+        // OneToMany should get EQUALS, NOT CONTAINS
+        VariableElement oneToMany = (VariableElement) type.getEnclosedElements().stream()
+                .filter(e -> e.getSimpleName().contentEquals("oneToMany"))
+                .findFirst().orElseThrow();
+        SearchOptions soOneToMany = SearchOptionsExtractor.INSTANCE.extract(oneToMany, new TestUtils.ProcessingEnvStub(elements));
+        assertEquals(List.of(SearchOperator.EQUALS), soOneToMany.getOperators(),
+                "OneToMany relationships should use EQUALS operator, not CONTAINS");
+    }
 }
