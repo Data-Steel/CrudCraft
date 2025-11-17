@@ -61,39 +61,37 @@ class OperatorSpecImplTest {
     }
 
     @Test
-    void valueOperatorDoesNotDoubleWrapCollections() {
+    void valueOperatorPreservesCollectionTypes() {
         TypeSpec.Builder builder = TypeSpec.classBuilder("Test");
         
-        // When element type is already a Set, don't wrap it again
+        // Collection types should be used as-is
         ClassName searchRequest = ClassName.get("nl.datasteel.test", "TagSearchRequest");
         ClassName setRaw = ClassName.get(java.util.Set.class);
-        TypeName alreadyWrapped = ParameterizedTypeName.get(setRaw, searchRequest);
+        TypeName collectionType = ParameterizedTypeName.get(setRaw, searchRequest);
         
-        OperatorSpecRegistry.value().addFields(builder, "tags", alreadyWrapped);
+        OperatorSpecRegistry.value().addFields(builder, "tags", collectionType);
         String code = builder.build().toString();
         
-        // Should be Set<TagSearchRequest>, NOT Set<Set<TagSearchRequest>>
+        // Should be Set<TagSearchRequest> as provided
         assertTrue(code.contains("java.util.Set<nl.datasteel.test.TagSearchRequest> tags"),
-                "Should not double-wrap collections - expected Set<TagSearchRequest>, got: " + code);
-        assertFalse(code.contains("Set<Set<"),
-                "Should not have double-wrapped Set<Set<...>>");
+                "Should preserve collection types - expected Set<TagSearchRequest>, got: " + code);
     }
 
     @Test
-    void valueOperatorWrapsSimpleTypes() {
+    void valueOperatorUsesScalarTypes() {
         TypeSpec.Builder builder = TypeSpec.classBuilder("Test");
         
-        // Simple types should still be wrapped in Set
+        // Simple types should be used as-is (not wrapped in Set) to avoid bracket notation in URLs
         OperatorSpecRegistry.value().addFields(builder, "name", ClassName.get(String.class));
         String code = builder.build().toString();
         
-        // Check that the type was wrapped in Set
-        assertTrue(code.contains("private java.util.Set<java.lang.String> name"),
-                "Simple types should be wrapped in Set, but got: " + code);
-        assertTrue(code.contains("public java.util.Set<java.lang.String> getName()"),
-                "Getter should return Set<String>");
-        assertTrue(code.contains("public void setName(java.util.Set<java.lang.String> name)"),
-                "Setter should accept Set<String>");
+        // Check that the type was NOT wrapped in Set
+        assertTrue(code.contains("private java.lang.String name"),
+                "Simple types should be scalar (not wrapped in Set) to comply with RFC 7230/3986, but got: " + code);
+        assertTrue(code.contains("public java.lang.String getName()"),
+                "Getter should return String");
+        assertTrue(code.contains("public void setName(java.lang.String name)"),
+                "Setter should accept String");
     }
 }
 
