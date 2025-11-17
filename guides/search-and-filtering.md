@@ -30,15 +30,13 @@ Multiple operators on the same field are combined.
 
 ## Nested Searches
 
-When a relationship field is marked as `@Searchable`, you can filter by nested properties using bracket notation:
+When a relationship field is marked as `@Searchable`, nested fields are automatically flattened using camelCase notation. For example, searching for posts by author name uses:
 
 ```
-GET /posts?author[name]=John&author[nameOp]=EQUALS
+GET /posts?authorName=John&authorNameOp=EQUALS
 ```
 
-This allows searching for posts by author properties. The `[nameOp]` parameter specifies the search operator (EQUALS, CONTAINS, etc.).
-
-**Note**: CrudCraft automatically configures Tomcat to accept square brackets in query parameter names for nested searches. Only square brackets are allowed for security - query parameters are safely bound to SearchRequest DTOs and used in parameterized queries.
+The path `author.name` becomes the flattened property `authorName`. This approach maintains URL security compliance without requiring special Tomcat configuration.
 
 ## Paging and Sorting
 
@@ -68,10 +66,10 @@ GET /books?author=Craig&author=Joshua&page=1&size=10
 GET /books?pageCount.between=100,400
 ```
 
-4. Search for posts by nested author name:
+4. Search for posts by author name using flattened notation:
 
 ```
-GET /posts?author[name]=John%20Doe&author[nameOp]=EQUALS&limit=10
+GET /posts?authorName=John%20Doe&authorNameOp=EQUALS&limit=10
 ```
 
 ## Tips
