@@ -57,7 +57,11 @@ public class SearchGenerator implements Generator {
             return List.of();
         }
 
-        int depth = CrudCraftSearchProperties.getStaticDepth();
+        // Use a default depth of 2 at code generation time to support one level of nesting.
+        // The runtime depth configuration affects query execution, not code generation.
+        // This allows flattening of nested @Searchable fields (e.g., author.name → authorName)
+        // without creating excessive circular references.
+        int depth = 2;
         List<SearchField> fields = List.copyOf(new SearchFieldCollector(ctx).collect(md, depth));
 
         JavaFile req = generateRequest(md, fields);

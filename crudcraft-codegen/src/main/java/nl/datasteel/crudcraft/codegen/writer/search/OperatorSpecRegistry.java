@@ -107,6 +107,7 @@ public final class OperatorSpecRegistry {
 
     /**
      * VALUE operators
+     * Uses scalar types (not wrapped in Set) to avoid bracket notation in URLs
      */
     public static final class ValueSpec {
         ValueSpec() {}
@@ -115,20 +116,10 @@ public final class OperatorSpecRegistry {
             Objects.requireNonNull(name);
             Objects.requireNonNull(elementType);
 
-            ClassName setRaw = ClassName.get(Set.class);
-            
-            // If elementType is already a collection (e.g., Set<TagSearchRequest>),
-            // use it as-is instead of double-wrapping it
-            TypeName fieldType;
-            if (elementType instanceof ParameterizedTypeName ptn 
-                    && ptn.rawType instanceof ClassName cn
-                    && (cn.canonicalName().equals("java.util.Set") 
-                        || cn.canonicalName().equals("java.util.List")
-                        || cn.canonicalName().equals("java.util.Collection"))) {
-                fieldType = elementType;
-            } else {
-                fieldType = ParameterizedTypeName.get(setRaw, elementType);
-            }
+            // Use the element type directly as a scalar field
+            // This avoids Swagger generating bracket notation like field[]=value
+            // which violates RFC 7230 and RFC 3986
+            TypeName fieldType = elementType;
 
             FieldSpec f = FieldSpec.builder(fieldType, name, Modifier.PRIVATE).build();
             cls.addField(f);
