@@ -44,10 +44,12 @@ public class OpenApiDocComponent implements ControllerMethodComponent {
     private AnnotationSpec createOperationAnnotation(CrudEndpoint endpoint, String modelName) {
         String summary = getOperationSummary(endpoint, modelName);
         String description = getOperationDescription(endpoint, modelName);
+        String operationId = getOperationId(endpoint, modelName);
         
         AnnotationSpec.Builder builder = AnnotationSpec.builder(
                 ClassName.get("io.swagger.v3.oas.annotations", "Operation"));
         
+        builder.addMember("operationId", "$S", operationId);
         builder.addMember("summary", "$S", summary);
         
         if (description != null && !description.isEmpty()) {
@@ -203,6 +205,43 @@ public class OpenApiDocComponent implements ControllerMethodComponent {
             case SEARCH -> "Search results for " + modelName + " entities";
             case EXPORT -> modelName + " data exported";
             case VALIDATE -> "Validation results";
+        };
+    }
+    
+    /**
+     * Gets the operation ID based on the endpoint type and model name.
+     * Pattern: {modelName}{EndpointType} (e.g., "postExists", "authorCreate")
+     */
+    private String getOperationId(CrudEndpoint endpoint, String modelName) {
+        // Convert model name to camelCase (first letter lowercase)
+        String entityName = modelName.substring(0, 1).toLowerCase() + modelName.substring(1);
+        String endpointTypeName = getEndpointTypeName(endpoint);
+        return entityName + endpointTypeName;
+    }
+    
+    /**
+     * Gets the endpoint type name in PascalCase for use in operationId.
+     */
+    private String getEndpointTypeName(CrudEndpoint endpoint) {
+        return switch (endpoint) {
+            case POST -> "Create";
+            case BULK_CREATE -> "BulkCreate";
+            case PUT -> "Update";
+            case PATCH -> "Patch";
+            case BULK_UPDATE -> "BulkUpdate";
+            case BULK_PATCH -> "BulkPatch";
+            case BULK_UPSERT -> "BulkUpsert";
+            case DELETE -> "Delete";
+            case BULK_DELETE -> "BulkDelete";
+            case GET_ONE -> "GetOne";
+            case GET_ALL -> "GetAll";
+            case GET_ALL_REF -> "GetAllRef";
+            case FIND_BY_IDS -> "FindByIds";
+            case EXISTS -> "Exists";
+            case COUNT -> "Count";
+            case SEARCH -> "Search";
+            case EXPORT -> "Export";
+            case VALIDATE -> "Validate";
         };
     }
     

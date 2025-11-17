@@ -29,8 +29,12 @@ public final class TestModelDescriptorFactory {
     private TestModelDescriptorFactory() {}
 
     public static ModelDescriptor create() {
+        return createWithName("Sample");
+    }
+
+    public static ModelDescriptor createWithName(String name) {
         ModelIdentity identity = new ModelIdentity(
-                "Sample", "com.example", List.of(), "com.example");
+                name, "com.example", List.of(), "com.example");
         ModelFlags flags = new ModelFlags(true, true, false, false);
         EndpointOptions endpoints = new EndpointOptions(
                 CrudTemplate.FULL, new CrudEndpoint[0], new CrudEndpoint[0], null);
