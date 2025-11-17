@@ -72,7 +72,7 @@ public class Post {
     private String summary;
 
     @Dto
-    @Searchable
+    @Searchable(depth = 2)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private Author author;
@@ -93,7 +93,7 @@ public class Post {
     private PostStatus status = PostStatus.DRAFT;
 
     @Dto
-    @Searchable
+    @Searchable(depth = 2)
     @Request
     @ManyToMany
     @JoinTable(
@@ -107,6 +107,7 @@ public class Post {
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private PostStats stats;
 
+    @Searchable(depth = 2)
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<Comment> comments = new HashSet<>();

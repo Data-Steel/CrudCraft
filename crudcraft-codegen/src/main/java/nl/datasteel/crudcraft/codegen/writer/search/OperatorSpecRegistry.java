@@ -116,7 +116,19 @@ public final class OperatorSpecRegistry {
             Objects.requireNonNull(elementType);
 
             ClassName setRaw = ClassName.get(Set.class);
-            ParameterizedTypeName fieldType = ParameterizedTypeName.get(setRaw, elementType);
+            
+            // If elementType is already a collection (e.g., Set<TagSearchRequest>),
+            // use it as-is instead of double-wrapping it
+            TypeName fieldType;
+            if (elementType instanceof ParameterizedTypeName ptn 
+                    && ptn.rawType instanceof ClassName cn
+                    && (cn.canonicalName().equals("java.util.Set") 
+                        || cn.canonicalName().equals("java.util.List")
+                        || cn.canonicalName().equals("java.util.Collection"))) {
+                fieldType = elementType;
+            } else {
+                fieldType = ParameterizedTypeName.get(setRaw, elementType);
+            }
 
             FieldSpec f = FieldSpec.builder(fieldType, name, Modifier.PRIVATE).build();
             cls.addField(f);
