@@ -40,7 +40,6 @@ import nl.datasteel.crudcraft.codegen.writer.search.PredicateGeneratorRegistry;
 import nl.datasteel.crudcraft.codegen.writer.search.PropertySpec;
 import nl.datasteel.crudcraft.codegen.writer.search.SearchField;
 import nl.datasteel.crudcraft.codegen.writer.search.SearchFieldCollector;
-import nl.datasteel.crudcraft.runtime.config.CrudCraftSearchProperties;
 
 /**
  * Generates a SearchRequest DTO and Specification implementation for
