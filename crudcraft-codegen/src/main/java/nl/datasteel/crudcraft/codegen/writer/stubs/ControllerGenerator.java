@@ -368,6 +368,7 @@ public class ControllerGenerator implements StubGenerator {
                     .addParameter(com.squareup.javapoet.ParameterSpec.builder(
                             JavaPoetUtils.getClassName("org.springframework.data.domain", "Pageable"),
                             "pageable")
+                            .addAnnotation(JavaPoetUtils.getClassName("org.springdoc.core.annotations", "ParameterObject"))
                             .build())
                     .addCode("$T clamped = clampPageable(pageable);\n",
                             JavaPoetUtils.getClassName("org.springframework.data.domain", "Pageable"))
