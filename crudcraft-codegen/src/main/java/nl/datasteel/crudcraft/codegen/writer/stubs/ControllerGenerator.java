@@ -20,6 +20,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
 import java.io.Writer;
@@ -330,10 +331,19 @@ public class ControllerGenerator implements StubGenerator {
             // Pluralized path segment (e.g., "list", "map")
             String pathSegment = StringCase.CAMEL.apply(dtoName).toLowerCase();
             
+            // Create parameterized return type for paginated response
+            ClassName paginatedResponseClass = JavaPoetUtils.getClassName(
+                    "nl.datasteel.crudcraft.runtime.controller.response", "PaginatedResponse");
+            ParameterizedTypeName paginatedResponse = ParameterizedTypeName.get(
+                    paginatedResponseClass, specializedDto);
+            ParameterizedTypeName paginatedReturnType = ParameterizedTypeName.get(
+                    JavaPoetUtils.getClassName("org.springframework.http", "ResponseEntity"),
+                    paginatedResponse);
+            
             // Generate GET /{entity}/{dtoName} - paginated list
             MethodSpec getAllMethod = MethodSpec.methodBuilder("getAll" + StringCase.PASCAL.apply(dtoName))
                     .addModifiers(Modifier.PUBLIC)
-                    .returns(JavaPoetUtils.getClassName("org.springframework.http", "ResponseEntity"))
+                    .returns(paginatedReturnType)
                     .addAnnotation(AnnotationSpec.builder(
                             JavaPoetUtils.getClassName("org.springframework.web.bind.annotation", "GetMapping"))
                             .addMember("value", "$S", "/" + pathSegment)
@@ -377,10 +387,15 @@ public class ControllerGenerator implements StubGenerator {
                     .build();
             methods.add(getAllMethod);
             
+            // Create parameterized return type for single item response
+            ParameterizedTypeName singleReturnType = ParameterizedTypeName.get(
+                    JavaPoetUtils.getClassName("org.springframework.http", "ResponseEntity"),
+                    specializedDto);
+            
             // Generate GET /{entity}/{dtoName}/{id} - single item
             MethodSpec getOneMethod = MethodSpec.methodBuilder("get" + StringCase.PASCAL.apply(dtoName) + "ById")
                     .addModifiers(Modifier.PUBLIC)
-                    .returns(JavaPoetUtils.getClassName("org.springframework.http", "ResponseEntity"))
+                    .returns(singleReturnType)
                     .addAnnotation(AnnotationSpec.builder(
                             JavaPoetUtils.getClassName("org.springframework.web.bind.annotation", "GetMapping"))
                             .addMember("value", "$S", "/" + pathSegment + "/{id}")
