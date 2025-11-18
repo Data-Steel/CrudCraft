@@ -47,7 +47,9 @@ public class GetAllRefEndpoint implements EndpointSpecProvider {
                         .addMember("value", "$S", "/ref").build(),
                 m -> returnType,
                 List.of(
-                        m -> ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable").build(),
+                        m -> ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable")
+                                .addAnnotation(EndpointSupport.PARAMETER_OBJECT)
+                                .build(),
                         m -> ParameterSpec.builder(
                                         ClassName.get(modelDescriptor.getPackageName() + ".search", searchReq),
                                         "searchRequest")

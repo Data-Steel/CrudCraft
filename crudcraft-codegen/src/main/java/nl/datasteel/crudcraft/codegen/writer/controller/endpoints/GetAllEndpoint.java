@@ -45,7 +45,9 @@ public class GetAllEndpoint implements EndpointSpecProvider {
                 m -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
                 m -> returnType,
                 List.of(
-                        m -> ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable").build(),
+                        m -> ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable")
+                                .addAnnotation(EndpointSupport.PARAMETER_OBJECT)
+                                .build(),
                         m -> ParameterSpec.builder(searchReq, "searchRequest")
                                 .addAnnotation(EndpointSupport.MODEL_ATTR)
                                 .build()

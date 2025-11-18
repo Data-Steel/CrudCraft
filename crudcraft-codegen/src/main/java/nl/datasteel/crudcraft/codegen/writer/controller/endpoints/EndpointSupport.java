@@ -33,6 +33,7 @@ public final class EndpointSupport {
     public static final ClassName PATH_VAR = ClassName.get("org.springframework.web.bind.annotation", "PathVariable");
     public static final ClassName MODEL_ATTR = ClassName.get("org.springframework.web.bind.annotation", "ModelAttribute");
     public static final ClassName REQUEST_PARAM = ClassName.get("org.springframework.web.bind.annotation", "RequestParam");
+    public static final ClassName PARAMETER_OBJECT = ClassName.get("org.springdoc.core.annotations", "ParameterObject");
     public static final ClassName VALID = ClassName.get("jakarta.validation", "Valid");
     public static final ClassName IDENTIFIED = ClassName.get("nl.datasteel.crudcraft.runtime", "Identified");
     public static final ClassName GET_MAPPING = ClassName.get("org.springframework.web.bind.annotation", "GetMapping");

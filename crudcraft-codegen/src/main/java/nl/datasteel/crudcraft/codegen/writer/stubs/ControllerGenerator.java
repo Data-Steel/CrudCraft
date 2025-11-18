@@ -20,6 +20,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
 import java.io.Writer;
@@ -330,16 +331,30 @@ public class ControllerGenerator implements StubGenerator {
             // Pluralized path segment (e.g., "list", "map")
             String pathSegment = StringCase.CAMEL.apply(dtoName).toLowerCase();
             
+            // Create parameterized return type for paginated response
+            ClassName paginatedResponseClass = JavaPoetUtils.getClassName(
+                    "nl.datasteel.crudcraft.runtime.controller.response", "PaginatedResponse");
+            ParameterizedTypeName paginatedResponse = ParameterizedTypeName.get(
+                    paginatedResponseClass, specializedDto);
+            ParameterizedTypeName paginatedReturnType = ParameterizedTypeName.get(
+                    JavaPoetUtils.getClassName("org.springframework.http", "ResponseEntity"),
+                    paginatedResponse);
+            
+            // Generate operationId following the pattern: {entityName}GetAll{DtoName}
+            String entityName = name.substring(0, 1).toLowerCase() + name.substring(1);
+            String getAllOperationId = entityName + "GetAll" + StringCase.PASCAL.apply(dtoName);
+            
             // Generate GET /{entity}/{dtoName} - paginated list
             MethodSpec getAllMethod = MethodSpec.methodBuilder("getAll" + StringCase.PASCAL.apply(dtoName))
                     .addModifiers(Modifier.PUBLIC)
-                    .returns(JavaPoetUtils.getClassName("org.springframework.http", "ResponseEntity"))
+                    .returns(paginatedReturnType)
                     .addAnnotation(AnnotationSpec.builder(
                             JavaPoetUtils.getClassName("org.springframework.web.bind.annotation", "GetMapping"))
                             .addMember("value", "$S", "/" + pathSegment)
                             .build())
                     .addAnnotation(AnnotationSpec.builder(
                             JavaPoetUtils.getClassName("io.swagger.v3.oas.annotations", "Operation"))
+                            .addMember("operationId", "$S", getAllOperationId)
                             .addMember("summary", "$S", "Get all " + modelDescriptor.getName() + " entities as " + dtoName + " projection")
                             .addMember("description", "$S", "Retrieves all " + modelDescriptor.getName() + " entities with support for pagination, projected to " + dtoName + " DTO.")
                             .build())
@@ -353,6 +368,7 @@ public class ControllerGenerator implements StubGenerator {
                     .addParameter(com.squareup.javapoet.ParameterSpec.builder(
                             JavaPoetUtils.getClassName("org.springframework.data.domain", "Pageable"),
                             "pageable")
+                            .addAnnotation(JavaPoetUtils.getClassName("org.springdoc.core.annotations", "ParameterObject"))
                             .build())
                     .addCode("$T clamped = clampPageable(pageable);\n",
                             JavaPoetUtils.getClassName("org.springframework.data.domain", "Pageable"))
@@ -377,16 +393,25 @@ public class ControllerGenerator implements StubGenerator {
                     .build();
             methods.add(getAllMethod);
             
+            // Create parameterized return type for single item response
+            ParameterizedTypeName singleReturnType = ParameterizedTypeName.get(
+                    JavaPoetUtils.getClassName("org.springframework.http", "ResponseEntity"),
+                    specializedDto);
+            
+            // Generate operationId following the pattern: {entityName}Get{DtoName}ById
+            String getByIdOperationId = entityName + "Get" + StringCase.PASCAL.apply(dtoName) + "ById";
+            
             // Generate GET /{entity}/{dtoName}/{id} - single item
             MethodSpec getOneMethod = MethodSpec.methodBuilder("get" + StringCase.PASCAL.apply(dtoName) + "ById")
                     .addModifiers(Modifier.PUBLIC)
-                    .returns(JavaPoetUtils.getClassName("org.springframework.http", "ResponseEntity"))
+                    .returns(singleReturnType)
                     .addAnnotation(AnnotationSpec.builder(
                             JavaPoetUtils.getClassName("org.springframework.web.bind.annotation", "GetMapping"))
                             .addMember("value", "$S", "/" + pathSegment + "/{id}")
                             .build())
                     .addAnnotation(AnnotationSpec.builder(
                             JavaPoetUtils.getClassName("io.swagger.v3.oas.annotations", "Operation"))
+                            .addMember("operationId", "$S", getByIdOperationId)
                             .addMember("summary", "$S", "Get a single " + modelDescriptor.getName() + " by ID as " + dtoName + " projection")
                             .addMember("description", "$S", "Retrieves a single " + modelDescriptor.getName() + " entity by its unique identifier, projected to " + dtoName + " DTO.")
                             .build())
