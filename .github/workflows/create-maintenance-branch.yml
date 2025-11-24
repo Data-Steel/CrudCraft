@@ -14,7 +14,7 @@ jobs:
     if: startsWith(github.event.release.tag_name, 'v') && endsWith(github.event.release.tag_name, '.0')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with: { fetch-depth: 0 }
 
       - name: Derive MAJOR, MINOR and maintenance branch
