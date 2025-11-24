@@ -84,7 +84,7 @@
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
         <mockito.version>5.8.0</mockito.version>
         <poi.ooxml.version>5.4.1</poi.ooxml.version>
-        <spotbugs.annotations.version>3.1.3</spotbugs.annotations.version>
+        <spotbugs.annotations.version>4.9.8</spotbugs.annotations.version>
         <checkstyle.lib.version>12.1.0</checkstyle.lib.version>
         <errorprone.version>2.41.0</errorprone.version>
 
