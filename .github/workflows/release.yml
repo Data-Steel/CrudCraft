@@ -30,7 +30,7 @@ jobs:
             exit 0
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           # Build exactly the released tag (release event) or the pushed tag (tag event)
