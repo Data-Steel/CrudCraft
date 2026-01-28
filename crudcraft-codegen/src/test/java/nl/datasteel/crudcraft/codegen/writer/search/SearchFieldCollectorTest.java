@@ -88,13 +88,12 @@ class SearchFieldCollectorTest {
         Fixture fx = fixture();
         List<SearchField> fields = fx.collector.collect(fx.root, 2);
         
-        // Currently only collecting tagsSize. The childValue field is not being collected
-        // in the test environment, possibly due to how @Searchable is processed in dynamically
-        // generated test classes. This should be investigated further, but the core functionality
-        // (not adding parent entity fields when recursing) is working as evidenced by the
-        // generated PostSearchRequest in the sample app.
-        assertEquals(1, fields.size());
+        // With the fix, we now correctly collect both:
+        // 1. tagsSize - from the List<String> tags field with SIZE_GT operator
+        // 2. childValue - from the nested Child.value field (depth=2 allows recursion)
+        assertEquals(2, fields.size());
         assertTrue(fields.stream().anyMatch(f -> f.property().equals("tagsSize") && f.operator() == SearchOperator.SIZE_GT));
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("childValue") && f.operator() == SearchOperator.EQUALS));
     }
 
     @Test
