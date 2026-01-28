@@ -95,26 +95,34 @@ public class SearchFieldCollector {
                     boolean willRecurse = false;
                     boolean isEntity = false;
                     if (te != null) {
-                        try {
-                            ModelDescriptor child = AnnotationModelReader.parse(te, ctx.env());
-                            // If we got here, it's an entity that could be recursed into
-                            isEntity = true;
-                            if (remaining > 1) {
-                                int next = Math.min(fd.getSearchDepth() > 0 ? fd.getSearchDepth() : remaining - 1,
-                                        remaining - 1
-                                );
-                                if (next > 0) {
-                                    willRecurse = true;
-                                    ctx.env().getMessager().printMessage(
-                                            Diagnostic.Kind.NOTE,
-                                            "Collecting search fields for " + child.getName() + " at depth " + next
+                        // Check if the type is actually a CrudCraft entity or JPA entity
+                        // by looking for @CrudCrafted or @Entity annotations
+                        boolean hasCrudCraftedAnnotation = te.getAnnotation(
+                                nl.datasteel.crudcraft.annotations.classes.CrudCrafted.class) != null;
+                        boolean hasEntityAnnotation = te.getAnnotation(jakarta.persistence.Entity.class) != null;
+                        
+                        if (hasCrudCraftedAnnotation || hasEntityAnnotation) {
+                            try {
+                                ModelDescriptor child = AnnotationModelReader.parse(te, ctx.env());
+                                // If we got here, it's an entity that could be recursed into
+                                isEntity = true;
+                                if (remaining > 1) {
+                                    int next = Math.min(fd.getSearchDepth() > 0 ? fd.getSearchDepth() : remaining - 1,
+                                            remaining - 1
                                     );
-                                    stack.push(new Node(child, path, next));
+                                    if (next > 0) {
+                                        willRecurse = true;
+                                        ctx.env().getMessager().printMessage(
+                                                Diagnostic.Kind.NOTE,
+                                                "Collecting search fields for " + child.getName() + " at depth " + next
+                                        );
+                                        stack.push(new Node(child, path, next));
+                                    }
                                 }
+                            } catch (Exception e) {
+                                // Not a valid entity, treat as regular type
+                                isEntity = false;
                             }
-                        } catch (Exception e) {
-                            // Not a valid entity, treat as regular type
-                            isEntity = false;
                         }
                     }
 

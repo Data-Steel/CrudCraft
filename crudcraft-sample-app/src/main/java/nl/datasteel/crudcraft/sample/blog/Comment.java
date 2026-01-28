@@ -50,6 +50,7 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Dto
+    @Searchable
     private UUID id;
 
     @Dto
@@ -85,6 +86,7 @@ public class Comment {
     private String content;
 
     @Dto
+    @Searchable
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
