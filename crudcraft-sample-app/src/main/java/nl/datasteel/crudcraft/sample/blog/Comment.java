@@ -101,6 +101,7 @@ public class Comment {
      */
     @Dto
     @Lob
+    @jakarta.persistence.Basic(fetch = jakarta.persistence.FetchType.LAZY)
     @Column(name = "attachment")
     private byte[] attachment;
 
