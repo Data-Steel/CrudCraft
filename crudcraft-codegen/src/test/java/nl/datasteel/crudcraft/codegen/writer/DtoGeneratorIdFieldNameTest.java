@@ -41,7 +41,7 @@ class DtoGeneratorIdFieldNameTest {
 
     private FieldDescriptor field(String name, RelationshipType relType) {
         Identity identity = new Identity(name, null, null, SchemaMetadata.empty());
-        DtoOptions dto = new DtoOptions(true, true, true, new String[0]);
+        DtoOptions dto = new DtoOptions(true, true, true, new String[0], false);
         EnumOptions en = new EnumOptions(false, null);
         Relationship rel = new Relationship(relType, "", "", false, false, false);
         Validation val = new Validation(null);

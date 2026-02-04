@@ -24,23 +24,24 @@ class DtoOptionsTest {
     @Test
     void gettersReflectConstructorArguments() {
         String[] dtos = {"A", "B"};
-        DtoOptions opts = new DtoOptions(true, false, true, dtos);
+        DtoOptions opts = new DtoOptions(true, false, true, dtos, false);
         assertTrue(opts.isInDto());
         assertFalse(opts.isInRequest());
         assertTrue(opts.isInRef());
         assertArrayEquals(dtos, opts.getResponseDtos());
+        assertFalse(opts.isLob());
     }
 
     @Test
     void allowsNullResponseDtos() {
-        DtoOptions opts = new DtoOptions(false, false, false, null);
+        DtoOptions opts = new DtoOptions(false, false, false, null, false);
         assertNull(opts.getResponseDtos());
     }
 
     @Test
     void responseDtoArrayNotDefensivelyCopied() {
         String[] dtos = {"A"};
-        DtoOptions opts = new DtoOptions(true, true, true, dtos);
+        DtoOptions opts = new DtoOptions(true, true, true, dtos, false);
         dtos[0] = "B";
         assertArrayEquals(new String[]{"B"}, opts.getResponseDtos());
     }

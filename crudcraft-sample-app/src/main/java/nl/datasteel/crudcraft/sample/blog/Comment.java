@@ -22,6 +22,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -93,6 +94,17 @@ public class Comment {
     @Dto
     @Column(nullable = false)
     private Boolean approved = false;
+
+    /**
+     * Attachment file data. Demonstrates @Lob support for large objects.
+     * LOB fields are lazy loaded and can be uploaded via Request DTOs.
+     */
+    @Dto
+    @Request
+    @Lob
+    @jakarta.persistence.Basic(fetch = jakarta.persistence.FetchType.LAZY)
+    @Column(name = "attachment")
+    private byte[] attachment;
 
     /**
      * The timestamp when the entity was last updated.
@@ -176,6 +188,15 @@ public class Comment {
     public void setApproved(Boolean approved) {
         this.approved = approved;
     }
+
+    public byte[] getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(byte[] attachment) {
+        this.attachment = attachment;
+    }
+
     public Instant getUpdatedAt() {
         return updatedAt;
     }
