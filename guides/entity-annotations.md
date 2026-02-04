@@ -57,22 +57,23 @@ The search request supports equals, contains, range, and sort operations dependi
 
 ## @Lob — Handle Large Objects (Files/Blobs)
 
-`@Lob` (from Jakarta Persistence) marks fields containing large binary or character data such as files, images, or documents. CrudCraft automatically handles LOB fields with special considerations:
+`@Lob` (from Jakarta Persistence) marks fields containing large binary or character data such as files, images, or documents. CrudCraft handles LOB fields like regular fields but with lazy loading support:
 
 ```java
 @Dto
+@Request
 @Lob
 @Basic(fetch = FetchType.LAZY)
 private byte[] attachment;
 ```
 
 **Key behaviors:**
-- LOB fields are **included in Response DTOs** for data retrieval
-- LOB fields are **excluded from Request DTOs** (files should be uploaded separately)
+- LOB fields can be included in **Request DTOs** with `@Request` for uploads
+- LOB fields are included in **Response DTOs** with `@Dto` for data retrieval
 - LOB fields are **excluded from Ref DTOs** (lightweight references)
 - Use `@Basic(fetch = FetchType.LAZY)` for optimal performance (lazy loading)
 
-**Example use case:** A Comment entity with an optional file attachment that clients can download but not directly upload via the standard create/update endpoints.
+**Example use case:** A Comment entity with an optional file attachment that clients can upload via create/update endpoints and download via read endpoints.
 
 ## Validation
 

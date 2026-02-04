@@ -97,9 +97,10 @@ public class Comment {
 
     /**
      * Attachment file data. Demonstrates @Lob support for large objects.
-     * LOB fields are lazy loaded and excluded from Request DTOs.
+     * LOB fields are lazy loaded and can be uploaded via Request DTOs.
      */
     @Dto
+    @Request
     @Lob
     @jakarta.persistence.Basic(fetch = jakarta.persistence.FetchType.LAZY)
     @Column(name = "attachment")

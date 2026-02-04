@@ -86,10 +86,9 @@ public class DtoGenerator implements Generator {
 
         // For non-abstract classes, generate all DTOs
         List<FieldDescriptor> requestFields = md.getFields().stream()
-                .filter(fd -> (fd.inRequest()
+                .filter(fd -> fd.inRequest()
                         || (fd.inDto() && fd.getRelType() != RelationshipType.NONE
                         && !fd.isEmbedded()))
-                        && !fd.isLob())  // Exclude LOB fields from Request DTOs
                 .toList();
 
         JavaFile req = generateDto(DtoType.REQUEST, md, requestFields);
