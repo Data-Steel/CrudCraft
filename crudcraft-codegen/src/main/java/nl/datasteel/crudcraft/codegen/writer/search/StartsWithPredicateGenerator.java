@@ -15,7 +15,6 @@
  */
 package nl.datasteel.crudcraft.codegen.writer.search;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import nl.datasteel.crudcraft.annotations.SearchOperator;
 
