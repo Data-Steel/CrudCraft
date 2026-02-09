@@ -39,8 +39,7 @@ public class StartsWithPredicateGenerator
     public CodeBlock generate(SearchField f) {
         String m = cap(f.property());
         return CodeBlock.builder()
-                .beginControlFlow("if (request.get$L() != null && request.get$LOp() "
-                        + " == $T.STARTS_WITH)",
+                .beginControlFlow("if (request.get$L() != null && request.get$LOp() == $T.STARTS_WITH)",
                         m,
                         m,
                         SearchOperator.class)

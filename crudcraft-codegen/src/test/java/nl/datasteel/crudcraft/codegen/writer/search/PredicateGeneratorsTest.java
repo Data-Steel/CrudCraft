@@ -42,7 +42,7 @@ if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft
 }
 """),
                 Arguments.of(SearchOperator.STARTS_WITH, "field", "root.get(\"field\")", """
-if (request.getField() != null && request.getFieldOp()  == nl.datasteel.crudcraft.annotations.SearchOperator.STARTS_WITH) {
+if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.STARTS_WITH) {
   p = cb.and(p, cb.like(root.get(\"field\"), request.getField() + \"%\"));
 }
 """),
