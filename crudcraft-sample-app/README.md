@@ -108,7 +108,9 @@ Example endpoints:
 
 ## Authentication
 
-Use the login endpoint to get a JWT token:
+The sample app has security configured but **all endpoints are open** (no authentication required) for easy testing. CSRF protection is disabled since this is a stateless API demonstration.
+
+You can optionally use the login endpoint to get a JWT token for testing secured endpoints:
 
 ```bash
 curl -X POST http://localhost:8080/auth/login \
@@ -121,6 +123,8 @@ Include the returned token in subsequent requests:
 curl http://localhost:8080/users \
   -H "Authorization: Bearer <your-token>"
 ```
+
+**Note:** In production, you should enable CSRF protection for non-stateless applications and properly secure your endpoints based on your security requirements.
 
 ## Learn More
 - [Getting Started guide](../guides/getting-started.md)
