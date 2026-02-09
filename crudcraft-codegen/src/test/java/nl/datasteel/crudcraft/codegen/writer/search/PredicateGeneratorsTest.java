@@ -37,43 +37,24 @@ if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft
 }
 """),
                 Arguments.of(SearchOperator.CONTAINS, "field", "root.get(\"field\")", """
-if (request.getField() != null && !request.getField().isEmpty() && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.CONTAINS) {
-  jakarta.persistence.criteria.Predicate[] predicates = new jakarta.persistence.criteria.Predicate[request.getField().size()];
-  int i = 0;
-  for (String value : request.getField()) {
-    predicates[i++] = cb.like(root.get(\"field\"), \"%\" + value + \"%\");
-  }
-  p = cb.and(p, cb.or(predicates));
+                        if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.CONTAINS) {
+                          p = cb.and(p, cb.like(root.get(\\"field\\"), \\"%\\" + request.getField() + \\"%\\"));
 }
 """),
                 Arguments.of(SearchOperator.STARTS_WITH, "field", "root.get(\"field\")", """
-if (request.getField() != null && !request.getField().isEmpty() && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.STARTS_WITH) {
-  jakarta.persistence.criteria.Predicate[] predicates = new jakarta.persistence.criteria.Predicate[request.getField().size()];
-  int i = 0;
-  for (String value : request.getField()) {
-    predicates[i++] = cb.like(root.get(\"field\"), value + \"%\");
-  }
-  p = cb.and(p, cb.or(predicates));
+                        if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.STARTS_WITH) {
+                                                             p = cb.and(p, cb.like(root.get(\\"field\\"), request.getField() + \\"%\\"));
+                                                           }
 }
 """),
                 Arguments.of(SearchOperator.ENDS_WITH, "field", "root.get(\"field\")", """
-if (request.getField() != null && !request.getField().isEmpty() && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.ENDS_WITH) {
-  jakarta.persistence.criteria.Predicate[] predicates = new jakarta.persistence.criteria.Predicate[request.getField().size()];
-  int i = 0;
-  for (String value : request.getField()) {
-    predicates[i++] = cb.like(root.get(\"field\"), \"%\" + value);
-  }
-  p = cb.and(p, cb.or(predicates));
+                        if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.ENDS_WITH) {
+                          p = cb.and(p, cb.like(root.get(\\"field\\"), \\"%\\" + request.getField()));
 }
 """),
                 Arguments.of(SearchOperator.REGEX, "field", "root.get(\"field\")", """
-if (request.getField() != null && !request.getField().isEmpty() && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.REGEX) {
-  jakarta.persistence.criteria.Predicate[] predicates = new jakarta.persistence.criteria.Predicate[request.getField().size()];
-  int i = 0;
-  for (String value : request.getField()) {
-    predicates[i++] = cb.like(root.get(\"field\"), value);
-  }
-  p = cb.and(p, cb.or(predicates));
+                        if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.REGEX) {
+                                                             p = cb.and(p, cb.like(root.get(\\"field\\"), request.getField()));
 }
 """),
                 Arguments.of(SearchOperator.GT, "field", "root.get(\"field\")", """

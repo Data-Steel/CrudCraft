@@ -74,17 +74,12 @@ public class SearchFieldCollector {
                     String path = prefix.isEmpty() ? fd.getName() : prefix + "." + fd.getName();
                     String prop = SearchPathUtil.toProperty(path);
 
-                    // Choose a SINGLE operator for the field:
-                    //  - if configured operators list is non-empty, pick the first
-                    //  - otherwise default to EQUALS
-                    SearchOperator op = fd.getSearchOperators().isEmpty()
-                            ? SearchOperator.EQUALS
-                            : fd.getSearchOperators().get(0);
-
-                    String property = switch (op) {
-                        case SIZE_EQUALS, SIZE_GT, SIZE_LT -> prop + "Size";
-                        default -> prop;
-                    };
+                    // Get all configured operators for the field
+                    //  - if configured operators list is non-empty, use all of them
+                    //  - otherwise default to EQUALS only
+                    List<SearchOperator> operators = fd.getSearchOperators().isEmpty()
+                            ? List.of(SearchOperator.EQUALS)
+                            : fd.getSearchOperators();
 
                     // Recurse into CRUD-target children if we can still go deeper
                     String candidateFqcn = fd.getTargetType();
@@ -130,12 +125,20 @@ public class SearchFieldCollector {
                     // AND it's not an entity type (to avoid exposing full entity schemas)
                     // When we recurse, we only want the flattened nested fields, not the parent entity
                     if (!willRecurse && !isEntity) {
-                        result.add(new SearchField(
-                                fd,
-                                property,
-                                SearchPathUtil.buildPath(path),
-                                op
-                        ));
+                        // Generate one SearchField entry for each operator
+                        for (SearchOperator op : operators) {
+                            String property = switch (op) {
+                                case SIZE_EQUALS, SIZE_GT, SIZE_LT -> prop + "Size";
+                                default -> prop;
+                            };
+
+                            result.add(new SearchField(
+                                    fd,
+                                    property,
+                                    SearchPathUtil.buildPath(path),
+                                    op
+                            ));
+                        }
                     }
                 }
             }
