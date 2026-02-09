@@ -15,6 +15,7 @@
  */
 package nl.datasteel.crudcraft.sample.blog;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -22,6 +23,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -84,6 +86,17 @@ public class Comment {
     @ProjectionField("comment.content")
     @Column(nullable = false, length = 2000)
     private String content;
+
+    /**
+     * Attachment file data. Demonstrates @Lob support for large objects.
+     * LOB fields are lazy loaded and can be uploaded via Request DTOs.
+     */
+    @Dto
+    @Request
+    @Lob
+    @Basic(fetch = jakarta.persistence.FetchType.LAZY)
+    @Column(name = "attachment")
+    private byte[] attachment;
 
     @Dto
     @Searchable
@@ -178,5 +191,13 @@ public class Comment {
     }
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public byte[] getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(byte[] attachment) {
+        this.attachment = attachment;
     }
 }
