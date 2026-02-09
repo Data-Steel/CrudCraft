@@ -30,7 +30,7 @@ public class ContainsPredicateGenerator
         String m = cap(f.property());
         return CodeBlock.builder()
                 .beginControlFlow(
-                        "if (request.get$L() != null && request.get$LOp() == $T.CONTAINS)",                        m,
+                        "if (request.get$L() != null && request.get$LOp() == $T.CONTAINS)",
                         m,
                         m,
                         SearchOperator.class
