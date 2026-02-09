@@ -74,12 +74,10 @@ public class SearchFieldCollector {
                     String path = prefix.isEmpty() ? fd.getName() : prefix + "." + fd.getName();
                     String prop = SearchPathUtil.toProperty(path);
 
-                    // Get all configured operators for the field
-                    //  - if configured operators list is non-empty, use all of them
-                    //  - otherwise default to EQUALS only
-                    List<SearchOperator> operators = fd.getSearchOperators().isEmpty()
-                            ? List.of(SearchOperator.EQUALS)
-                            : fd.getSearchOperators();
+                    // Get all configured operators for the field.
+                    // The operators are already populated by SearchOptionsExtractor
+                    // with appropriate defaults based on field type.
+                    List<SearchOperator> operators = fd.getSearchOperators();
 
                     // Recurse into CRUD-target children if we can still go deeper
                     String candidateFqcn = fd.getTargetType();

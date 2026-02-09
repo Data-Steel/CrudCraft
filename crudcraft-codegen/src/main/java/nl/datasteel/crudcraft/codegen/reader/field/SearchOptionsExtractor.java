@@ -55,9 +55,16 @@ public class SearchOptionsExtractor implements FieldPartExtractor<SearchOptions>
                 ? Arrays.asList(annotation.operators())
                 : List.of();
 
+        FieldPartExtractor.log(env.getMessager(), Diagnostic.Kind.NOTE, field,
+                String.format("SearchOptions DEBUG → isSearchable=%s, operators.isEmpty()=%s, operators=%s, fieldType=%s",
+                        isSearchable, operators.isEmpty(), operators, fieldType));
+
         if (isSearchable && operators.isEmpty()) {
             boolean isRelationship = isRelationshipField(field);
             operators = getDefaultOperatorsFor(fieldType, isRelationship);
+            FieldPartExtractor.log(env.getMessager(), Diagnostic.Kind.NOTE, field,
+                    String.format("SearchOptions DEBUG → Applied defaults, isRelationship=%s, newOperators=%s",
+                            isRelationship, operators));
         }
 
         int depth = isSearchable ? annotation.depth() : 0;
@@ -122,39 +129,46 @@ public class SearchOptionsExtractor implements FieldPartExtractor<SearchOptions>
      * Checks if the type is a String.
      */
     private static boolean isString(String t) {
-        return t.equals("java.lang.String");
+        return t.equals("java.lang.String") || t.endsWith(" String");
     }
 
     /**
      * Checks if the type is a boolean or Boolean.
      */
     private static boolean isBoolean(String t) {
-        return t.equals("boolean") || t.equals("java.lang.Boolean");
+        return t.equals("boolean") || t.equals("java.lang.Boolean") 
+                || t.endsWith(" boolean") || t.endsWith(" Boolean");
     }
 
     /**
      * Checks if the type is a numeric type.
      */
     private static boolean isNumeric(String t) {
-        return List.of(
-                "int", "java.lang.Integer", "long", "java.lang.Long",
-                "float", "java.lang.Float", "double", "java.lang.Double"
-        ).contains(t);
+        return t.equals("int") || t.equals("java.lang.Integer") 
+                || t.equals("long") || t.equals("java.lang.Long")
+                || t.equals("float") || t.equals("java.lang.Float") 
+                || t.equals("double") || t.equals("java.lang.Double")
+                || t.endsWith(" int") || t.endsWith(" Integer")
+                || t.endsWith(" long") || t.endsWith(" Long")
+                || t.endsWith(" float") || t.endsWith(" Float")
+                || t.endsWith(" double") || t.endsWith(" Double");
     }
 
     /**
      * Checks if the type is a UUID.
      */
     private static boolean isUuid(String t) {
-        return t.equals("java.util.UUID");
+        return t.equals("java.util.UUID") || t.endsWith(" UUID");
     }
 
     /**
      * Checks if the type is a date/time type.
      */
     private static boolean isDateTime(String t) {
-        return List.of("java.time.LocalDate", "java.time.LocalDateTime", "java.time.Instant")
-                .contains(t);
+        return t.equals("java.time.LocalDate") || t.equals("java.time.LocalDateTime") 
+                || t.equals("java.time.Instant") || t.equals("java.time.OffsetDateTime")
+                || t.endsWith(" LocalDate") || t.endsWith(" LocalDateTime") 
+                || t.endsWith(" Instant") || t.endsWith(" OffsetDateTime");
     }
 
     /**
