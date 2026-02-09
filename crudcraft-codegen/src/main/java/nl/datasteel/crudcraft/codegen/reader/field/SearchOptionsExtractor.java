@@ -55,16 +55,9 @@ public class SearchOptionsExtractor implements FieldPartExtractor<SearchOptions>
                 ? Arrays.asList(annotation.operators())
                 : List.of();
 
-        FieldPartExtractor.log(env.getMessager(), Diagnostic.Kind.NOTE, field,
-                String.format("SearchOptions DEBUG → isSearchable=%s, operators.isEmpty()=%s, operators=%s, fieldType=%s",
-                        isSearchable, operators.isEmpty(), operators, fieldType));
-
         if (isSearchable && operators.isEmpty()) {
             boolean isRelationship = isRelationshipField(field);
             operators = getDefaultOperatorsFor(fieldType, isRelationship);
-            FieldPartExtractor.log(env.getMessager(), Diagnostic.Kind.NOTE, field,
-                    String.format("SearchOptions DEBUG → Applied defaults, isRelationship=%s, newOperators=%s",
-                            isRelationship, operators));
         }
 
         int depth = isSearchable ? annotation.depth() : 0;
