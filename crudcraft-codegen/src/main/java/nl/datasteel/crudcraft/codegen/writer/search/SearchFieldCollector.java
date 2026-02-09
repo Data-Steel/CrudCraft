@@ -77,9 +77,7 @@ public class SearchFieldCollector {
                     // Get all configured operators for the field
                     //  - if configured operators list is non-empty, use all of them
                     //  - otherwise default to EQUALS only
-                    List<SearchOperator> operators = fd.getSearchOperators().isEmpty()
-                            ? List.of(SearchOperator.EQUALS)
-                            : fd.getSearchOperators();
+                    List<SearchOperator> operators = fd.getSearchOperators();
 
                     // Recurse into CRUD-target children if we can still go deeper
                     String candidateFqcn = fd.getTargetType();
