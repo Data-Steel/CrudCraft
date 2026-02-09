@@ -73,6 +73,21 @@ private byte[] attachment;
 - LOB fields are **excluded from Ref DTOs** (lightweight references)
 - Use `@Basic(fetch = FetchType.LAZY)` for optimal performance (lazy loading)
 
+**JSON Format:**
+- `byte[]` fields are automatically serialized/deserialized as **Base64-encoded strings** in JSON
+- When uploading files, encode the binary data as Base64 and include it as a string in the JSON request body
+- When downloading, the response will contain the Base64-encoded string which you decode on the client
+
+**Example JSON request:**
+```json
+{
+  "authorName": "John Doe",
+  "authorEmail": "john@example.com",
+  "content": "Great article!",
+  "attachment": "SGVsbG8gV29ybGQh"
+}
+```
+
 **Example use case:** A Comment entity with an optional file attachment that clients can upload via create/update endpoints and download via read endpoints.
 
 ## Validation
