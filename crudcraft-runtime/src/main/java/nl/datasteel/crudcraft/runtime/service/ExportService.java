@@ -196,13 +196,13 @@ public class ExportService<R, S> {
      * Gets the appropriate exporter for the format.
      *
      * @param format the format string
-     * @param exportRequest the export request for field filtering (currently only applied to CSV/XLSX, not JSON)
+     * @param exportRequest the export request for field filtering (applied to all formats)
      * @return the exporter function
      */
     private BiConsumer<Iterator<R>, OutputStream> getExporter(String format, ExportRequest exportRequest) {
         return switch (format) {
             case "csv" -> (iter, out) -> ExportUtil.streamCsv(iter, out, exportRequest);
-            case "json" -> (iter, out) -> ExportUtil.streamJson(iter, out);  // JSON does not support ExportRequest filtering
+            case "json" -> (iter, out) -> ExportUtil.streamJson(iter, out, exportRequest);
             case "xlsx" -> (iter, out) -> ExportUtil.streamXlsx(iter, out, exportRequest);
             default -> throw new IllegalArgumentException("Unsupported format: " + format);
         };

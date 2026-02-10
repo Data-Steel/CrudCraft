@@ -14,15 +14,17 @@ The export endpoint now accepts an `ExportRequest` parameter that allows you to:
 
 **What Works Now:**
 - Export filters within Response DTO fields (fields marked with `@Dto`)
-- Field inclusion/exclusion using dot notation (CSV/XLSX only)
-- Depth control for nested relationships (CSV/XLSX only)
+- Field inclusion/exclusion using dot notation for all formats
+- Depth control for nested relationships (CSV/XLSX only - JSON preserves nested structure)
 - Permanent exclusions via `@ExportExclude` (planned feature)
 
 **Important Limitations:**
 
 1. **DTO-Based Export:** The current implementation works with Response DTOs. This means **you can only export fields that are marked with `@Dto`** in your entity.
 
-2. **Format Support:** ExportRequest parameters (`includeFields`, `excludeFields`, `maxDepth`) currently only affect CSV and XLSX exports. JSON exports include all DTO fields without filtering.
+2. **Format Differences:** 
+   - **CSV/XLSX**: Flatten nested objects with dot notation (e.g., `author.name`). Support `maxDepth` to control flattening depth.
+   - **JSON**: Preserve nested object structure. Field filtering applies, but `maxDepth` is ignored (nested objects remain as objects/arrays).
 
 3. **Memory Buffering:** CSV and XLSX exports buffer all rows in memory to compute complete headers before writing output. This can impact memory usage for large exports (within configured row limits). JSON exports stream without buffering.
 
@@ -156,14 +158,15 @@ GET /posts/export?format=csv&limit=1000&includeFields=id&includeFields=title&inc
 ```bash
 GET /posts/export?format=csv&limit=1000&excludeFields=passwordHash&excludeFields=author.email
 ```
+Works for all formats. JSON preserves structure while filtering fields.
 
 ### Export with Depth Limitation (CSV/XLSX only)
 ```bash
 GET /posts/export?format=csv&limit=100&maxDepth=0
 ```
-This exports only top-level fields. Nested objects are serialized as JSON strings in a single column.
+This exports only top-level fields for CSV/XLSX. Nested objects are serialized as JSON strings in a single column.
 
-**Note:** `maxDepth`, `includeFields`, and `excludeFields` parameters currently only affect CSV and XLSX exports. JSON exports include all DTO fields without filtering.
+**Note:** `maxDepth` parameter only affects CSV and XLSX exports (controls flattening depth). JSON exports preserve nested structure regardless of maxDepth.
 
 ### Complex Export Configuration
 ```bash
@@ -225,7 +228,7 @@ id,title,author.name,author.email
 
 The `maxDepth` parameter controls how deep the flattening goes for CSV and XLSX exports:
 
-**Note:** These examples apply to CSV/XLSX exports. JSON exports do not currently support ExportRequest parameters.
+**Note:** `maxDepth` only affects CSV/XLSX formats. JSON exports preserve the full nested structure while still respecting `includeFields` and `excludeFields`.
 
 ### maxDepth = 0
 ```

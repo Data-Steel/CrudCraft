@@ -334,4 +334,55 @@ class ExportUtilTest {
         assertFalse(text.contains("author.email"));
         assertFalse(text.contains("John Doe"));
     }
+    
+    @Test
+    void streamJsonWithExportRequestIncludeFieldsFiltersFields() {
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java", "spring"));
+        ExportRequest exportRequest = new ExportRequest();
+        exportRequest.setIncludeFields(Set.of("title"));
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamJson(List.of(post).iterator(), out, exportRequest);
+        String text = out.toString(StandardCharsets.UTF_8);
+        
+        assertTrue(text.contains("title"));
+        assertTrue(text.contains("Java Tips"));
+        assertFalse(text.contains("John Doe"));
+        assertFalse(text.contains("john@example.com"));
+    }
+    
+    @Test
+    void streamJsonWithExportRequestExcludeFieldsFiltersFields() {
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java", "spring"));
+        ExportRequest exportRequest = new ExportRequest();
+        exportRequest.setExcludeFields(Set.of("author.email", "tags"));
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamJson(List.of(post).iterator(), out, exportRequest);
+        String text = out.toString(StandardCharsets.UTF_8);
+        
+        assertTrue(text.contains("title"));
+        assertTrue(text.contains("author"));
+        assertTrue(text.contains("John Doe"));
+        assertFalse(text.contains("john@example.com"));
+        assertFalse(text.contains("tags"));
+    }
+    
+    @Test
+    void streamJsonWithExportRequestPreservesNestedStructure() {
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java"));
+        ExportRequest exportRequest = new ExportRequest();
+        exportRequest.setIncludeFields(Set.of("title", "author"));
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamJson(List.of(post).iterator(), out, exportRequest);
+        String text = out.toString(StandardCharsets.UTF_8);
+        
+        // JSON should preserve nested structure (not flattened)
+        assertTrue(text.contains("\"author\""));
+        assertTrue(text.contains("\"name\""));
+        assertTrue(text.contains("John Doe"));
+        // Verify it's structured JSON, not flattened
+        assertFalse(text.contains("author.name"));
+    }
 }

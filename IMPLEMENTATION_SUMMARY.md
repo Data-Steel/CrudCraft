@@ -173,7 +173,7 @@ Exports post fields plus specific author fields.
 ```bash
 GET /posts/export?format=csv&maxDepth=2
 ```
-Exports posts with relationships up to 2 levels deep (CSV/XLSX only).
+Exports posts with relationships up to 2 levels deep (CSV/XLSX only - controls flattening depth).
 
 ### Complex Configuration
 ```bash

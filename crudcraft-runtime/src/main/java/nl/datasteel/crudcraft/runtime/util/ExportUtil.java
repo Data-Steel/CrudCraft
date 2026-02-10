@@ -24,11 +24,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import nl.datasteel.crudcraft.runtime.export.ExportRequest;
 import org.apache.commons.csv.CSVFormat;
@@ -274,8 +277,8 @@ public final class ExportUtil {
             }
             
             // Collect all rows first to determine complete header set
-            List<Map<String, Object>> rows = new java.util.ArrayList<>();
-            java.util.Set<String> allHeaders = new java.util.LinkedHashSet<>();
+            List<Map<String, Object>> rows = new ArrayList<>();
+            Set<String> allHeaders = new LinkedHashSet<>();
             
             while (dtos.hasNext()) {
                 Map<String, Object> row = toFlatMap(dtos.next(), exportRequest);
@@ -328,21 +331,109 @@ public final class ExportUtil {
 
     /**
      * Streams a list of DTOs to a JSON array.
+     * If exportRequest is provided, filters fields according to include/exclude rules.
+     * Unlike CSV/XLSX, JSON exports keep the nested object structure (no flattening).
      *
      * @param dtos the iterator of DTOs to export
      * @param out  the output stream to write the JSON to
+     * @param exportRequest the export request for field filtering (null for no filtering)
      */
-    public static <R> void streamJson(Iterator<R> dtos, OutputStream out) {
+    public static <R> void streamJson(Iterator<R> dtos, OutputStream out, ExportRequest exportRequest) {
         try (JsonGenerator gen = objectMapper.getFactory().createGenerator(out)) {
             gen.writeStartArray();
             while (dtos.hasNext()) {
-                objectMapper.writeValue(gen, dtos.next());
+                R dto = dtos.next();
+                if (exportRequest == null) {
+                    objectMapper.writeValue(gen, dto);
+                } else {
+                    // Convert to map and filter fields
+                    Map<String, Object> map = objectMapper.convertValue(
+                            dto, new TypeReference<Map<String, Object>>() {});
+                    Map<String, Object> filtered = filterJsonMap(map, exportRequest, "");
+                    objectMapper.writeValue(gen, filtered);
+                }
             }
             gen.writeEndArray();
             gen.flush();
         } catch (Exception e) {
             throw new RuntimeException("Failed to export JSON", e);
         }
+    }
+
+    /**
+     * Streams a list of DTOs to a JSON array (without field filtering).
+     *
+     * @param dtos the iterator of DTOs to export
+     * @param out  the output stream to write the JSON to
+     */
+    public static <R> void streamJson(Iterator<R> dtos, OutputStream out) {
+        streamJson(dtos, out, null);
+    }
+
+    /**
+     * Filters a map structure based on ExportRequest rules, keeping nested structure intact.
+     * Unlike flattenMap, this preserves the hierarchical structure for JSON exports.
+     *
+     * @param map the map to filter
+     * @param exportRequest the export request with filtering rules
+     * @param prefix the current path prefix for nested fields
+     * @return filtered map
+     */
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> filterJsonMap(Map<String, Object> map, 
+                                                      ExportRequest exportRequest, 
+                                                      String prefix) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            String fullPath = prefix.isEmpty() ? key : prefix + "." + key;
+            Object value = entry.getValue();
+            
+            // Check if this field should be included
+            if (!exportRequest.shouldIncludeField(fullPath)) {
+                continue;
+            }
+            
+            // Process the value
+            if (value == null) {
+                result.put(key, null);
+            } else if (value instanceof Map) {
+                // Recursively filter nested maps
+                Map<String, Object> nestedMap = (Map<String, Object>) value;
+                Map<String, Object> filteredNested = filterJsonMap(nestedMap, exportRequest, fullPath);
+                if (!filteredNested.isEmpty()) {
+                    result.put(key, filteredNested);
+                }
+            } else if (value instanceof Collection) {
+                // Process collections
+                Collection<?> collection = (Collection<?>) value;
+                if (!collection.isEmpty()) {
+                    List<Object> filteredList = new ArrayList<>();
+                    for (Object item : collection) {
+                        if (item instanceof Map) {
+                            Map<String, Object> itemMap = (Map<String, Object>) item;
+                            Map<String, Object> filteredItem = filterJsonMap(itemMap, exportRequest, fullPath);
+                            if (!filteredItem.isEmpty()) {
+                                filteredList.add(filteredItem);
+                            }
+                        } else {
+                            filteredList.add(item);
+                        }
+                    }
+                    if (!filteredList.isEmpty()) {
+                        result.put(key, filteredList);
+                    }
+                } else {
+                    result.put(key, collection);
+                }
+            } else {
+                // Scalar value
+                result.put(key, value);
+            }
+        }
+        
+        return result;
     }
 
     /**
@@ -362,8 +453,8 @@ public final class ExportUtil {
             }
             
             // Collect all rows first to determine complete header set
-            List<Map<String, Object>> rows = new java.util.ArrayList<>();
-            java.util.Set<String> allHeaders = new java.util.LinkedHashSet<>();
+            List<Map<String, Object>> rows = new ArrayList<>();
+            Set<String> allHeaders = new LinkedHashSet<>();
             
             while (dtos.hasNext()) {
                 Map<String, Object> rowMap = toFlatMap(dtos.next(), exportRequest);
