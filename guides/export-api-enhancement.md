@@ -7,12 +7,44 @@ This document describes the enhanced export functionality that allows fine-grain
 The export endpoint now accepts an `ExportRequest` parameter that allows you to:
 - Control which fields are included or excluded from the export
 - Limit the depth of nested relationships
+- Use @ExportExclude annotation to permanently exclude fields
 - Prepare for future entity-level exports (not just DTO fields)
+
+## Field-Level Annotations
+
+### @ExportExclude
+
+Mark a field as permanently excluded from all exports. This annotation is checked at the DTO level.
+
+**Example:**
+```java
+@Entity
+public class User {
+    @Dto
+    @ExportExclude  // This field will never be exported
+    private String internalProcessingData;
+    
+    @Dto
+    private String name;  // This field can be exported
+}
+```
+
+**Use cases:**
+- Internal processing fields that should never leave the system
+- Computed values that are expensive to calculate
+- Fields with sensitive business logic
+
+**Note:** @ExportExclude takes precedence over includeFields in ExportRequest. A field marked with @ExportExclude will never be exported, even if explicitly included.
 
 ## ExportRequest Parameters
 
 ### includeFields (Set<String>)
 Specify which fields to include in the export. Use dot notation for nested fields.
+
+**How it works:**
+- Filters **within existing DTO fields** - doesn't add new fields not in the DTO
+- If empty/not specified, all DTO fields are included by default
+- Including a parent field (e.g., "author") automatically includes all its children (e.g., "author.name", "author.email")
 
 **Example:**
 ```json
@@ -21,10 +53,15 @@ Specify which fields to include in the export. Use dot notation for nested field
 }
 ```
 
-If not specified or empty, all DTO fields are included by default.
+**Why use it:** When you only need a subset of fields for a specific report or integration.
 
 ### excludeFields (Set<String>)
 Specify which fields to exclude from the export. Exclusions take precedence over inclusions.
+
+**How it works:**
+- Filters out specific fields from the export
+- Takes precedence over includeFields
+- Useful for "export everything except..." scenarios
 
 **Example:**
 ```json
@@ -33,8 +70,18 @@ Specify which fields to exclude from the export. Exclusions take precedence over
 }
 ```
 
+**Why use it:** 
+- Simpler than listing all fields you DO want when you only want to exclude a few
+- Example: Export all user data except sensitive fields like passwordHash
+- Without excludeFields, you'd need to list every other field explicitly in includeFields
+
 ### maxDepth (Integer)
 Control the maximum depth for nested relationships. Default is 1.
+
+**How it works:**
+- Controls automatic expansion of nested objects during export
+- Different from explicit field selection with dot notation
+- When you specify includeFields=["author"], maxDepth determines how many levels deep to traverse
 
 **Values:**
 - `0` - No nested relationships (only top-level fields)
@@ -47,6 +94,11 @@ Control the maximum depth for nested relationships. Default is 1.
   "maxDepth": 2
 }
 ```
+
+**Why use it:**
+- With maxDepth=2 and includeFields=["author"], you automatically get author.name, author.email, author.address.city, author.address.country
+- Without maxDepth control, you'd need to list every nested field explicitly: author.name, author.email, author.address.city, etc.
+- Simplifies exports when you want "everything about X" without listing all fields
 
 ### includeAllFields (Boolean)
 **Future capability** - When `true`, will export all accessible entity fields (not just DTO fields). Currently a placeholder for future implementation. Default is `false`.
