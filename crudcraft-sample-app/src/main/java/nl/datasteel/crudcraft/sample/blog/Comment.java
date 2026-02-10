@@ -18,7 +18,7 @@ package nl.datasteel.crudcraft.sample.blog;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
+import static jakarta.persistence.FetchType.LAZY;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -57,7 +57,7 @@ public class Comment {
 
     @Dto
     @Searchable
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
@@ -94,7 +94,7 @@ public class Comment {
     @Dto
     @Request
     @Lob
-    @Basic(fetch = jakarta.persistence.FetchType.LAZY)
+    @Basic(fetch = LAZY)
     @Column(name = "attachment")
     private byte[] attachment;
 
