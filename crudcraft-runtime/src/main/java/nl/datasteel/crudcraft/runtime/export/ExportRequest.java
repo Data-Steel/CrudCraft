@@ -45,7 +45,21 @@ public class ExportRequest {
     
     /**
      * Whether to include all entity fields (not just DTO fields). Default is false.
-     * When true, exports all accessible fields from the entity, subject to security filtering.
+     * 
+     * <p><strong>Note:</strong> This is currently a placeholder for future implementation.
+     * Full entity-based export requires significant architectural work including:
+     * <ul>
+     *   <li>Entity metadata introspection</li>
+     *   <li>Dynamic query building with projections</li>
+     *   <li>Efficient relationship hydration (avoiding N+1 queries)</li>
+     *   <li>Transaction management for lazy loading</li>
+     * </ul>
+     * 
+     * <p>See {@code guides/dynamic-entity-export-plan.md} for the implementation plan.
+     * 
+     * <p>Current behavior: This flag is recognized but not fully implemented. 
+     * Exports still work with Response DTO fields. To export specific fields,
+     * ensure they are marked with {@code @Dto} annotation on the entity.
      */
     private Boolean includeAllFields;
 

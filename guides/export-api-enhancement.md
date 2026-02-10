@@ -10,6 +10,32 @@ The export endpoint now accepts an `ExportRequest` parameter that allows you to:
 - Use `@ExportExclude` annotation to permanently exclude fields
 - Prepare for future entity-level exports (not just DTO fields)
 
+## Current Scope and Limitations
+
+**What Works Now:**
+- Export filters within Response DTO fields (fields marked with `@Dto`)
+- Field inclusion/exclusion using dot notation
+- Depth control for nested relationships
+- Permanent exclusions via `@ExportExclude`
+
+**Important Limitation:**
+The current implementation works with Response DTOs. This means **you can only export fields that are marked with `@Dto`** in your entity.
+
+**Example:**
+```java
+@Entity
+public class Product {
+    @Dto private String name;              // ✅ Can export
+    @Dto private BigDecimal price;         // ✅ Can export
+    
+    private String internalSKU;            // ❌ Cannot export (not in DTO)
+    private ConfigParams configuration;    // ❌ Cannot export (not in DTO)
+}
+```
+
+**Future Direction:**
+Full entity-based export (where any entity field can be dynamically selected) requires significant architectural work. See `guides/dynamic-entity-export-plan.md` for the implementation plan.
+
 ## Field-Level Annotations
 
 ### @ExportExclude
