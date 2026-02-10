@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nl.datasteel.crudcraft.runtime.export.ExportRequest;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.poi.ss.usermodel.Row;
@@ -62,30 +63,55 @@ public final class ExportUtil {
      * @param prefix the prefix to prepend to keys (empty string for top level)
      * @param value  the value to flatten
      * @param result the map to store flattened key-value pairs
+     * @param exportRequest the export request for field filtering (null for no filtering)
+     * @param depth the current nesting depth
      */
     @SuppressWarnings("unchecked")
-    private static void flattenMap(String prefix, Object value, Map<String, Object> result) {
+    private static void flattenMap(String prefix, Object value, Map<String, Object> result, 
+                                   ExportRequest exportRequest, int depth) {
         if (value == null) {
-            result.put(prefix, null);
+            if (exportRequest == null || exportRequest.shouldIncludeField(prefix)) {
+                result.put(prefix, null);
+            }
             return;
         }
 
         if (value instanceof Map) {
             Map<String, Object> map = (Map<String, Object>) value;
             if (map.isEmpty()) {
-                result.put(prefix, null);
+                if (exportRequest == null || exportRequest.shouldIncludeField(prefix)) {
+                    result.put(prefix, null);
+                }
+                return;
+            }
+            // Check max depth
+            if (exportRequest != null && depth > exportRequest.getEffectiveMaxDepth()) {
+                // Convert to string representation instead of flattening further
+                if (exportRequest.shouldIncludeField(prefix)) {
+                    result.put(prefix, map.toString());
+                }
                 return;
             }
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String key = entry.getKey();
                 String newPrefix = prefix.isEmpty() ? key : prefix + "." + key;
-                flattenMap(newPrefix, entry.getValue(), result);
+                flattenMap(newPrefix, entry.getValue(), result, exportRequest, depth + 1);
             }
         } else if (value instanceof Collection) {
             Collection<?> collection = (Collection<?>) value;
             if (collection.isEmpty()) {
-                result.put(prefix, null);
+                if (exportRequest == null || exportRequest.shouldIncludeField(prefix)) {
+                    result.put(prefix, null);
+                }
             } else {
+                // Check max depth
+                if (exportRequest != null && depth > exportRequest.getEffectiveMaxDepth()) {
+                    // Convert to string representation instead of processing further
+                    if (exportRequest.shouldIncludeField(prefix)) {
+                        result.put(prefix, collection.toString());
+                    }
+                    return;
+                }
                 // Convert collection to comma-separated string
                 String collectionStr = collection.stream()
                         .map(item -> {
@@ -102,11 +128,33 @@ public final class ExportUtil {
                             }
                         })
                         .collect(Collectors.joining(", "));
-                result.put(prefix, collectionStr);
+                if (exportRequest == null || exportRequest.shouldIncludeField(prefix)) {
+                    result.put(prefix, collectionStr);
+                }
             }
         } else {
-            result.put(prefix, value);
+            if (exportRequest == null || exportRequest.shouldIncludeField(prefix)) {
+                result.put(prefix, value);
+            }
         }
+    }
+
+    /**
+     * Converts a DTO to a flattened map structure suitable for CSV/XLSX export.
+     * Nested objects are flattened with dot-separated keys (e.g., "author.name", "author.email").
+     *
+     * @param dto the DTO to convert
+     * @param exportRequest the export request for field filtering (null for no filtering)
+     * @return a flattened map representation of the DTO
+     */
+    private static <R> Map<String, Object> toFlatMap(R dto, ExportRequest exportRequest) {
+        Map<String, Object> originalMap = objectMapper.convertValue(
+                dto, new TypeReference<Map<String, Object>>() {});
+        Map<String, Object> flatMap = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : originalMap.entrySet()) {
+            flattenMap(entry.getKey(), entry.getValue(), flatMap, exportRequest, 0);
+        }
+        return flatMap;
     }
 
     /**
@@ -117,13 +165,7 @@ public final class ExportUtil {
      * @return a flattened map representation of the DTO
      */
     private static <R> Map<String, Object> toFlatMap(R dto) {
-        Map<String, Object> originalMap = objectMapper.convertValue(
-                dto, new TypeReference<Map<String, Object>>() {});
-        Map<String, Object> flatMap = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> entry : originalMap.entrySet()) {
-            flattenMap(entry.getKey(), entry.getValue(), flatMap);
-        }
-        return flatMap;
+        return toFlatMap(dto, null);
     }
 
     /**
@@ -213,8 +255,9 @@ public final class ExportUtil {
      *
      * @param dtos the iterator of DTOs to export
      * @param out  the output stream to write the CSV to
+     * @param exportRequest the export request for field filtering (null for no filtering)
      */
-    public static <R> void streamCsv(Iterator<R> dtos, OutputStream out) {
+    public static <R> void streamCsv(Iterator<R> dtos, OutputStream out, ExportRequest exportRequest) {
         try {
             if (!dtos.hasNext()) {
                 return;
@@ -225,7 +268,7 @@ public final class ExportUtil {
             java.util.Set<String> allHeaders = new java.util.LinkedHashSet<>();
             
             while (dtos.hasNext()) {
-                Map<String, Object> row = toFlatMap(dtos.next());
+                Map<String, Object> row = toFlatMap(dtos.next(), exportRequest);
                 rows.add(row);
                 allHeaders.addAll(row.keySet());
             }
@@ -246,6 +289,16 @@ public final class ExportUtil {
         } catch (Exception e) {
             throw new RuntimeException("Failed to export CSV", e);
         }
+    }
+
+    /**
+     * Streams a list of DTOs to a CSV file.
+     *
+     * @param dtos the iterator of DTOs to export
+     * @param out  the output stream to write the CSV to
+     */
+    public static <R> void streamCsv(Iterator<R> dtos, OutputStream out) {
+        streamCsv(dtos, out, null);
     }
 
     /**
@@ -287,8 +340,9 @@ public final class ExportUtil {
      *
      * @param dtos the iterator of DTOs to export
      * @param out  the output stream to write the XLSX file to
+     * @param exportRequest the export request for field filtering (null for no filtering)
      */
-    public static <R> void streamXlsx(Iterator<R> dtos, OutputStream out) {
+    public static <R> void streamXlsx(Iterator<R> dtos, OutputStream out, ExportRequest exportRequest) {
         try (SXSSFWorkbook workbook = new SXSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("export");
             if (!dtos.hasNext()) {
@@ -302,7 +356,7 @@ public final class ExportUtil {
             java.util.Set<String> allHeaders = new java.util.LinkedHashSet<>();
             
             while (dtos.hasNext()) {
-                Map<String, Object> rowMap = toFlatMap(dtos.next());
+                Map<String, Object> rowMap = toFlatMap(dtos.next(), exportRequest);
                 rows.add(rowMap);
                 allHeaders.addAll(rowMap.keySet());
             }
@@ -329,6 +383,16 @@ public final class ExportUtil {
         } catch (Exception e) {
             throw new RuntimeException("Failed to export XLSX", e);
         }
+    }
+
+    /**
+     * Streams a list of DTOs to an XLSX file.
+     *
+     * @param dtos the iterator of DTOs to export
+     * @param out  the output stream to write the XLSX file to
+     */
+    public static <R> void streamXlsx(Iterator<R> dtos, OutputStream out) {
+        streamXlsx(dtos, out, null);
     }
 
     /**

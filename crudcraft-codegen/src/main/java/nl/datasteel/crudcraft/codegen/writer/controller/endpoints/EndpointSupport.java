@@ -56,6 +56,7 @@ public final class EndpointSupport {
     public static final ClassName PAGE_REQUEST = ClassName.get("org.springframework.data.domain", "PageRequest");
     public static final ClassName EXPORT_UTIL = ClassName.get("nl.datasteel.crudcraft.runtime.util", "ExportUtil");
     public static final ClassName EXPORT_SERVICE = ClassName.get("nl.datasteel.crudcraft.runtime.service", "ExportService");
+    public static final ClassName EXPORT_REQUEST = ClassName.get("nl.datasteel.crudcraft.runtime.export", "ExportRequest");
     public static final ClassName NO_SUCH_ELEMENT = ClassName.get("java.util", "NoSuchElementException");
     public static final ClassName ITERATOR = ClassName.get("java.util", "Iterator");
     public static final ClassName COLLECTIONS = ClassName.get("java.util", "Collections");

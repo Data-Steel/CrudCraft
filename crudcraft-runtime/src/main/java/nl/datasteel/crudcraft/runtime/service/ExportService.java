@@ -19,6 +19,7 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import nl.datasteel.crudcraft.runtime.export.ExportRequest;
 import nl.datasteel.crudcraft.runtime.util.ExportUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -108,6 +109,7 @@ public class ExportService<R, S> {
      * @param searchRequest the search request for filtering data
      * @param limit the maximum number of rows to export (null for default)
      * @param format the export format (csv, json, xlsx)
+     * @param exportRequest the export request for field filtering (null for no filtering)
      * @param searchFunction function to search and fetch data with pagination
      * @param securityFilter function to apply security filtering to each DTO
      * @return ResponseEntity with streaming response body
@@ -116,6 +118,7 @@ public class ExportService<R, S> {
             S searchRequest,
             Integer limit,
             String format,
+            ExportRequest exportRequest,
             Function<PageRequest, Page<R>> searchFunction,
             Function<R, R> securityFilter) {
 
@@ -137,7 +140,7 @@ public class ExportService<R, S> {
         if (effectiveLimit == 0) {
             // Create empty iterator for empty export
             Iterator<R> emptyIterator = java.util.Collections.emptyIterator();
-            BiConsumer<Iterator<R>, OutputStream> exporter = getExporter(lower);
+            BiConsumer<Iterator<R>, OutputStream> exporter = getExporter(lower, exportRequest);
             StreamingResponseBody body = out -> exporter.accept(emptyIterator, out);
             
             String filename = "export-" + System.currentTimeMillis() + "." + formatInfo.extension;
@@ -160,7 +163,7 @@ public class ExportService<R, S> {
         Iterator<R> iterator = new PaginatedIterator<>(searchFunction, securityFilter, clamped, pageSize);
 
         // Create streaming response
-        BiConsumer<Iterator<R>, OutputStream> exporter = getExporter(lower);
+        BiConsumer<Iterator<R>, OutputStream> exporter = getExporter(lower, exportRequest);
         StreamingResponseBody body = out -> exporter.accept(iterator, out);
 
         String filename = "export-" + System.currentTimeMillis() + "." + formatInfo.extension;
@@ -171,18 +174,48 @@ public class ExportService<R, S> {
     }
 
     /**
+     * Exports data in the specified format with streaming support.
+     *
+     * @param searchRequest the search request for filtering data
+     * @param limit the maximum number of rows to export (null for default)
+     * @param format the export format (csv, json, xlsx)
+     * @param searchFunction function to search and fetch data with pagination
+     * @param securityFilter function to apply security filtering to each DTO
+     * @return ResponseEntity with streaming response body
+     */
+    public ResponseEntity<StreamingResponseBody> export(
+            S searchRequest,
+            Integer limit,
+            String format,
+            Function<PageRequest, Page<R>> searchFunction,
+            Function<R, R> securityFilter) {
+        return export(searchRequest, limit, format, null, searchFunction, securityFilter);
+    }
+
+    /**
+     * Gets the appropriate exporter for the format.
+     *
+     * @param format the format string
+     * @param exportRequest the export request for field filtering (null for no filtering)
+     * @return the exporter function
+     */
+    private BiConsumer<Iterator<R>, OutputStream> getExporter(String format, ExportRequest exportRequest) {
+        return switch (format) {
+            case "csv" -> (iter, out) -> ExportUtil.streamCsv(iter, out, exportRequest);
+            case "json" -> (iter, out) -> ExportUtil.streamJson(iter, out);
+            case "xlsx" -> (iter, out) -> ExportUtil.streamXlsx(iter, out, exportRequest);
+            default -> throw new IllegalArgumentException("Unsupported format: " + format);
+        };
+    }
+
+    /**
      * Gets the appropriate exporter for the format.
      *
      * @param format the format string
      * @return the exporter function
      */
     private BiConsumer<Iterator<R>, OutputStream> getExporter(String format) {
-        return switch (format) {
-            case "csv" -> (iter, out) -> ExportUtil.streamCsv(iter, out);
-            case "json" -> (iter, out) -> ExportUtil.streamJson(iter, out);
-            case "xlsx" -> (iter, out) -> ExportUtil.streamXlsx(iter, out);
-            default -> throw new IllegalArgumentException("Unsupported format: " + format);
-        };
+        return getExporter(format, null);
     }
 
     /**
