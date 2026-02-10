@@ -45,6 +45,7 @@ import nl.datasteel.crudcraft.annotations.fields.Searchable;
 public class Tag {
 
     @Id
+    @Searchable
     @GeneratedValue(strategy = GenerationType.UUID)
     @Dto
     private UUID id;

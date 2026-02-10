@@ -42,7 +42,7 @@ class MapperGeneratorTest {
     private FieldDescriptor parentField(TypeMirror type) {
         return new FieldDescriptor(
                 new Identity("parent", type, null, SchemaMetadata.empty()),
-                new DtoOptions(true, true, true, new String[0]),
+                new DtoOptions(true, true, true, new String[0], false),
                 new EnumOptions(false, List.of()),
                 new Relationship(RelationshipType.MANY_TO_ONE, "", "nl.other.Parent", true, false, false),
                 new Validation(List.of()),
@@ -54,7 +54,7 @@ class MapperGeneratorTest {
     private FieldDescriptor childrenField(TypeMirror type) {
         return new FieldDescriptor(
                 new Identity("children", type, null, SchemaMetadata.empty()),
-                new DtoOptions(true, true, true, new String[0]),
+                new DtoOptions(true, true, true, new String[0], false),
                 new EnumOptions(false, List.of()),
                 new Relationship(RelationshipType.ONE_TO_MANY, "", "nl.other.Child", true, false, false),
                 new Validation(List.of()),
@@ -66,7 +66,7 @@ class MapperGeneratorTest {
     private FieldDescriptor simpleField(TypeMirror type) {
         return new FieldDescriptor(
                 new Identity("name", type, null, SchemaMetadata.empty()),
-                new DtoOptions(true, true, true, new String[0]),
+                new DtoOptions(true, true, true, new String[0], false),
                 new EnumOptions(false, List.of()),
                 new Relationship(RelationshipType.NONE, "", null, false, false, false),
                 new Validation(List.of()),
@@ -156,7 +156,7 @@ class MapperGeneratorTest {
         // Create a field with specialized DTO annotations
         FieldDescriptor fieldWithSpecializedDto = new FieldDescriptor(
                 new Identity("name", tf.type(String.class), null, SchemaMetadata.empty()),
-                new DtoOptions(true, true, true, new String[]{"List", "Map"}),
+                new DtoOptions(true, true, true, new String[]{"List", "Map"}, false),
                 new EnumOptions(false, List.of()),
                 new Relationship(RelationshipType.NONE, "", null, false, false, false),
                 new Validation(List.of()),
