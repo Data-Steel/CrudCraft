@@ -69,7 +69,8 @@ public class DtoGenerator implements Generator {
                 .toList();
 
         List<FieldDescriptor> refFields = dtoFields.stream()
-                .filter(fd -> fd.inRef() || "id".equalsIgnoreCase(fd.getName()))
+                .filter(fd -> (fd.inRef() || "id".equalsIgnoreCase(fd.getName()))
+                        && !fd.isLob())
                 .toList();
 
         // For abstract classes, only generate Ref DTO

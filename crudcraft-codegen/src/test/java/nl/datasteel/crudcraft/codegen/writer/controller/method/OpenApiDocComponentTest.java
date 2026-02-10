@@ -18,16 +18,14 @@ package nl.datasteel.crudcraft.codegen.writer.controller.method;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
+import java.util.List;
 import nl.datasteel.crudcraft.annotations.CrudEndpoint;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.writer.controller.EndpointSpec;
 import nl.datasteel.crudcraft.codegen.writer.controller.TestModelDescriptorFactory;
 import nl.datasteel.crudcraft.codegen.writer.controller.endpoints.EndpointSupport;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 class OpenApiDocComponentTest {
 
