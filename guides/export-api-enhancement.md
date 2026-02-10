@@ -7,7 +7,7 @@ This document describes the enhanced export functionality that allows fine-grain
 The export endpoint now accepts an `ExportRequest` parameter that allows you to:
 - Control which fields are included or excluded from the export
 - Limit the depth of nested relationships
-- Use @ExportExclude annotation to permanently exclude fields
+- Use `@ExportExclude` annotation to permanently exclude fields
 - Prepare for future entity-level exports (not just DTO fields)
 
 ## Field-Level Annotations
@@ -42,8 +42,8 @@ public class User {
 Specify which fields to include in the export. Use dot notation for nested fields.
 
 **How it works:**
-- Filters **within existing DTO fields** - doesn't add new fields not in the DTO
-- If empty/not specified, all DTO fields are included by default
+- Filters within the existing DTO fields. It does not add fields that are not already defined in the DTO.
+- If empty or not specified, all DTO fields are included by default
 - Including a parent field (e.g., "author") automatically includes all its children (e.g., "author.name", "author.email")
 
 **Example:**
