@@ -15,6 +15,7 @@
  */
 package nl.datasteel.crudcraft.codegen.writer.search;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import nl.datasteel.crudcraft.annotations.SearchOperator;
 
@@ -32,15 +33,17 @@ public class ContainsAllPredicateGenerator
 
         return CodeBlock.builder()
                 .beginControlFlow(
-                        "if (request.get$L() != null && request.get$LOp() == $T.CONTAINS_ALL)",
-                        prop, prop, SearchOperator.class
+                        "if (request.get$L() != null && !request.get$L().isEmpty() && request.get$LOp() == $T.CONTAINS_ALL)",
+                        prop, prop, prop, SearchOperator.class
                 )
+                .addStatement("$T innerPredicate = cb.conjunction()",
+                        ClassName.get("jakarta.persistence.criteria", "Predicate"))
                 .beginControlFlow("for (var item : request.get$L())", prop)
-                .addStatement(
-                        "p = cb.and(p, cb.isMember(item, $L))",
-                        collPath
-                )
+                .addStatement("innerPredicate = cb.and(innerPredicate, cb.isMember(item, $L))", collPath)
                 .endControlFlow()
+                .addStatement("p = logic == $T.AND ? cb.and(p, innerPredicate) : cb.or(p, innerPredicate)",
+                        ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"))
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

@@ -15,6 +15,7 @@
  */
 package nl.datasteel.crudcraft.runtime.search;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
@@ -39,5 +40,11 @@ class SearchRequestTest {
         Specification<Object> spec = (root, query, cb) -> cb.disjunction();
         DummySearch req = new DummySearch(spec);
         assertSame(spec, req.toSpecification());
+    }
+
+    @Test
+    void defaultSearchLogicIsOr() {
+        SearchRequest<Object> req = new DummySearch((root, query, cb) -> cb.conjunction());
+        assertEquals(SearchLogic.OR, req.getSearchLogic());
     }
 }
