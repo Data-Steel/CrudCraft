@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  *
- * @see nl.datasteel.crudcraft.runtime.export.ExportRequest
+ * @see ExportRequest (in crudcraft-runtime module)
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

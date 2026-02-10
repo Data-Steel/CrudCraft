@@ -84,16 +84,16 @@ class ExportRequestTest {
     }
 
     @Test
-    void isIncludeAllFieldsEnabledReturnsFalseByDefault() {
+    void isEntityModeEnabledReturnsFalseByDefault() {
         ExportRequest request = new ExportRequest();
-        assertFalse(request.isIncludeAllFieldsEnabled());
+        assertFalse(request.isEntityModeEnabled());
     }
 
     @Test
-    void isIncludeAllFieldsEnabledReturnsTrueWhenSet() {
+    void isEntityModeEnabledReturnsTrueWhenSet() {
         ExportRequest request = new ExportRequest();
-        request.setIncludeAllFields(true);
-        assertTrue(request.isIncludeAllFieldsEnabled());
+        request.setExportMode(ExportRequest.ExportMode.ENTITY);
+        assertTrue(request.isEntityModeEnabled());
     }
     
     @Test

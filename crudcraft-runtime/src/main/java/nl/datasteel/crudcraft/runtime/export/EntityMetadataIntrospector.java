@@ -30,7 +30,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import nl.datasteel.crudcraft.annotations.fields.ExportExclude;
+import nl.datasteel.crudcraft.annotations.export.ExportExclude;
 
 /**
  * Introspects entity classes to extract metadata for dynamic export functionality.

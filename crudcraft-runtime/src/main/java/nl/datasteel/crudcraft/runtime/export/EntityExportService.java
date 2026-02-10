@@ -22,7 +22,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,14 +140,15 @@ public class EntityExportService {
             // Build a query to fetch all collection elements for these entities
             try {
                 CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-                CriteriaQuery<?> query = cb.createQuery(metadata.getEntityClass());
-                Root<?> root = query.from(metadata.getEntityClass());
+                @SuppressWarnings("unchecked")
+                CriteriaQuery<T> query = (CriteriaQuery<T>) cb.createQuery(metadata.getEntityClass());
+                Root<T> root = query.from((Class<T>) metadata.getEntityClass());
                 
                 // Fetch the collection
-                Fetch<?, ?> fetch = root.fetch(field.getName(), JoinType.LEFT);
+                Fetch<T, ?> fetch = root.fetch(field.getName(), JoinType.LEFT);
                 
                 // Filter to only our entities
-                query.where(root.in(entities));
+                query.where(root.in((Collection<T>) entities));
                 query.select(root);
                 
                 entityManager.createQuery(query).getResultList();
