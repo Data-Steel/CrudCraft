@@ -55,6 +55,26 @@ private String genre;
 
 The search request supports equals, contains, range, and sort operations depending on the field type.
 
+## @Lob — Handle Large Objects (Files/Blobs)
+
+`@Lob` (from Jakarta Persistence) marks fields containing large binary or character data such as files, images, or documents. CrudCraft handles LOB fields like regular fields but with lazy loading support:
+
+```java
+@Dto
+@Request
+@Lob
+@Basic(fetch = FetchType.LAZY)
+private byte[] attachment;
+```
+
+**Key behaviors:**
+- LOB fields can be included in **Request DTOs** with `@Request` for uploads
+- LOB fields are included in **Response DTOs** with `@Dto` for data retrieval
+- LOB fields are **excluded from Ref DTOs** (lightweight references)
+- Use `@Basic(fetch = FetchType.LAZY)` for optimal performance (lazy loading)
+
+**Example use case:** A Comment entity with an optional file attachment that clients can upload via create/update endpoints and download via read endpoints.
+
 ## Validation
 
 CrudCraft preserves Jakarta Validation annotations placed alongside CrudCraft annotations. Generated request DTOs carry constraints such as `@NotBlank` or `@Size`, and Spring validates them automatically.
@@ -74,6 +94,7 @@ private String isbn;
 | `@Dto` | Include field in response DTO | `ref` |
 | `@Request` | Include field in request DTO | — |
 | `@Searchable` | Expose field in search requests | — |
+| `@Lob` | Mark field as large object (file/blob) | Use with `@Basic(fetch = LAZY)` |
 | Jakarta Validation | Enforce constraints | depends on annotation |
 
 ## Next Steps

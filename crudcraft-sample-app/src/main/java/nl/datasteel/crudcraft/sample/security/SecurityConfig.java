@@ -47,8 +47,7 @@ public class SecurityConfig {
             throws Exception {
 
         http
-                .csrf(csrf -> csrf.ignoringRequestMatchers(
-                        PathRequest.toH2Console(), new AntPathRequestMatcher("/auth/login")))
+                .csrf(csrf -> csrf.disable())
                 .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth

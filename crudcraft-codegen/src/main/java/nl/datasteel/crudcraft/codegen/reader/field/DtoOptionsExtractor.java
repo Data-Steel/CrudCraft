@@ -53,11 +53,15 @@ public class DtoOptionsExtractor implements FieldPartExtractor<DtoOptions> {
         Request requestAnnotation = field.getAnnotation(Request.class);
         boolean isInRequest = requestAnnotation != null;
 
+        // Check for Jakarta @Lob annotation
+        boolean isLob = field.getAnnotationMirrors().stream()
+                .anyMatch(am -> am.getAnnotationType().toString().equals("jakarta.persistence.Lob"));
+
         FieldPartExtractor.log(env.getMessager(), Diagnostic.Kind.NOTE, field,
                 String.format("Extracting DtoOptions: isInDto=%b, "
-                        + "isInRequest=%b, isInRefDto=%b, responseDtos=%s",
-                        isInDto, isInRequest, isInRefDto, java.util.Arrays.toString(responseDtos)));
+                        + "isInRequest=%b, isInRefDto=%b, responseDtos=%s, isLob=%b",
+                        isInDto, isInRequest, isInRefDto, java.util.Arrays.toString(responseDtos), isLob));
 
-        return new DtoOptions(isInDto, isInRequest, isInRefDto, responseDtos);
+        return new DtoOptions(isInDto, isInRequest, isInRefDto, responseDtos, isLob);
     }
 }
