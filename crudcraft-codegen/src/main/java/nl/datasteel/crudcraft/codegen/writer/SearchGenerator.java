@@ -129,7 +129,7 @@ public class SearchGenerator implements Generator {
 
         specs.forEach(ps -> ps.addMembers(cls));
 
-        // Add searchLogic field with default value OR
+        // Add searchLogic field (defaults to OR via getter)
         cls.addField(searchLogicCls, "searchLogic", Modifier.PRIVATE);
         
         // Add getter for searchLogic

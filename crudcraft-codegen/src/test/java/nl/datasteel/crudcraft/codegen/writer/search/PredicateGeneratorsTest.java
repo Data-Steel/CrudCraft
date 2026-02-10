@@ -29,123 +29,147 @@ class PredicateGeneratorsTest {
                 Arguments.of(SearchOperator.EQUALS, "field", "root.get(\"field\")", """
 if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.EQUALS) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, root.get(\"field\").in(request.getField())) : cb.or(p, root.get(\"field\").in(request.getField()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.NOT_EQUALS, "field", "root.get(\"field\")", """
 if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.NOT_EQUALS) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.not(root.get(\"field\").in(request.getField()))) : cb.or(p, cb.not(root.get(\"field\").in(request.getField())));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.CONTAINS, "field", "root.get(\"field\")", """
 if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.CONTAINS) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.like(root.get("field"), "%" + request.getField() + "%")) : cb.or(p, cb.like(root.get("field"), "%" + request.getField() + "%"));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.STARTS_WITH, "field", "root.get(\"field\")", """
 if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.STARTS_WITH) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.like(root.get("field"), request.getField() + "%")) : cb.or(p, cb.like(root.get("field"), request.getField() + "%"));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.ENDS_WITH, "field", "root.get(\"field\")", """
 if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.ENDS_WITH) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.like(root.get("field"), "%" + request.getField())) : cb.or(p, cb.like(root.get("field"), "%" + request.getField()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.REGEX, "field", "root.get(\"field\")", """
 if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.REGEX) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.like(root.get("field"), request.getField())) : cb.or(p, cb.like(root.get("field"), request.getField()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.GT, "field", "root.get(\"field\")", """
 if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.GT) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.greaterThan(root.get(\"field\"), request.getField())) : cb.or(p, cb.greaterThan(root.get(\"field\"), request.getField()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.GTE, "field", "root.get(\"field\")", """
 if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.GTE) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.greaterThanOrEqualTo(root.get(\"field\"), request.getField())) : cb.or(p, cb.greaterThanOrEqualTo(root.get(\"field\"), request.getField()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.LT, "field", "root.get(\"field\")", """
 if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.LT) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.lessThan(root.get(\"field\"), request.getField())) : cb.or(p, cb.lessThan(root.get(\"field\"), request.getField()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.LTE, "field", "root.get(\"field\")", """
 if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.LTE) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.lessThanOrEqualTo(root.get(\"field\"), request.getField())) : cb.or(p, cb.lessThanOrEqualTo(root.get(\"field\"), request.getField()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.IN, "values", "root.get(\"field\")", """
 if (request.getValues() != null && request.getValuesOp() == nl.datasteel.crudcraft.annotations.SearchOperator.IN) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, root.get(\"field\").in(request.getValues())) : cb.or(p, root.get(\"field\").in(request.getValues()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.NOT_IN, "values", "root.get(\"field\")", """
 if (request.getValues() != null && request.getValuesOp() == nl.datasteel.crudcraft.annotations.SearchOperator.NOT_IN) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.not(root.get(\"field\").in(request.getValues()))) : cb.or(p, cb.not(root.get(\"field\").in(request.getValues())));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.RANGE, "field", "root.get(\"field\")", """
 if (request.getFieldStart() != null && request.getFieldEnd() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.RANGE) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.between(root.get(\"field\"), request.getFieldStart(), request.getFieldEnd())) : cb.or(p, cb.between(root.get(\"field\"), request.getFieldStart(), request.getFieldEnd()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.BEFORE, "field", "root.get(\"field\")", """
 if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.BEFORE) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.lessThan(root.get(\"field\"), request.getField())) : cb.or(p, cb.lessThan(root.get(\"field\"), request.getField()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.AFTER, "field", "root.get(\"field\")", """
 if (request.getField() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.AFTER) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.greaterThan(root.get(\"field\"), request.getField())) : cb.or(p, cb.greaterThan(root.get(\"field\"), request.getField()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.BETWEEN, "field", "root.get(\"field\")", """
 if (request.getFieldStart() != null && request.getFieldEnd() != null && request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.BETWEEN) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.between(root.get(\"field\"), request.getFieldStart(), request.getFieldEnd())) : cb.or(p, cb.between(root.get(\"field\"), request.getFieldStart(), request.getFieldEnd()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.IS_EMPTY, "field", "root.get(\"field\")", """
 if (request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.IS_EMPTY) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.isEmpty(root.get(\"field\"))) : cb.or(p, cb.isEmpty(root.get(\"field\")));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.NOT_EMPTY, "field", "root.get(\"field\")", """
 if (request.getFieldOp() == nl.datasteel.crudcraft.annotations.SearchOperator.NOT_EMPTY) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.isNotEmpty(root.get(\"field\"))) : cb.or(p, cb.isNotEmpty(root.get(\"field\")));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.SIZE_EQUALS, "size", "root.get(\"values\")", """
 if (request.getSize() != null && request.getSizeOp() == nl.datasteel.crudcraft.annotations.SearchOperator.SIZE_EQUALS) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.equal(cb.size(root.get(\"values\")), request.getSize())) : cb.or(p, cb.equal(cb.size(root.get(\"values\")), request.getSize()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.SIZE_GT, "size", "root.get(\"values\")", """
 if (request.getSize() != null && request.getSizeOp() == nl.datasteel.crudcraft.annotations.SearchOperator.SIZE_GT) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.greaterThan(cb.size(root.get(\"values\")), request.getSize())) : cb.or(p, cb.greaterThan(cb.size(root.get(\"values\")), request.getSize()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.SIZE_LT, "size", "root.get(\"values\")", """
 if (request.getSize() != null && request.getSizeOp() == nl.datasteel.crudcraft.annotations.SearchOperator.SIZE_LT) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.lessThan(cb.size(root.get(\"values\")), request.getSize())) : cb.or(p, cb.lessThan(cb.size(root.get(\"values\")), request.getSize()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.CONTAINS_ALL, "values", "root.get(\"values\")", """
 if (request.getValues() != null && request.getValuesOp() == nl.datasteel.crudcraft.annotations.SearchOperator.CONTAINS_ALL) {
   for (var item : request.getValues()) {
     p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.isMember(item, root.get(\"values\"))) : cb.or(p, cb.isMember(item, root.get(\"values\")));
+  hasCriteria = true;
   }
 }
 """),
                 Arguments.of(SearchOperator.CONTAINS_KEY, "key", "root.get(\"map\")", """
 if (request.getKey() != null && request.getKeyOp() == nl.datasteel.crudcraft.annotations.SearchOperator.CONTAINS_KEY) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.isMember(request.getKey(), root.get(\"map\").keySet())) : cb.or(p, cb.isMember(request.getKey(), root.get(\"map\").keySet()));
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.CONTAINS_VALUE, "value", "root.get(\"map\")", """
 if (request.getValue() != null && request.getValueOp() == nl.datasteel.crudcraft.annotations.SearchOperator.CONTAINS_VALUE) {
   p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.isMember(request.getValue(), root.get(\"map\").values())) : cb.or(p, cb.isMember(request.getValue(), root.get(\"map\").values()));
+  hasCriteria = true;
 }
 """)
         );
