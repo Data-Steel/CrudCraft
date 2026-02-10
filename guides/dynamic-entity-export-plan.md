@@ -3,8 +3,7 @@
 ## Problem Statement
 
 The current export system is limited to Response DTO fields. Users need the ability to export ANY entity field dynamically, including:
-- Configuration parameters not included in DTOs
-- All relationship types without N+1 query problems
+- All relationship types and their fields without N+1 query problems
 - Fields selected at runtime via API parameters
 
 ## Current Situation
