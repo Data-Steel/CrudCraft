@@ -68,8 +68,8 @@ public class ExportRequest {
 
     public ExportRequest(Set<String> includeFields, Set<String> excludeFields, 
                         Integer maxDepth, Boolean includeAllFields) {
-        this.includeFields = includeFields;
-        this.excludeFields = excludeFields;
+        this.includeFields = includeFields == null ? null : new HashSet<>(includeFields);
+        this.excludeFields = excludeFields == null ? null : new HashSet<>(excludeFields);
         this.maxDepth = maxDepth;
         this.includeAllFields = includeAllFields;
     }
