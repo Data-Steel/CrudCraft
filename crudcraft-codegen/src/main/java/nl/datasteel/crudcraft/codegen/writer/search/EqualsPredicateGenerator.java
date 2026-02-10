@@ -44,6 +44,7 @@ public class EqualsPredicateGenerator
                         f.path(),
                         m
                 )
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

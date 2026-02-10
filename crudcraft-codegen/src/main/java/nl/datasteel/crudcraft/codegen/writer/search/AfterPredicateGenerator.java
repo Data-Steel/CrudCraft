@@ -42,6 +42,7 @@ public class AfterPredicateGenerator
                         m,
                         f.path(),
                         m)
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

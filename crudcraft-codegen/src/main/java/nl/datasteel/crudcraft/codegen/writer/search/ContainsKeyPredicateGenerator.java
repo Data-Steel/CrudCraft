@@ -42,6 +42,7 @@ public class ContainsKeyPredicateGenerator
                         f.path(),
                         m,
                         f.path())
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

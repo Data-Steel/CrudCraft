@@ -51,6 +51,7 @@ public class SizeEqualsPredicateGenerator
                         m,
                         f.path(),
                         m)
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

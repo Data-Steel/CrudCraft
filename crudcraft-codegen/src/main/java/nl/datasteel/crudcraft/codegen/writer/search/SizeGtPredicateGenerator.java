@@ -48,6 +48,7 @@ public class SizeGtPredicateGenerator
                         m,
                         f.path(),
                         m)
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

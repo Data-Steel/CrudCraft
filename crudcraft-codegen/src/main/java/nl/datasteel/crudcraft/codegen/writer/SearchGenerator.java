@@ -249,7 +249,8 @@ public class SearchGenerator implements Generator {
             method.addStatement("$T logic = request.getSearchLogic()", 
                     ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"))
                   .addStatement("Predicate p = logic == $T.AND ? cb.conjunction() : cb.disjunction()",
-                    ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"));
+                    ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"))
+                  .addStatement("boolean hasCriteria = false");
         } else {
             method.addStatement("Predicate p = cb.conjunction()");
         }
@@ -270,6 +271,15 @@ public class SearchGenerator implements Generator {
                     .generate(sf);
 
             method.addCode(block);
+        }
+
+        // If no criteria were applied with OR logic (disjunction), return match-all (conjunction)
+        // to avoid returning zero results for empty search requests
+        if (!fields.isEmpty()) {
+            method.beginControlFlow("if (!hasCriteria && logic == $T.OR)", 
+                    ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"))
+                  .addStatement("return cb.conjunction()")
+                  .endControlFlow();
         }
 
         method.addStatement("return p");

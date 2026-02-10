@@ -51,6 +51,7 @@ public class SizeLtPredicateGenerator
                         m,
                         f.path(),
                         m)
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

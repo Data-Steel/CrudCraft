@@ -41,6 +41,7 @@ public class ContainsAllPredicateGenerator
                         ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"),
                         collPath,
                         collPath)
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .endControlFlow()
                 .build();

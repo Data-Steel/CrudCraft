@@ -46,6 +46,7 @@ public class BetweenPredicateGenerator
                         f.path(),
                         m,
                         m)
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

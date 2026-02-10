@@ -43,6 +43,7 @@ public class NotEmptyPredicateGenerator
                         ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"),
                         f.path(),
                         f.path())
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

@@ -42,6 +42,7 @@ public class GreaterThanOrEqualPredicateGenerator
                         m,
                         f.path(),
                         m)
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

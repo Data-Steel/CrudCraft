@@ -42,6 +42,7 @@ public class ContainsValuePredicateGenerator
                         f.path(),
                         m,
                         f.path())
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

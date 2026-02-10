@@ -54,6 +54,7 @@ public class RangePredicateGenerator
                         f.path(),
                         m,
                         m)
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }
