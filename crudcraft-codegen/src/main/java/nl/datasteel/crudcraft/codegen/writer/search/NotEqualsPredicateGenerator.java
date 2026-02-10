@@ -15,6 +15,7 @@
  */
 package nl.datasteel.crudcraft.codegen.writer.search;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import nl.datasteel.crudcraft.annotations.SearchOperator;
 
@@ -35,11 +36,13 @@ public class NotEqualsPredicateGenerator
                         m,
                         SearchOperator.class
                 )
-                .addStatement(
-                        "p = cb.and(p, cb.not($L.in(request.get$L())))",
+                .addStatement("p = logic == $T.AND ? cb.and(p, cb.not($L.in(request.get$L()))) : cb.or(p, cb.not($L.in(request.get$L())))",
+                        ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"),
                         f.path(),
-                        m
-                )
+                        m,
+                        f.path(),
+                        m)
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

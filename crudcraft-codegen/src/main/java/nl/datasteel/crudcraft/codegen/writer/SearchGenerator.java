@@ -109,6 +109,10 @@ public class SearchGenerator implements Generator {
                         LinkedHashMap::new
                 ));
 
+        ClassName searchLogicCls = ClassName.get(
+                "nl.datasteel.crudcraft.runtime.search",
+                "SearchLogic");
+
         TypeSpec.Builder cls = TypeSpec.classBuilder(name)
                 .addJavadoc(SearchStrictHeader.header(
                                 md.getName(),
@@ -125,6 +129,24 @@ public class SearchGenerator implements Generator {
 
         specs.forEach(ps -> ps.addMembers(cls));
 
+        // Add searchLogic field (defaults to OR via getter)
+        cls.addField(searchLogicCls, "searchLogic", Modifier.PRIVATE);
+        
+        // Add getter for searchLogic
+        cls.addMethod(MethodSpec.methodBuilder("getSearchLogic")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(searchLogicCls)
+                .addStatement("return searchLogic != null ? searchLogic : $T.OR", searchLogicCls)
+                .build());
+        
+        // Add setter for searchLogic
+        cls.addMethod(MethodSpec.methodBuilder("setSearchLogic")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(searchLogicCls, "searchLogic")
+                .addStatement("this.searchLogic = searchLogic")
+                .build());
+
 
         ClassName specClass = ClassName.get(pkg, md.getName() + "Specification");
 
@@ -135,6 +157,7 @@ public class SearchGenerator implements Generator {
                     .addParameter(ClassName.get(pkg, name), "other");
             copyCtor.beginControlFlow("if (other != null)");
             specs.forEach(ps -> ps.addCopyStatements(copyCtor));
+            copyCtor.addStatement("this.searchLogic = other.searchLogic");
             copyCtor.endControlFlow();
             cls.addMethod(copyCtor.build());
         }
@@ -219,8 +242,18 @@ public class SearchGenerator implements Generator {
                 .returns(predicate)
                 .addParameter(rootType, "root")
                 .addParameter(queryType, "query")
-                .addParameter(cb, "cb")
-                .addStatement("Predicate p = cb.conjunction()");
+                .addParameter(cb, "cb");
+        
+        // Initialize predicate based on search logic
+        if (!fields.isEmpty()) {
+            method.addStatement("$T logic = request.getSearchLogic()", 
+                    ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"))
+                  .addStatement("Predicate p = logic == $T.AND ? cb.conjunction() : cb.disjunction()",
+                    ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"))
+                  .addStatement("boolean hasCriteria = false");
+        } else {
+            method.addStatement("Predicate p = cb.conjunction()");
+        }
 
         // Check if any field path contains a join, which indicates a relationship traversal
         boolean hasJoins = fields.stream()
@@ -238,6 +271,15 @@ public class SearchGenerator implements Generator {
                     .generate(sf);
 
             method.addCode(block);
+        }
+
+        // If no criteria were applied with OR logic (disjunction), return match-all (conjunction)
+        // to avoid returning zero results for empty search requests
+        if (!fields.isEmpty()) {
+            method.beginControlFlow("if (!hasCriteria && logic == $T.OR)", 
+                    ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"))
+                  .addStatement("return cb.conjunction()")
+                  .endControlFlow();
         }
 
         method.addStatement("return p");

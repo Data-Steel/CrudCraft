@@ -35,4 +35,14 @@ public interface SearchRequest<T> {
      * Returns a JPA specification representing the search criteria.
      */
     Specification<T> toSpecification();
+    
+    /**
+     * Returns the logic operator used to combine multiple search criteria.
+     * Defaults to OR logic if not specified.
+     * 
+     * @return the search logic (OR or AND)
+     */
+    default SearchLogic getSearchLogic() {
+        return SearchLogic.OR;
+    }
 }
