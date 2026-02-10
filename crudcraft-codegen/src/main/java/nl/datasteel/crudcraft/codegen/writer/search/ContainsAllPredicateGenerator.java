@@ -33,16 +33,17 @@ public class ContainsAllPredicateGenerator
 
         return CodeBlock.builder()
                 .beginControlFlow(
-                        "if (request.get$L() != null && request.get$LOp() == $T.CONTAINS_ALL)",
-                        prop, prop, SearchOperator.class
+                        "if (request.get$L() != null && !request.get$L().isEmpty() && request.get$LOp() == $T.CONTAINS_ALL)",
+                        prop, prop, prop, SearchOperator.class
                 )
+                .addStatement("$T innerPredicate = cb.conjunction()",
+                        ClassName.get("jakarta.persistence.criteria", "Predicate"))
                 .beginControlFlow("for (var item : request.get$L())", prop)
-                .addStatement("p = logic == $T.AND ? cb.and(p, cb.isMember(item, $L)) : cb.or(p, cb.isMember(item, $L))",
-                        ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"),
-                        collPath,
-                        collPath)
-                .addStatement("hasCriteria = true")
+                .addStatement("innerPredicate = cb.and(innerPredicate, cb.isMember(item, $L))", collPath)
                 .endControlFlow()
+                .addStatement("p = logic == $T.AND ? cb.and(p, innerPredicate) : cb.or(p, innerPredicate)",
+                        ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"))
+                .addStatement("hasCriteria = true")
                 .endControlFlow()
                 .build();
     }

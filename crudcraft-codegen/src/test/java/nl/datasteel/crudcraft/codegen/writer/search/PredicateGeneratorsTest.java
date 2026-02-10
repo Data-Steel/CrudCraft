@@ -153,11 +153,13 @@ if (request.getSize() != null && request.getSizeOp() == nl.datasteel.crudcraft.a
 }
 """),
                 Arguments.of(SearchOperator.CONTAINS_ALL, "values", "root.get(\"values\")", """
-if (request.getValues() != null && request.getValuesOp() == nl.datasteel.crudcraft.annotations.SearchOperator.CONTAINS_ALL) {
+if (request.getValues() != null && !request.getValues().isEmpty() && request.getValuesOp() == nl.datasteel.crudcraft.annotations.SearchOperator.CONTAINS_ALL) {
+  jakarta.persistence.criteria.Predicate innerPredicate = cb.conjunction();
   for (var item : request.getValues()) {
-    p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, cb.isMember(item, root.get(\"values\"))) : cb.or(p, cb.isMember(item, root.get(\"values\")));
-  hasCriteria = true;
+    innerPredicate = cb.and(innerPredicate, cb.isMember(item, root.get(\"values\")));
   }
+  p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND ? cb.and(p, innerPredicate) : cb.or(p, innerPredicate);
+  hasCriteria = true;
 }
 """),
                 Arguments.of(SearchOperator.CONTAINS_KEY, "key", "root.get(\"map\")", """
