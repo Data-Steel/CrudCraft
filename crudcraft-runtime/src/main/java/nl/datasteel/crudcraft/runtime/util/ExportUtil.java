@@ -24,7 +24,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,6 +55,78 @@ public final class ExportUtil {
     }
 
     /**
+     * Flattens a nested map structure into a single-level map with dot-separated keys.
+     * Nested objects are flattened recursively, collections are converted to comma-separated strings,
+     * and null values are preserved.
+     *
+     * @param prefix the prefix to prepend to keys (empty string for top level)
+     * @param value  the value to flatten
+     * @param result the map to store flattened key-value pairs
+     */
+    @SuppressWarnings("unchecked")
+    private static void flattenMap(String prefix, Object value, Map<String, Object> result) {
+        if (value == null) {
+            result.put(prefix, null);
+            return;
+        }
+
+        if (value instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) value;
+            if (map.isEmpty()) {
+                result.put(prefix, null);
+                return;
+            }
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                String key = entry.getKey();
+                String newPrefix = prefix.isEmpty() ? key : prefix + "." + key;
+                flattenMap(newPrefix, entry.getValue(), result);
+            }
+        } else if (value instanceof Collection) {
+            Collection<?> collection = (Collection<?>) value;
+            if (collection.isEmpty()) {
+                result.put(prefix, null);
+            } else {
+                // Convert collection to comma-separated string
+                String collectionStr = collection.stream()
+                        .map(item -> {
+                            if (item == null) {
+                                return "null";
+                            } else if (item instanceof Map) {
+                                // For nested objects in collections, convert to JSON-like string
+                                Map<String, Object> itemMap = (Map<String, Object>) item;
+                                return itemMap.entrySet().stream()
+                                        .map(e -> e.getKey() + "=" + e.getValue())
+                                        .collect(Collectors.joining(", ", "{", "}"));
+                            } else {
+                                return String.valueOf(item);
+                            }
+                        })
+                        .collect(Collectors.joining(", "));
+                result.put(prefix, collectionStr);
+            }
+        } else {
+            result.put(prefix, value);
+        }
+    }
+
+    /**
+     * Converts a DTO to a flattened map structure suitable for CSV/XLSX export.
+     * Nested objects are flattened with dot-separated keys (e.g., "author.name", "author.email").
+     *
+     * @param dto the DTO to convert
+     * @return a flattened map representation of the DTO
+     */
+    private static <R> Map<String, Object> toFlatMap(R dto) {
+        Map<String, Object> originalMap = objectMapper.convertValue(
+                dto, new TypeReference<Map<String, Object>>() {});
+        Map<String, Object> flatMap = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : originalMap.entrySet()) {
+            flattenMap(entry.getKey(), entry.getValue(), flatMap);
+        }
+        return flatMap;
+    }
+
+    /**
      * Exports a list of DTOs to a CSV file.
      *
      * @param dtos the list of DTOs to export
@@ -64,8 +138,7 @@ public final class ExportUtil {
                 return out.toByteArray();
             }
             List<Map<String, Object>> maps = dtos.stream()
-                    .map(d -> objectMapper.convertValue(
-                            d, new TypeReference<Map<String, Object>>() {}))
+                    .map(ExportUtil::toFlatMap)
                     .toList();
             String[] headers = maps.get(0).keySet().toArray(new String[0]);
             try (CSVPrinter printer = new CSVPrinter(
@@ -111,8 +184,7 @@ public final class ExportUtil {
 
             if (!dtos.isEmpty()) {
                 List<Map<String, Object>> maps = dtos.stream()
-                        .map(d -> objectMapper.convertValue(
-                                d, new TypeReference<Map<String, Object>>() {}))
+                        .map(ExportUtil::toFlatMap)
                         .collect(Collectors.toList());
                 String[] headers = maps.get(0).keySet().toArray(new String[0]);
                 Row headerRow = sheet.createRow(0);
@@ -148,17 +220,14 @@ public final class ExportUtil {
                 return;
             }
             R first = dtos.next();
-            Map<String, Object> firstMap =
-                    objectMapper.convertValue(first, new TypeReference<Map<String, Object>>() {});
+            Map<String, Object> firstMap = toFlatMap(first);
             String[] headers = firstMap.keySet().toArray(new String[0]);
             try (CSVPrinter printer = new CSVPrinter(
                     new OutputStreamWriter(out, StandardCharsets.UTF_8),
                     CSVFormat.DEFAULT.withHeader(headers))) {
                 writeCsvRow(printer, headers, firstMap);
                 while (dtos.hasNext()) {
-                    Map<String, Object> row =
-                            objectMapper.convertValue(
-                                    dtos.next(), new TypeReference<Map<String, Object>>() {});
+                    Map<String, Object> row = toFlatMap(dtos.next());
                     writeCsvRow(printer, headers, row);
                 }
                 printer.flush();
@@ -217,8 +286,7 @@ public final class ExportUtil {
                 return;
             }
             R first = dtos.next();
-            Map<String, Object> firstMap =
-                    objectMapper.convertValue(first, new TypeReference<Map<String, Object>>() {});
+            Map<String, Object> firstMap = toFlatMap(first);
             String[] headers = firstMap.keySet().toArray(new String[0]);
             Row headerRow = sheet.createRow(0);
             for (int c = 0; c < headers.length; c++) {
@@ -227,8 +295,7 @@ public final class ExportUtil {
             int r = 1;
             writeXlsxRow(sheet.createRow(r++), headers, firstMap);
             while (dtos.hasNext()) {
-                Map<String, Object> rowMap = objectMapper.convertValue(
-                        dtos.next(), new TypeReference<Map<String, Object>>() {});
+                Map<String, Object> rowMap = toFlatMap(dtos.next());
                 writeXlsxRow(sheet.createRow(r++), headers, rowMap);
             }
             workbook.write(out);
