@@ -210,6 +210,7 @@ public class ExportService<R, S> {
 
     /**
      * Gets the appropriate exporter for the format.
+     * This method is used by the legacy export() method to maintain backward compatibility.
      *
      * @param format the format string
      * @return the exporter function

@@ -61,19 +61,19 @@ public class ExportRequest {
     }
 
     public Set<String> getIncludeFields() {
-        return includeFields == null ? Collections.emptySet() : new HashSet<>(includeFields);
+        return includeFields == null ? Collections.emptySet() : Collections.unmodifiableSet(includeFields);
     }
 
     public void setIncludeFields(Set<String> includeFields) {
-        this.includeFields = includeFields;
+        this.includeFields = includeFields == null ? null : new HashSet<>(includeFields);
     }
 
     public Set<String> getExcludeFields() {
-        return excludeFields == null ? Collections.emptySet() : new HashSet<>(excludeFields);
+        return excludeFields == null ? Collections.emptySet() : Collections.unmodifiableSet(excludeFields);
     }
 
     public void setExcludeFields(Set<String> excludeFields) {
-        this.excludeFields = excludeFields;
+        this.excludeFields = excludeFields == null ? null : new HashSet<>(excludeFields);
     }
 
     public Integer getMaxDepth() {

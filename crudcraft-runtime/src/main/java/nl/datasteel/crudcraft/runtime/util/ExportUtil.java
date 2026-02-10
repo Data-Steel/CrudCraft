@@ -86,9 +86,14 @@ public final class ExportUtil {
             }
             // Check max depth
             if (exportRequest != null && depth > exportRequest.getEffectiveMaxDepth()) {
-                // Convert to string representation instead of flattening further
+                // Convert to JSON-like string representation for better readability
                 if (exportRequest.shouldIncludeField(prefix)) {
-                    result.put(prefix, map.toString());
+                    try {
+                        result.put(prefix, objectMapper.writeValueAsString(map));
+                    } catch (Exception e) {
+                        // Fallback to toString if JSON serialization fails
+                        result.put(prefix, map.toString());
+                    }
                 }
                 return;
             }
@@ -106,9 +111,14 @@ public final class ExportUtil {
             } else {
                 // Check max depth
                 if (exportRequest != null && depth > exportRequest.getEffectiveMaxDepth()) {
-                    // Convert to string representation instead of processing further
+                    // Convert to JSON-like string representation for better readability
                     if (exportRequest.shouldIncludeField(prefix)) {
-                        result.put(prefix, collection.toString());
+                        try {
+                            result.put(prefix, objectMapper.writeValueAsString(collection));
+                        } catch (Exception e) {
+                            // Fallback to toString if JSON serialization fails
+                            result.put(prefix, collection.toString());
+                        }
                     }
                     return;
                 }
