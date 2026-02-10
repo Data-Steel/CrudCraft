@@ -119,6 +119,11 @@ public class ExportService<R, S> {
             Function<PageRequest, Page<R>> searchFunction,
             Function<R, R> securityFilter) {
 
+        // Validate limit parameter
+        if (limit != null && limit <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
         final int effectiveLimit = limit != null ? limit : 1000;
         String lower = format == null ? "" : format.toLowerCase();
 
@@ -131,6 +136,11 @@ public class ExportService<R, S> {
         // Clamp limit to format maximum
         int clamped = Math.min(effectiveLimit, formatInfo.maxRows);
         int pageSize = Math.min(config.maxPageSize, clamped);
+        
+        // Ensure pageSize is at least 1
+        if (pageSize <= 0) {
+            pageSize = 1;
+        }
 
         // Create paginated iterator
         Iterator<R> iterator = new PaginatedIterator<>(searchFunction, securityFilter, clamped, pageSize);

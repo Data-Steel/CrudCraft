@@ -28,6 +28,14 @@ class ExportUtilTest {
     record Person(String name, int age) {}
 
     record Event(String title, Instant timestamp) {}
+    
+    record Address(String city, String country) {}
+    
+    record Author(String name, String email) {}
+    
+    record Post(String title, Author author, List<String> tags) {}
+    
+    record PostWithNullAuthor(String title, Author author) {}
 
     @Test
     void toCsvReturnsEmptyForEmptyList() {
@@ -150,5 +158,73 @@ class ExportUtilTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ExportUtil.streamXlsx(List.of(new Event("Meeting", now)).iterator(), out);
         assertTrue(out.toByteArray().length > 0);
+    }
+    
+    @Test
+    void toCsvFlattensNestedObjects() {
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java", "spring"));
+        byte[] csv = ExportUtil.toCsv(List.of(post));
+        String text = new String(csv, StandardCharsets.UTF_8);
+        assertTrue(text.contains("title"));
+        assertTrue(text.contains("author.name"));
+        assertTrue(text.contains("author.email"));
+        assertTrue(text.contains("Java Tips"));
+        assertTrue(text.contains("John Doe"));
+        assertTrue(text.contains("john@example.com"));
+    }
+    
+    @Test
+    void streamCsvFlattensNestedObjects() {
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java", "spring"));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamCsv(List.of(post).iterator(), out);
+        String text = out.toString(StandardCharsets.UTF_8);
+        assertTrue(text.contains("author.name"));
+        assertTrue(text.contains("author.email"));
+        assertTrue(text.contains("John Doe"));
+        assertTrue(text.contains("john@example.com"));
+    }
+    
+    @Test
+    void streamXlsxFlattensNestedObjects() {
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java", "spring"));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamXlsx(List.of(post).iterator(), out);
+        assertTrue(out.toByteArray().length > 0);
+    }
+    
+    @Test
+    void streamCsvHandlesNullNestedObjects() {
+        PostWithNullAuthor post1 = new PostWithNullAuthor("Post 1", null);
+        PostWithNullAuthor post2 = new PostWithNullAuthor("Post 2", new Author("Jane", "jane@example.com"));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamCsv(List.of(post1, post2).iterator(), out);
+        String text = out.toString(StandardCharsets.UTF_8);
+        // Should contain headers from both rows
+        assertTrue(text.contains("title"));
+        assertTrue(text.contains("author.name") || text.contains("author.email"));
+        assertTrue(text.contains("Post 1"));
+        assertTrue(text.contains("Post 2"));
+        assertTrue(text.contains("Jane"));
+    }
+    
+    @Test
+    void streamXlsxHandlesNullNestedObjects() {
+        PostWithNullAuthor post1 = new PostWithNullAuthor("Post 1", null);
+        PostWithNullAuthor post2 = new PostWithNullAuthor("Post 2", new Author("Jane", "jane@example.com"));
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamXlsx(List.of(post1, post2).iterator(), out);
+        assertTrue(out.toByteArray().length > 0);
+    }
+    
+    @Test
+    void toCsvHandlesCollectionsAsCommaSeparated() {
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java", "spring", "boot"));
+        byte[] csv = ExportUtil.toCsv(List.of(post));
+        String text = new String(csv, StandardCharsets.UTF_8);
+        assertTrue(text.contains("tags"));
+        assertTrue(text.contains("java"));
+        assertTrue(text.contains("spring"));
+        assertTrue(text.contains("boot"));
     }
 }

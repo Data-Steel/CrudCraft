@@ -1,18 +1,3 @@
-/*
- * Copyright (c) 2025 CrudCraft contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 // Copyright (c) 2025 CrudCraft contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,7 +72,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
  * - Source model: Post
  * - Package: nl.datasteel.crudcraft.sample.blog.controller
  * - Generator: ControllerGenerator
- * - Generation time: 2026-02-10T10:50:31.610926907Z
+ * - Generation time: 2026-02-10T11:14:04.084729493Z
  * - CrudCraft version: 1.0.1-SNAPSHOT
  *
  * Recommendations:
@@ -138,26 +123,6 @@ public class PostController {
         return PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
     }
 
-    @PostMapping("/batch")
-    @Operation(
-            operationId = "postBulkCreate",
-            summary = "Create multiple Post entities",
-            description = "Creates multiple Post entities in a single request. Returns all created entities with generated IDs."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Post entities created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data")
-    })
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<List<PostResponseDto>> createAll(
-            @Valid @RequestBody List<PostRequestDto> requests) {
-        requests.forEach(FieldSecurityUtil::filterWrite);
-        List<PostResponseDto> dtos = service.createAll(requests).stream()
-                .map(FieldSecurityUtil::filterRead)
-                .toList();
-        return ResponseEntity.status(201).body(dtos);
-    }
-
     @PatchMapping("/{id}")
     @Operation(
             operationId = "postPatch",
@@ -177,82 +142,24 @@ public class PostController {
         return ResponseEntity.ok(FieldSecurityUtil.filterRead(patched));
     }
 
-    @DeleteMapping("/batch/delete")
+    @PostMapping("/batch")
     @Operation(
-            operationId = "postBulkDelete",
-            summary = "Delete multiple Post entities",
-            description = "Permanently deletes multiple Post entities by their IDs."
-    )
-    @ApiResponses(@ApiResponse(responseCode = "204", description = "Post entities deleted successfully"))
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<Void> deleteAllByIds(@RequestBody Collection<UUID> ids) {
-        service.deleteAllByIds(ids);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/batch/ids")
-    @Operation(
-            operationId = "postFindByIds",
-            summary = "Find Post entities by IDs",
-            description = "Retrieves multiple Post entities by their IDs in a single request."
-    )
-    @ApiResponses(@ApiResponse(responseCode = "200", description = "Post entities retrieved successfully"))
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<PaginatedResponse<PostResponseDto>> findByIds(
-            @RequestBody List<UUID> ids) {
-        var dtos = service.findByIds(ids).stream()
-            .map(FieldSecurityUtil::filterRead)
-            .toList();
-        PaginatedResponse<PostResponseDto> response = new PaginatedResponse<>(
-            dtos,
-            0,
-            dtos.size(),
-            1,
-            dtos.size(),
-            true,
-            true
-        );
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping
-    @Operation(
-            operationId = "postGetAll",
-            summary = "Get all Post entities with pagination",
-            description = "Retrieves all Post entities with support for pagination, sorting, and filtering via search parameters."
-    )
-    @ApiResponses(@ApiResponse(responseCode = "200", description = "Paginated list of Post entities"))
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<PaginatedResponse<PostResponseDto>> getAll(Pageable pageable,
-            @ModelAttribute PostSearchRequest searchRequest) {
-        Page<PostResponseDto> page = service.search(searchRequest, clampPageable(pageable));
-        Page<PostResponseDto> dtoPage = page.map(FieldSecurityUtil::filterRead);
-        PaginatedResponse<PostResponseDto> response = new PaginatedResponse<>(
-            dtoPage.getContent(), dtoPage.getNumber(), dtoPage.getSize(),
-            dtoPage.getTotalPages(), dtoPage.getTotalElements(),
-            dtoPage.isFirst(), dtoPage.isLast()
-        );
-        return ResponseEntity.ok(response);
-    }
-
-    @PatchMapping("/batch")
-    @Operation(
-            operationId = "postBulkPatch",
-            summary = "Partially update multiple Post entities",
-            description = "Partially updates multiple Post entities in a single request. Each entity must include its ID. Returns all updated entities."
+            operationId = "postBulkCreate",
+            summary = "Create multiple Post entities",
+            description = "Creates multiple Post entities in a single request. Returns all created entities with generated IDs."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Post entities partially updated successfully"),
+            @ApiResponse(responseCode = "201", description = "Post entities created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request data")
     })
     @PreAuthorize("permitAll()")
-    public ResponseEntity<List<PostResponseDto>> patchAll(
-            @Valid @RequestBody List<Identified<UUID, PostRequestDto>> requests) {
-        requests.forEach(r -> FieldSecurityUtil.filterWrite(r.getData()));
-        List<PostResponseDto> dtos = service.patchAll(requests).stream()
+    public ResponseEntity<List<PostResponseDto>> createAll(
+            @Valid @RequestBody List<PostRequestDto> requests) {
+        requests.forEach(FieldSecurityUtil::filterWrite);
+        List<PostResponseDto> dtos = service.createAll(requests).stream()
                 .map(FieldSecurityUtil::filterRead)
                 .toList();
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.status(201).body(dtos);
     }
 
     @RequestMapping(
@@ -303,25 +210,6 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{id}")
-    @Operation(
-            operationId = "postUpdate",
-            summary = "Update an existing Post",
-            description = "Updates an existing Post entity identified by ID. Returns the updated entity."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Post updated successfully"),
-            @ApiResponse(responseCode = "404", description = "Post with the specified ID was not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data")
-    })
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<PostResponseDto> update(@PathVariable("id") UUID id,
-            @RequestBody PostRequestDto request) {
-        FieldSecurityUtil.filterWrite(request);
-        PostResponseDto updated = service.update(id, request);
-        return ResponseEntity.ok(FieldSecurityUtil.filterRead(updated));
-    }
-
     @GetMapping("/ref")
     @Operation(
             operationId = "postGetAllRef",
@@ -356,6 +244,46 @@ public class PostController {
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    @Operation(
+            operationId = "postGetAll",
+            summary = "Get all Post entities with pagination",
+            description = "Retrieves all Post entities with support for pagination, sorting, and filtering via search parameters."
+    )
+    @ApiResponses(@ApiResponse(responseCode = "200", description = "Paginated list of Post entities"))
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<PaginatedResponse<PostResponseDto>> getAll(Pageable pageable,
+            @ModelAttribute PostSearchRequest searchRequest) {
+        Page<PostResponseDto> page = service.search(searchRequest, clampPageable(pageable));
+        Page<PostResponseDto> dtoPage = page.map(FieldSecurityUtil::filterRead);
+        PaginatedResponse<PostResponseDto> response = new PaginatedResponse<>(
+            dtoPage.getContent(), dtoPage.getNumber(), dtoPage.getSize(),
+            dtoPage.getTotalPages(), dtoPage.getTotalElements(),
+            dtoPage.isFirst(), dtoPage.isLast()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/batch")
+    @Operation(
+            operationId = "postBulkUpdate",
+            summary = "Update multiple Post entities",
+            description = "Updates multiple Post entities in a single request. Each entity must include its ID. Returns all updated entities."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Post entities updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data")
+    })
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<List<PostResponseDto>> updateAll(
+            @Valid @RequestBody List<Identified<UUID, PostRequestDto>> requests) {
+        requests.forEach(r -> FieldSecurityUtil.filterWrite(r.getData()));
+        List<PostResponseDto> dtos = service.updateAll(requests).stream()
+                .map(FieldSecurityUtil::filterRead)
+                .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/search")
@@ -400,21 +328,112 @@ public class PostController {
         return ResponseEntity.status(201).body(FieldSecurityUtil.filterRead(created));
     }
 
-    @PutMapping("/batch")
+    @PutMapping("/{id}")
     @Operation(
-            operationId = "postBulkUpdate",
-            summary = "Update multiple Post entities",
-            description = "Updates multiple Post entities in a single request. Each entity must include its ID. Returns all updated entities."
+            operationId = "postUpdate",
+            summary = "Update an existing Post",
+            description = "Updates an existing Post entity identified by ID. Returns the updated entity."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Post entities updated successfully"),
+            @ApiResponse(responseCode = "200", description = "Post updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Post with the specified ID was not found"),
             @ApiResponse(responseCode = "400", description = "Invalid request data")
     })
     @PreAuthorize("permitAll()")
-    public ResponseEntity<List<PostResponseDto>> updateAll(
+    public ResponseEntity<PostResponseDto> update(@PathVariable("id") UUID id,
+            @RequestBody PostRequestDto request) {
+        FieldSecurityUtil.filterWrite(request);
+        PostResponseDto updated = service.update(id, request);
+        return ResponseEntity.ok(FieldSecurityUtil.filterRead(updated));
+    }
+
+    @DeleteMapping("/batch/delete")
+    @Operation(
+            operationId = "postBulkDelete",
+            summary = "Delete multiple Post entities",
+            description = "Permanently deletes multiple Post entities by their IDs."
+    )
+    @ApiResponses(@ApiResponse(responseCode = "204", description = "Post entities deleted successfully"))
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<Void> deleteAllByIds(@RequestBody Collection<UUID> ids) {
+        service.deleteAllByIds(ids);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/export")
+    @Operation(
+            operationId = "postExport",
+            summary = "Export Post entities",
+            description = "Exports Post entities in the requested format."
+    )
+    @ApiResponses(@ApiResponse(responseCode = "200", description = "Post data exported"))
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<StreamingResponseBody> export(
+            @ModelAttribute PostSearchRequest searchRequest,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "format", required = true) String format) {
+        return exportService.export(
+            searchRequest,
+            limit,
+            format,
+            pageable -> service.search(searchRequest, pageable),
+            FieldSecurityUtil::filterRead
+        );
+    }
+
+    @PostMapping("/batch/ids")
+    @Operation(
+            operationId = "postFindByIds",
+            summary = "Find Post entities by IDs",
+            description = "Retrieves multiple Post entities by their IDs in a single request."
+    )
+    @ApiResponses(@ApiResponse(responseCode = "200", description = "Post entities retrieved successfully"))
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<PaginatedResponse<PostResponseDto>> findByIds(
+            @RequestBody List<UUID> ids) {
+        var dtos = service.findByIds(ids).stream()
+            .map(FieldSecurityUtil::filterRead)
+            .toList();
+        PaginatedResponse<PostResponseDto> response = new PaginatedResponse<>(
+            dtos,
+            0,
+            dtos.size(),
+            1,
+            dtos.size(),
+            true,
+            true
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/count")
+    @Operation(
+            operationId = "postCount",
+            summary = "Count Post entities",
+            description = "Counts the total number of Post entities matching the search criteria."
+    )
+    @ApiResponses(@ApiResponse(responseCode = "200", description = "Count of Post entities"))
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<Map<String, Long>> count() {
+        long total = service.count();
+        return ResponseEntity.ok(Map.of("count", total));
+    }
+
+    @PatchMapping("/batch")
+    @Operation(
+            operationId = "postBulkPatch",
+            summary = "Partially update multiple Post entities",
+            description = "Partially updates multiple Post entities in a single request. Each entity must include its ID. Returns all updated entities."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Post entities partially updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data")
+    })
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<List<PostResponseDto>> patchAll(
             @Valid @RequestBody List<Identified<UUID, PostRequestDto>> requests) {
         requests.forEach(r -> FieldSecurityUtil.filterWrite(r.getData()));
-        List<PostResponseDto> dtos = service.updateAll(requests).stream()
+        List<PostResponseDto> dtos = service.patchAll(requests).stream()
                 .map(FieldSecurityUtil::filterRead)
                 .toList();
         return ResponseEntity.ok(dtos);
@@ -438,43 +457,6 @@ public class PostController {
                 .map(FieldSecurityUtil::filterRead)
                 .toList();
         return ResponseEntity.ok(dtos);
-    }
-
-    @GetMapping("/count")
-    @Operation(
-            operationId = "postCount",
-            summary = "Count Post entities",
-            description = "Counts the total number of Post entities matching the search criteria."
-    )
-    @ApiResponses(@ApiResponse(responseCode = "200", description = "Count of Post entities"))
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<Map<String, Long>> count() {
-        long total = service.count();
-        return ResponseEntity.ok(Map.of("count", total));
-    }
-
-    @GetMapping("/export")
-    @Operation(
-            operationId = "postExport",
-            summary = "Export Post entities",
-            description = "Exports Post entities in the requested format."
-    )
-    @ApiResponses(@ApiResponse(responseCode = "200", description = "Post data exported"))
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<StreamingResponseBody> export(
-            @ModelAttribute PostSearchRequest searchRequest,
-            @RequestParam(value = "limit", required = false) Integer limit,
-            @RequestParam(value = "format", required = true) String format) {
-        if (limit != null && limit < 0) {
-            throw new IllegalArgumentException("Limit must be non-negative");
-        }
-        return exportService.export(
-            searchRequest,
-            limit,
-            format,
-            pageable -> service.search(searchRequest, pageable),
-            FieldSecurityUtil::filterRead
-        );
     }
 
     @GetMapping("/list")

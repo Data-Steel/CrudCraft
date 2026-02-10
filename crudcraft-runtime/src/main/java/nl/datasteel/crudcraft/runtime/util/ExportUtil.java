@@ -219,15 +219,26 @@ public final class ExportUtil {
             if (!dtos.hasNext()) {
                 return;
             }
-            R first = dtos.next();
-            Map<String, Object> firstMap = toFlatMap(first);
-            String[] headers = firstMap.keySet().toArray(new String[0]);
+            
+            // Collect all rows first to determine complete header set
+            List<Map<String, Object>> rows = new java.util.ArrayList<>();
+            java.util.Set<String> allHeaders = new java.util.LinkedHashSet<>();
+            
+            while (dtos.hasNext()) {
+                Map<String, Object> row = toFlatMap(dtos.next());
+                rows.add(row);
+                allHeaders.addAll(row.keySet());
+            }
+            
+            if (rows.isEmpty()) {
+                return;
+            }
+            
+            String[] headers = allHeaders.toArray(new String[0]);
             try (CSVPrinter printer = new CSVPrinter(
                     new OutputStreamWriter(out, StandardCharsets.UTF_8),
                     CSVFormat.DEFAULT.withHeader(headers))) {
-                writeCsvRow(printer, headers, firstMap);
-                while (dtos.hasNext()) {
-                    Map<String, Object> row = toFlatMap(dtos.next());
+                for (Map<String, Object> row : rows) {
                     writeCsvRow(printer, headers, row);
                 }
                 printer.flush();
@@ -285,19 +296,34 @@ public final class ExportUtil {
                 workbook.dispose();
                 return;
             }
-            R first = dtos.next();
-            Map<String, Object> firstMap = toFlatMap(first);
-            String[] headers = firstMap.keySet().toArray(new String[0]);
+            
+            // Collect all rows first to determine complete header set
+            List<Map<String, Object>> rows = new java.util.ArrayList<>();
+            java.util.Set<String> allHeaders = new java.util.LinkedHashSet<>();
+            
+            while (dtos.hasNext()) {
+                Map<String, Object> rowMap = toFlatMap(dtos.next());
+                rows.add(rowMap);
+                allHeaders.addAll(rowMap.keySet());
+            }
+            
+            if (rows.isEmpty()) {
+                workbook.write(out);
+                workbook.dispose();
+                return;
+            }
+            
+            String[] headers = allHeaders.toArray(new String[0]);
             Row headerRow = sheet.createRow(0);
             for (int c = 0; c < headers.length; c++) {
                 headerRow.createCell(c).setCellValue(headers[c]);
             }
+            
             int r = 1;
-            writeXlsxRow(sheet.createRow(r++), headers, firstMap);
-            while (dtos.hasNext()) {
-                Map<String, Object> rowMap = toFlatMap(dtos.next());
+            for (Map<String, Object> rowMap : rows) {
                 writeXlsxRow(sheet.createRow(r++), headers, rowMap);
             }
+            
             workbook.write(out);
             workbook.dispose();
         } catch (Exception e) {

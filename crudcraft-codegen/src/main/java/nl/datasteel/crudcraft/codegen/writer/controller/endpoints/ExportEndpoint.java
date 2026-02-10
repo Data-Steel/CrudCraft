@@ -61,17 +61,13 @@ public class ExportEndpoint implements EndpointSpecProvider {
                                         .build())
                                 .build()),
                 (mb, md) -> mb.addCode(
-                        "if (limit != null && limit < 0) {\n" +
-                                "    throw new $T(\"Limit must be non-negative\");\n" +
-                                "}\n" +
-                                "return exportService.export(\n" +
+                        "return exportService.export(\n" +
                                 "    searchRequest,\n" +
                                 "    limit,\n" +
                                 "    format,\n" +
                                 "    pageable -> service.search(searchRequest, pageable),\n" +
                                 "    $T::filterRead\n" +
                                 ");\n",
-                        ClassName.get(IllegalArgumentException.class),
                         EndpointSupport.FIELD_SECURITY_UTIL)
         );
     }
