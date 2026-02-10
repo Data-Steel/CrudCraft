@@ -21,12 +21,16 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Serializes entity objects to Map structures for export, applying field filtering
  * and relationship traversal based on ExportRequest configuration.
  */
 public class EntitySerializer {
+    
+    private static final Logger log = LoggerFactory.getLogger(EntitySerializer.class);
     
     private final EntityMetadataRegistry metadataRegistry;
     
@@ -131,7 +135,11 @@ public class EntitySerializer {
             field.setAccessible(true);
             return field.get(entity);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException("Failed to access field: " + field.getName(), e);
+            log.error("Failed to access field '{}' on entity class '{}': {}", 
+                field.getName(), entity.getClass().getName(), e.getMessage());
+            throw new RuntimeException(String.format(
+                "Failed to access field '%s' on entity '%s'", 
+                field.getName(), entity.getClass().getName()), e);
         }
     }
     

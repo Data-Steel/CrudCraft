@@ -26,6 +26,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
  * Uses JPA Criteria API to build dynamic queries with JOIN FETCH for efficient loading.
  */
 public class EntityExportService {
+    
+    private static final Logger log = LoggerFactory.getLogger(EntityExportService.class);
     
     private final EntityManager entityManager;
     private final EntityMetadataRegistry metadataRegistry;
@@ -115,7 +119,10 @@ public class EntityExportService {
                 try {
                     root.fetch(field.getName(), JoinType.LEFT);
                 } catch (IllegalArgumentException e) {
-                    // Field might not be fetchable, skip it
+                    // Field might not be fetchable (e.g., @Transient or mapped incorrectly)
+                    // Log at DEBUG level and continue without fetching
+                    log.debug("Could not add JOIN FETCH for field '{}' on entity '{}': {}", 
+                        field.getName(), metadata.getEntityClass().getName(), e.getMessage());
                 }
             }
         }
@@ -155,6 +162,11 @@ public class EntityExportService {
             } catch (Exception e) {
                 // If batch loading fails, collections will be lazy-loaded individually
                 // This is less efficient but ensures the export still works
+                // Log at WARN level since this defeats the N+1 optimization
+                log.warn("Batch loading failed for collection field '{}' on entity '{}'. " +
+                    "Falling back to lazy loading (may cause N+1 queries): {}", 
+                    field.getName(), metadata.getEntityClass().getName(), e.getMessage());
+                log.debug("Batch loading exception details", e);
             }
         }
     }
