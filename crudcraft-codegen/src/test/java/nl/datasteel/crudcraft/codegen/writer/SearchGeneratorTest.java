@@ -169,4 +169,77 @@ class SearchGeneratorTest {
         assertFalse(specCode.contains("query.distinct(true)"),
                 "Specification should NOT call query.distinct(true) when only simple fields are searched");
     }
+
+    @Test
+    void generatedRequestHasSearchLogicField() {
+        // Create a simple model
+        String entitySrc = "package test;" +
+                "import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;" +
+                "import nl.datasteel.crudcraft.annotations.fields.Searchable;" +
+                "@CrudCrafted class SimpleEntity {" +
+                "  @Searchable String name;" +
+                "}";
+
+        Elements elements = CompilationTestUtils.elements(
+                JavaFileObjects.forSourceString("test.SimpleEntity", entitySrc)
+        );
+        ProcessingEnvironment env = new EnvStub(elements);
+        WriteContext testCtx = new WriteContext(env);
+
+        var entityEl = elements.getTypeElement("test.SimpleEntity");
+        ModelDescriptor md = AnnotationModelReader.parse(entityEl, env);
+
+        SearchGenerator gen = new SearchGenerator();
+        List<JavaFile> files = gen.generate(md, testCtx);
+
+        // Get the SearchRequest file
+        JavaFile requestFile = files.get(0);
+        String requestCode = requestFile.toString();
+
+        // Should contain searchLogic field
+        assertTrue(requestCode.contains("private SearchLogic searchLogic"),
+                "SearchRequest should have a searchLogic field");
+        assertTrue(requestCode.contains("public SearchLogic getSearchLogic()"),
+                "SearchRequest should have a getSearchLogic() method");
+        assertTrue(requestCode.contains("public void setSearchLogic(SearchLogic searchLogic)"),
+                "SearchRequest should have a setSearchLogic() method");
+        assertTrue(requestCode.contains("searchLogic != null ? searchLogic : SearchLogic.OR"),
+                "getSearchLogic should default to OR");
+    }
+
+    @Test
+    void generatedSpecificationUsesSearchLogic() {
+        // Create a simple model
+        String entitySrc = "package test;" +
+                "import nl.datasteel.crudcraft.annotations.classes.CrudCrafted;" +
+                "import nl.datasteel.crudcraft.annotations.fields.Searchable;" +
+                "@CrudCrafted class SimpleEntity {" +
+                "  @Searchable String name;" +
+                "}";
+
+        Elements elements = CompilationTestUtils.elements(
+                JavaFileObjects.forSourceString("test.SimpleEntity", entitySrc)
+        );
+        ProcessingEnvironment env = new EnvStub(elements);
+        WriteContext testCtx = new WriteContext(env);
+
+        var entityEl = elements.getTypeElement("test.SimpleEntity");
+        ModelDescriptor md = AnnotationModelReader.parse(entityEl, env);
+
+        SearchGenerator gen = new SearchGenerator();
+        List<JavaFile> files = gen.generate(md, testCtx);
+
+        // Get the Specification file
+        JavaFile specFile = files.get(1);
+        String specCode = specFile.toString();
+
+        // Should contain logic variable initialization
+        assertTrue(specCode.contains("SearchLogic logic = request.getSearchLogic()"),
+                "Specification should get logic from request");
+        assertTrue(specCode.contains("logic == SearchLogic.AND ? cb.conjunction() : cb.disjunction()"),
+                "Specification should initialize predicate based on logic");
+        assertTrue(specCode.contains("logic == SearchLogic.AND ? cb.and(p,") ||
+                        specCode.contains("logic == SearchLogic.AND ? cb.and"),
+                "Specification should use logic to combine predicates");
+    }
 }
