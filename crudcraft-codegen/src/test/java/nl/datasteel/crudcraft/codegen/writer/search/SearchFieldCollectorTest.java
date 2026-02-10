@@ -87,14 +87,23 @@ class SearchFieldCollectorTest {
     void collectsNestedFieldsUpToDepth() {
         Fixture fx = fixture();
         List<SearchField> fields = fx.collector.collect(fx.root, 2);
-        
-        // Currently only collecting tagsSize. The childValue field is not being collected
-        // in the test environment, possibly due to how @Searchable is processed in dynamically
-        // generated test classes. This should be investigated further, but the core functionality
-        // (not adding parent entity fields when recursing) is working as evidenced by the
-        // generated PostSearchRequest in the sample app.
-        assertEquals(1, fields.size());
+
+        // With the fix, we now correctly collect:
+        // 1. tagsSize - from the List<String> tags field with SIZE_GT operator (1 entry)
+        // 2. childValue - from the nested Child.value field with ALL default String operators (8 entries)
+        //    (EQUALS, CONTAINS, STARTS_WITH, ENDS_WITH, IN, NOT_EQUALS, NOT_IN, REGEX)
+        assertEquals(9, fields.size());
         assertTrue(fields.stream().anyMatch(f -> f.property().equals("tagsSize") && f.operator() == SearchOperator.SIZE_GT));
+
+        // Verify all default String operators are present for childValue
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("childValue") && f.operator() == SearchOperator.EQUALS));
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("childValue") && f.operator() == SearchOperator.CONTAINS));
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("childValue") && f.operator() == SearchOperator.STARTS_WITH));
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("childValue") && f.operator() == SearchOperator.ENDS_WITH));
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("childValue") && f.operator() == SearchOperator.IN));
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("childValue") && f.operator() == SearchOperator.NOT_EQUALS));
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("childValue") && f.operator() == SearchOperator.NOT_IN));
+        assertTrue(fields.stream().anyMatch(f -> f.property().equals("childValue") && f.operator() == SearchOperator.REGEX));
     }
 
     @Test

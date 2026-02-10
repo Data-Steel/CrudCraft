@@ -15,13 +15,15 @@
  */
 package nl.datasteel.crudcraft.sample.blog;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
+import static jakarta.persistence.FetchType.LAZY;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -50,11 +52,12 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Dto
+    @Searchable
     private UUID id;
 
     @Dto
     @Searchable
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
@@ -84,7 +87,19 @@ public class Comment {
     @Column(nullable = false, length = 2000)
     private String content;
 
+    /**
+     * Attachment file data. Demonstrates @Lob support for large objects.
+     * LOB fields are lazy loaded and can be uploaded via Request DTOs.
+     */
     @Dto
+    @Request
+    @Lob
+    @Basic(fetch = LAZY)
+    @Column(name = "attachment")
+    private byte[] attachment;
+
+    @Dto
+    @Searchable
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
@@ -176,5 +191,13 @@ public class Comment {
     }
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public byte[] getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(byte[] attachment) {
+        this.attachment = attachment;
     }
 }

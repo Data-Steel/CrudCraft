@@ -26,8 +26,9 @@ import java.util.Objects;
  * @param inRequest whether the field is included in the request DTO
  * @param inRef whether the field is included in the reference DTO
  * @param responseDtos names of additional response DTO variants this field participates in
+ * @param isLob whether the field is a large object (Jakarta @Lob)
  */
-public record DtoOptions(boolean inDto, boolean inRequest, boolean inRef, String[] responseDtos) {
+public record DtoOptions(boolean inDto, boolean inRequest, boolean inRef, String[] responseDtos, boolean isLob) {
     /**
      * Returns whether the field should be included in the DTO.
      */
@@ -57,6 +58,13 @@ public record DtoOptions(boolean inDto, boolean inRequest, boolean inRef, String
     }
 
     /**
+     * Returns whether the field is a large object (Jakarta @Lob).
+     */
+    public boolean isLob() {
+        return isLob;
+    }
+
+    /**
      * Indicates whether some other object is "equal to" this one.
      *
      * @param o the reference object with which to compare.
@@ -70,6 +78,7 @@ public record DtoOptions(boolean inDto, boolean inRequest, boolean inRef, String
         if (inDto != that.inDto) return false;
         if (inRequest != that.inRequest) return false;
         if (inRef != that.inRef) return false;
+        if (isLob != that.isLob) return false;
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         return Arrays.equals(responseDtos, that.responseDtos);
     }
@@ -81,7 +90,7 @@ public record DtoOptions(boolean inDto, boolean inRequest, boolean inRef, String
      */
     @Override
     public int hashCode() {
-        int result = Objects.hash(inDto, inRequest, inRef);
+        int result = Objects.hash(inDto, inRequest, inRef, isLob);
         result = 31 * result + Arrays.hashCode(responseDtos);
         return result;
     }
@@ -98,6 +107,7 @@ public record DtoOptions(boolean inDto, boolean inRequest, boolean inRef, String
                 ", inRequest=" + inRequest +
                 ", inRef=" + inRef +
                 ", responseDtos=" + Arrays.toString(responseDtos) +
+                ", isLob=" + isLob +
                 '}';
     }
 }
