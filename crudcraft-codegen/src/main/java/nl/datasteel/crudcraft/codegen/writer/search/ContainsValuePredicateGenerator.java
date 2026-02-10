@@ -15,6 +15,7 @@
  */
 package nl.datasteel.crudcraft.codegen.writer.search;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import nl.datasteel.crudcraft.annotations.SearchOperator;
 
@@ -35,11 +36,12 @@ public class ContainsValuePredicateGenerator
                         m,
                         SearchOperator.class
                 )
-                .addStatement(
-                        combinePredicateStatement("cb.isMember(request.get$L(), $L.values())"),
+                .addStatement("p = logic == $T.AND ? cb.and(p, cb.isMember(request.get$L(), $L.values())) : cb.or(p, cb.isMember(request.get$L(), $L.values()))",
+                        ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"),
                         m,
-                        f.path()
-                )
+                        f.path(),
+                        m,
+                        f.path())
                 .endControlFlow()
                 .build();
     }

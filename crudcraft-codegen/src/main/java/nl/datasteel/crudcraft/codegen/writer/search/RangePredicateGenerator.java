@@ -15,6 +15,7 @@
  */
 package nl.datasteel.crudcraft.codegen.writer.search;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import nl.datasteel.crudcraft.annotations.SearchOperator;
 
@@ -45,8 +46,11 @@ public class RangePredicateGenerator
                         m,
                         m,
                         SearchOperator.class)
-                .addStatement(
-                        combinePredicateStatement("cb.between($L, request.get$LStart(), request.get$LEnd())"),
+                .addStatement("p = logic == $T.AND ? cb.and(p, cb.between($L, request.get$LStart(), request.get$LEnd())) : cb.or(p, cb.between($L, request.get$LStart(), request.get$LEnd()))",
+                        ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"),
+                        f.path(),
+                        m,
+                        m,
                         f.path(),
                         m,
                         m)

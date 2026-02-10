@@ -15,6 +15,7 @@
  */
 package nl.datasteel.crudcraft.codegen.writer.search;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import nl.datasteel.crudcraft.annotations.SearchOperator;
 
@@ -35,11 +36,12 @@ public class GreaterThanOrEqualPredicateGenerator
                         m,
                         SearchOperator.class
                 )
-                .addStatement(
-                        combinePredicateStatement("cb.greaterThanOrEqualTo($L, request.get$L())"),
+                .addStatement("p = logic == $T.AND ? cb.and(p, cb.greaterThanOrEqualTo($L, request.get$L())) : cb.or(p, cb.greaterThanOrEqualTo($L, request.get$L()))",
+                        ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"),
                         f.path(),
-                        m
-                )
+                        m,
+                        f.path(),
+                        m)
                 .endControlFlow()
                 .build();
     }

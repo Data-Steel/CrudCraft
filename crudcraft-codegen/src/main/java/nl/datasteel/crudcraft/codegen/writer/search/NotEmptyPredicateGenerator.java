@@ -15,6 +15,7 @@
  */
 package nl.datasteel.crudcraft.codegen.writer.search;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import nl.datasteel.crudcraft.annotations.SearchOperator;
 
@@ -38,7 +39,10 @@ public class NotEmptyPredicateGenerator
                         m,
                         SearchOperator.class
                 )
-                .addStatement(combinePredicateStatement("cb.isNotEmpty($L)"), f.path())
+                .addStatement("p = logic == $T.AND ? cb.and(p, cb.isNotEmpty($L)) : cb.or(p, cb.isNotEmpty($L))",
+                        ClassName.get("nl.datasteel.crudcraft.runtime.search", "SearchLogic"),
+                        f.path(),
+                        f.path())
                 .endControlFlow()
                 .build();
     }
