@@ -20,6 +20,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
 import java.io.Writer;
@@ -105,8 +107,22 @@ public class ControllerGenerator implements StubGenerator {
         ClassName valueAnn = JavaPoetUtils.getClassName("org.springframework.beans.factory.annotation", "Value");
         ClassName pageableClass = JavaPoetUtils.getClassName("org.springframework.data.domain", "Pageable");
         ClassName pageRequest = JavaPoetUtils.getClassName("org.springframework.data.domain", "PageRequest");
+        ClassName exportServiceClass = JavaPoetUtils.getClassName(
+                "nl.datasteel.crudcraft.runtime.service", "ExportService");
+        ClassName exportConfigClass = ClassName.get(
+                "nl.datasteel.crudcraft.runtime.service", "ExportService", "ExportConfig");
+        ClassName dtoRespClass = ClassName.get(
+                modelDescriptor.getBasePackage() + ".dto.response", modelName + "ResponseDto");
+        ClassName searchReqClass = ClassName.get(
+                modelDescriptor.getBasePackage() + ".search", modelName + "SearchRequest");
 
         FieldSpec serviceField = FieldSpec.builder(svcClass, "service", Modifier.PRIVATE, Modifier.FINAL).build();
+        FieldSpec exportServiceField = FieldSpec.builder(
+                ParameterizedTypeName.get(exportServiceClass, dtoRespClass, searchReqClass),
+                "exportService",
+                Modifier.PRIVATE,
+                Modifier.FINAL
+        ).build();
         FieldSpec maxPageSize = FieldSpec.builder(int.class, "maxPageSize", Modifier.PROTECTED)
                 .addAnnotation(AnnotationSpec.builder(valueAnn)
                         .addMember("value", "$S", "${crudcraft.api.max-page-size:100}")
@@ -131,7 +147,33 @@ public class ControllerGenerator implements StubGenerator {
         MethodSpec ctor = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(svcClass, "service")
+                .addParameter(ParameterSpec.builder(int.class, "maxPageSize")
+                        .addAnnotation(AnnotationSpec.builder(valueAnn)
+                                .addMember("value", "$S", "${crudcraft.api.max-page-size:100}")
+                                .build())
+                        .build())
+                .addParameter(ParameterSpec.builder(int.class, "maxCsvRows")
+                        .addAnnotation(AnnotationSpec.builder(valueAnn)
+                                .addMember("value", "$S", "${crudcraft.export.max-csv-rows:100000}")
+                                .build())
+                        .build())
+                .addParameter(ParameterSpec.builder(int.class, "maxJsonRows")
+                        .addAnnotation(AnnotationSpec.builder(valueAnn)
+                                .addMember("value", "$S", "${crudcraft.export.max-json-rows:50000}")
+                                .build())
+                        .build())
+                .addParameter(ParameterSpec.builder(int.class, "maxXlsxRows")
+                        .addAnnotation(AnnotationSpec.builder(valueAnn)
+                                .addMember("value", "$S", "${crudcraft.export.max-xlsx-rows:25000}")
+                                .build())
+                        .build())
                 .addStatement("this.service = service")
+                .addStatement("this.maxPageSize = maxPageSize")
+                .addStatement("this.maxCsvRows = maxCsvRows")
+                .addStatement("this.maxJsonRows = maxJsonRows")
+                .addStatement("this.maxXlsxRows = maxXlsxRows")
+                .addStatement("this.exportService = new $T<>(new $T(maxCsvRows, maxJsonRows, maxXlsxRows, maxPageSize))",
+                        exportServiceClass, exportConfigClass)
                 .build();
 
         MethodSpec clampPageable = MethodSpec.methodBuilder("clampPageable")
@@ -153,6 +195,7 @@ public class ControllerGenerator implements StubGenerator {
                         .addMember("value", "$S", path)
                         .build())
                 .addField(serviceField)
+                .addField(exportServiceField)
                 .addField(maxPageSize)
                 .addField(maxCsvRows)
                 .addField(maxJsonRows)
@@ -350,7 +393,7 @@ public class ControllerGenerator implements StubGenerator {
                                     "200",
                                     "Paginated list of " + modelDescriptor.getName() + " entities")
                             .build())
-                    .addParameter(com.squareup.javapoet.ParameterSpec.builder(
+                    .addParameter(ParameterSpec.builder(
                             JavaPoetUtils.getClassName("org.springframework.data.domain", "Pageable"),
                             "pageable")
                             .build())
@@ -400,7 +443,7 @@ public class ControllerGenerator implements StubGenerator {
                                     "404",
                                     modelDescriptor.getName() + " with the specified ID was not found")
                             .build())
-                    .addParameter(com.squareup.javapoet.ParameterSpec.builder(
+                    .addParameter(ParameterSpec.builder(
                             JavaPoetUtils.getClassName("java.util", "UUID"),
                             "id")
                             .addAnnotation(JavaPoetUtils.getClassName("org.springframework.web.bind.annotation", "PathVariable"))
