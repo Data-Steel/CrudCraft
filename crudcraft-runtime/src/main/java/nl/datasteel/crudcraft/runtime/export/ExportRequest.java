@@ -158,11 +158,15 @@ public class ExportRequest {
 
     /**
      * Gets the effective max depth, using a default of 1 if not specified.
+     * Negative values are treated as 0 (no nesting).
      *
-     * @return the maximum depth for nested relationships
+     * @return the maximum depth for nested relationships (>= 0)
      */
     public int getEffectiveMaxDepth() {
-        return maxDepth != null ? maxDepth : 1;
+        if (maxDepth == null) {
+            return 1;
+        }
+        return Math.max(0, maxDepth);
     }
 
     /**

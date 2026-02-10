@@ -85,7 +85,7 @@ public final class ExportUtil {
                 return;
             }
             // Check max depth
-            if (exportRequest != null && depth > exportRequest.getEffectiveMaxDepth()) {
+            if (exportRequest != null && depth >= exportRequest.getEffectiveMaxDepth()) {
                 // Convert to JSON-like string representation for better readability
                 if (exportRequest.shouldIncludeField(prefix)) {
                     try {
@@ -110,7 +110,7 @@ public final class ExportUtil {
                 }
             } else {
                 // Check max depth
-                if (exportRequest != null && depth > exportRequest.getEffectiveMaxDepth()) {
+                if (exportRequest != null && depth >= exportRequest.getEffectiveMaxDepth()) {
                     // Convert to JSON-like string representation for better readability
                     if (exportRequest.shouldIncludeField(prefix)) {
                         try {

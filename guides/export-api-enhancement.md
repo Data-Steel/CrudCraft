@@ -40,14 +40,20 @@ Full entity-based export (where any entity field can be dynamically selected) re
 
 ### @ExportExclude
 
-Mark a field as permanently excluded from all exports. This annotation is checked at the DTO level.
+Mark a field as permanently excluded from all exports. 
+
+**Current Status:** This annotation is a marker for future implementation. Enforcement is not yet wired into the export pipeline.
+
+**Workaround:** To exclude fields from export now:
+1. Don't mark the field with `@Dto` annotation (it won't be in the DTO and thus not exportable)
+2. Use `excludeFields` parameter in `ExportRequest`
 
 **Example:**
 ```java
 @Entity
 public class User {
     @Dto
-    @ExportExclude  // This field will never be exported
+    @ExportExclude  // Planned feature - not yet enforced
     private String internalProcessingData;
     
     @Dto
@@ -55,12 +61,12 @@ public class User {
 }
 ```
 
-**Use cases:**
+**Planned Use Cases:**
 - Internal processing fields that should never leave the system
 - Computed values that are expensive to calculate
 - Fields with sensitive business logic
 
-**Note:** @ExportExclude takes precedence over includeFields in ExportRequest. A field marked with @ExportExclude will never be exported, even if explicitly included.
+**Note:** When implemented, @ExportExclude will take precedence over includeFields in ExportRequest. A field marked with @ExportExclude will never be exported, even if explicitly included.
 
 ## ExportRequest Parameters
 

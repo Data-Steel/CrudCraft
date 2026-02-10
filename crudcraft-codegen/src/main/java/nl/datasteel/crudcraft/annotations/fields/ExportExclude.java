@@ -25,16 +25,23 @@ import java.lang.annotation.Target;
  * Fields annotated with @ExportExclude will never be included in any export,
  * regardless of includeFields or excludeFields settings in ExportRequest.
  *
+ * <p><strong>Note:</strong> This annotation is currently a marker for future implementation.
+ * Enforcement is not yet wired into the export pipeline. To exclude fields from export now,
+ * ensure they are not marked with {@code @Dto} annotation, or use the {@code excludeFields}
+ * parameter in {@code ExportRequest}.
+ *
  * <p>This is useful for fields that should never be exported for security,
  * performance, or business logic reasons.
  *
  * <p>Example:
  * <pre>
  * {@code
- * @ExportExclude
+ * @ExportExclude  // Planned for future enforcement
  * private String internalProcessingData;
  * }
  * </pre>
+ *
+ * @see nl.datasteel.crudcraft.runtime.export.ExportRequest
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

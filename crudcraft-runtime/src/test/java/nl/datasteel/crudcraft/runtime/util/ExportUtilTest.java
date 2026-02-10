@@ -19,7 +19,10 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
+import nl.datasteel.crudcraft.runtime.export.ExportRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
@@ -226,5 +229,91 @@ class ExportUtilTest {
         assertTrue(text.contains("java"));
         assertTrue(text.contains("spring"));
         assertTrue(text.contains("boot"));
+    }
+    
+    @Test
+    void streamCsvWithExportRequestIncludeFieldsFiltersFields() {
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java", "spring"));
+        ExportRequest exportRequest = new ExportRequest();
+        exportRequest.setIncludeFields(Set.of("title"));
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamCsv(List.of(post).iterator(), out, exportRequest);
+        String text = out.toString(StandardCharsets.UTF_8);
+        
+        assertTrue(text.contains("title"));
+        assertTrue(text.contains("Java Tips"));
+        assertFalse(text.contains("author.name"));
+        assertFalse(text.contains("John Doe"));
+    }
+    
+    @Test
+    void streamCsvWithExportRequestExcludeFieldsFiltersFields() {
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java", "spring"));
+        ExportRequest exportRequest = new ExportRequest();
+        exportRequest.setExcludeFields(Set.of("author.email", "tags"));
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamCsv(List.of(post).iterator(), out, exportRequest);
+        String text = out.toString(StandardCharsets.UTF_8);
+        
+        assertTrue(text.contains("title"));
+        assertTrue(text.contains("author.name"));
+        assertFalse(text.contains("author.email"));
+        assertFalse(text.contains("tags"));
+    }
+    
+    @Test
+    void streamCsvWithMaxDepthZeroFlattensNestedObjects() {
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java"));
+        ExportRequest exportRequest = new ExportRequest();
+        exportRequest.setMaxDepth(0);
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamCsv(List.of(post).iterator(), out, exportRequest);
+        String text = out.toString(StandardCharsets.UTF_8);
+        
+        assertTrue(text.contains("title"));
+        assertTrue(text.contains("Java Tips"));
+        // With maxDepth=0, nested objects should be serialized as JSON strings
+        assertFalse(text.contains("author.name"));
+        assertFalse(text.contains("author.email"));
+        // Should contain some form of author data (as JSON)
+        assertTrue(text.contains("author") || text.contains("John"));
+    }
+    
+    @Test
+    void streamXlsxWithExportRequestFiltersFields() {
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java"));
+        ExportRequest exportRequest = new ExportRequest();
+        exportRequest.setIncludeFields(Set.of("title", "author.name"));
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamXlsx(List.of(post).iterator(), out, exportRequest);
+        // Just verify it produces output without errors
+        assertTrue(out.toByteArray().length > 0);
+    }
+    
+    @Test
+    void exportRequestEffectiveMaxDepthHandlesNegativeValues() {
+        ExportRequest exportRequest = new ExportRequest();
+        exportRequest.setMaxDepth(-5);
+        
+        assertEquals(0, exportRequest.getEffectiveMaxDepth());
+    }
+    
+    @Test
+    void exportRequestEffectiveMaxDepthDefaultsToOne() {
+        ExportRequest exportRequest = new ExportRequest();
+        
+        assertEquals(1, exportRequest.getEffectiveMaxDepth());
+    }
+    
+    @Test
+    void exportRequestEffectiveMaxDepthReturnsSetValue() {
+        ExportRequest exportRequest = new ExportRequest();
+        exportRequest.setMaxDepth(3);
+        
+        assertEquals(3, exportRequest.getEffectiveMaxDepth());
     }
 }
