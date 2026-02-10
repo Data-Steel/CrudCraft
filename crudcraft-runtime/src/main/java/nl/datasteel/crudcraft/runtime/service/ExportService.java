@@ -214,6 +214,7 @@ public class ExportService<R, S> {
      * @param format the format string
      * @return the exporter function
      */
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private BiConsumer<Iterator<R>, OutputStream> getExporter(String format) {
         return getExporter(format, null);
     }
