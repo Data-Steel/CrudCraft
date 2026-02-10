@@ -59,12 +59,16 @@ public class ExportEndpoint implements EndpointSpecProvider {
                                         .addMember("value", "$S", "format")
                                         .addMember("required", "$L", true)
                                         .build())
+                                .build(),
+                        md -> ParameterSpec.builder(EndpointSupport.EXPORT_REQUEST, "exportRequest")
+                                .addAnnotation(EndpointSupport.MODEL_ATTR)
                                 .build()),
                 (mb, md) -> mb.addCode(
                         "return exportService.export(\n" +
                                 "    searchRequest,\n" +
                                 "    limit,\n" +
                                 "    format,\n" +
+                                "    exportRequest,\n" +
                                 "    pageable -> service.search(searchRequest, pageable),\n" +
                                 "    $T::filterRead\n" +
                                 ");\n",
