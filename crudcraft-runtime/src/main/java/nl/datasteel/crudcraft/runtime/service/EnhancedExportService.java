@@ -43,6 +43,7 @@ public class EnhancedExportService<R, E, S> {
     private final ExportService<R, S> dtoExportService;
     private final EntityExportAdapter entityExportAdapter;
     private final Class<E> entityClass;
+    private final ExportService.ExportConfig config;
     
     /**
      * Creates a new enhanced export service.
@@ -57,6 +58,7 @@ public class EnhancedExportService<R, E, S> {
         this.dtoExportService = new ExportService<>(config);
         this.entityExportAdapter = entityExportAdapter;
         this.entityClass = entityClass;
+        this.config = config;
     }
     
     /**
@@ -131,7 +133,7 @@ public class EnhancedExportService<R, E, S> {
         
         // Clamp limit and calculate page size
         int clamped = Math.min(effectiveLimit, formatInfo.maxRows);
-        int pageSize = Math.min(100, clamped); // Default max page size of 100
+        int pageSize = Math.min(config.getMaxPageSize(), clamped);
         pageSize = Math.max(1, pageSize);
         
         // Create entity iterator
@@ -202,9 +204,9 @@ public class EnhancedExportService<R, E, S> {
      */
     private FormatInfo getFormatInfo(String format) {
         return switch (format) {
-            case "csv" -> new FormatInfo(100000, "text/csv", "csv");
-            case "json" -> new FormatInfo(50000, "application/json", "json");
-            case "xlsx" -> new FormatInfo(25000,
+            case "csv" -> new FormatInfo(config.getMaxCsvRows(), "text/csv", "csv");
+            case "json" -> new FormatInfo(config.getMaxJsonRows(), "application/json", "json");
+            case "xlsx" -> new FormatInfo(config.getMaxXlsxRows(),
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx");
             default -> null;
         };

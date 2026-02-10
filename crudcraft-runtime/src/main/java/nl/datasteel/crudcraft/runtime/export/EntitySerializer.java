@@ -69,8 +69,8 @@ public class EntitySerializer {
             return null;
         }
         
-        // Check depth limit
-        if (depth >= exportRequest.getEffectiveMaxDepth()) {
+        // Check depth limit: allow serialization at maxDepth, stop only when depth exceeds it
+        if (depth > exportRequest.getEffectiveMaxDepth()) {
             return null;
         }
         
@@ -81,8 +81,16 @@ public class EntitySerializer {
             String fieldName = fieldMetadata.getName();
             String fieldPath = pathPrefix.isEmpty() ? fieldName : pathPrefix + "." + fieldName;
             
-            // Check if this field should be included
-            if (!exportRequest.shouldIncludeField(fieldPath)) {
+            // Determine if this is a nested field (collection / relationship / embedded)
+            boolean isNestedField = fieldMetadata.isCollection()
+                    || fieldMetadata.isRelationship()
+                    || fieldMetadata.getType() == EntityFieldMetadata.FieldType.EMBEDDED;
+
+            boolean includeField = exportRequest.shouldIncludeField(fieldPath);
+            boolean hasIncludedDescendants = isNestedField && exportRequest.hasIncludedDescendants(fieldPath);
+
+            // Skip fields that are neither directly included nor have included descendants
+            if (!includeField && !hasIncludedDescendants) {
                 continue;
             }
             
@@ -144,12 +152,20 @@ public class EntitySerializer {
     }
     
     /**
-     * Checks if an object is an entity (has @Entity annotation).
+     * Checks if an object is an entity (has metadata registered).
      *
      * @param obj the object to check
      * @return true if it's an entity
      */
     private boolean isEntity(Object obj) {
-        return obj != null && metadataRegistry.hasMetadata(obj.getClass());
+        if (obj == null) {
+            return false;
+        }
+        try {
+            metadataRegistry.getMetadata(obj.getClass());
+            return true;
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
     }
 }

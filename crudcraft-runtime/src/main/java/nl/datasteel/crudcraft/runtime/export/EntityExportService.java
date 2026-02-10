@@ -19,13 +19,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -108,8 +105,9 @@ public class EntityExportService {
      */
     private void addJoinFetches(Root<?> root, EntityMetadata metadata, ExportRequest exportRequest) {
         for (EntityFieldMetadata field : metadata.getExportableFields()) {
-            // Only fetch if field should be included
-            if (!exportRequest.shouldIncludeField(field.getName())) {
+            // Only fetch if field itself or any of its descendants should be included
+            if (!exportRequest.shouldIncludeField(field.getName())
+                    && !exportRequest.hasIncludedDescendants(field.getName())) {
                 continue;
             }
             
@@ -139,8 +137,10 @@ public class EntityExportService {
     private <T> void batchLoadCollections(List<T> entities, EntityMetadata metadata, 
                                            ExportRequest exportRequest) {
         for (EntityFieldMetadata field : metadata.getExportableFields()) {
-            // Check if this is a collection field that should be included
-            if (!field.isCollection() || !exportRequest.shouldIncludeField(field.getName())) {
+            // Check if this is a collection field that should be included or has included descendants
+            if (!field.isCollection() 
+                    || (!exportRequest.shouldIncludeField(field.getName()) 
+                        && !exportRequest.hasIncludedDescendants(field.getName()))) {
                 continue;
             }
             
@@ -152,7 +152,7 @@ public class EntityExportService {
                 Root<T> root = query.from((Class<T>) metadata.getEntityClass());
                 
                 // Fetch the collection
-                Fetch<T, ?> fetch = root.fetch(field.getName(), JoinType.LEFT);
+                root.fetch(field.getName(), JoinType.LEFT);
                 
                 // Filter to only our entities
                 query.where(root.in((Collection<T>) entities));

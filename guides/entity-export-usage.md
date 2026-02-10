@@ -200,13 +200,15 @@ Entity mode uses optimized query strategies:
 
 1. **JOIN FETCH** for non-collection relationships
 2. **Batch loading** for collections
-3. **Streaming** for memory efficiency
+3. **Streaming** for memory efficiency (format-dependent)
 4. **Pagination** for large datasets
 
 ### Expected Performance
 
 - **Query efficiency**: O(1+N) queries where N = collection relationship count
-- **Memory**: Streaming keeps memory < 100MB regardless of export size
+- **Memory**: Varies by format:
+  - **JSON**: True streaming keeps memory usage low (typically < 100MB for large datasets)
+  - **CSV/XLSX**: Current implementation buffers all rows to compute headers; memory usage is proportional to the number of rows and selected fields
 - **Speed**: 10,000 records in < 10 seconds
 - **No N+1**: All collections batch-fetched
 
@@ -334,7 +336,7 @@ crudcraft:
 
 ### Bean Configuration
 
-The entity export infrastructure is automatically configured when JPA is present. You can customize it:
+The entity export infrastructure is provided via Spring beans. Ensure `EntityExportConfiguration` is imported or component-scanned in your application context. You can customize it:
 
 ```java
 @Configuration
@@ -355,13 +357,15 @@ public class CustomExportConfig {
 
 **Cause:** EntityExportAdapter not configured
 
-**Solution:** Ensure JPA is on classpath and EntityExportConfiguration is loaded
+**Solution:** Ensure JPA is on classpath and `EntityExportConfiguration` is imported or component-scanned in your Spring context.
 
 ### Issue: Lazy loading exceptions
 
-**Cause:** Export happening outside transaction
+**Cause:** Parts of the export (such as serialization) run outside the per-page database transactions, so lazily loaded associations may be accessed after the transaction is closed.
 
-**Solution:** Export endpoints are automatically @Transactional. Verify transaction management is enabled.
+**Solution:** Export endpoints are not wrapped in a single transaction by default. If you rely on lazy-loaded associations during export, either:
+- Annotate your own controller/service method that invokes the export with `@Transactional`, or
+- Adjust your mapping/fetch strategy (e.g. use DTOs or eager fetching) so all required data is loaded within the transactional page-fetch phase.
 
 ### Issue: Slow export for large datasets
 

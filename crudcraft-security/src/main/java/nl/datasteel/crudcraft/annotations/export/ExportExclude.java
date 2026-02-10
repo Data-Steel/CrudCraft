@@ -25,10 +25,9 @@ import java.lang.annotation.Target;
  * Fields annotated with @ExportExclude will never be included in any export,
  * regardless of includeFields or excludeFields settings in ExportRequest.
  *
- * <p><strong>Note:</strong> This annotation is currently a marker for future implementation.
- * Enforcement is not yet wired into the export pipeline. To exclude fields from export now,
- * ensure they are not marked with {@code @Dto} annotation, or use the {@code excludeFields}
- * parameter in {@code ExportRequest}.
+ * <p>This annotation is enforced by the entity export system. In entity export mode,
+ * fields marked with @ExportExclude are automatically excluded during metadata introspection.
+ * In DTO export mode, ensure excluded fields are not marked with {@code @Dto} annotation.
  *
  * <p>This is useful for fields that should never be exported for security,
  * performance, or business logic reasons.
@@ -36,8 +35,13 @@ import java.lang.annotation.Target;
  * <p>Example:
  * <pre>
  * {@code
- * @ExportExclude  // Planned for future enforcement
- * private String internalProcessingData;
+ * @Entity
+ * public class User {
+ *     private String name;  // Exportable
+ *     
+ *     @ExportExclude
+ *     private String passwordHash;  // Never exported
+ * }
  * }
  * </pre>
  *

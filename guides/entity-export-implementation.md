@@ -86,10 +86,11 @@ public enum ExportMode {
 #### 5. Spring Configuration
 Located in: `crudcraft-runtime/src/main/java/nl/datasteel/crudcraft/runtime/config/EntityExportConfiguration.java`
 
-**Auto-configuration:**
-- Automatically enabled when JPA is present
-- Creates all necessary beans
-- Conditional configuration based on classpath
+**Configuration behavior:**
+- Provides Spring configuration for entity-based export in JPA-powered applications
+- Creates all necessary beans when the configuration is imported or enabled
+- Can be conditionally activated based on classpath or application configuration
+- Requires explicit import or component scanning to be activated
 
 ## Performance Characteristics
 
@@ -107,12 +108,17 @@ Example with Post entity:
 
 ### Memory Usage
 
-**Achieved:** < 100MB for streaming exports regardless of dataset size
+**Achieved (for true streaming formats, e.g. JSON/NDJSON):** typically < 100MB even for very large datasets
 
-Streaming is used throughout:
-- Results fetched in pages
-- Each page processed and written to output stream
-- No full dataset held in memory
+Streaming behavior by format:
+- **JSON/NDJSON and other streaming-friendly formats:**
+  - Results fetched in pages
+  - Each page processed and written to the output stream
+  - No full dataset held in memory
+- **CSV/XLSX:**
+  - Current implementation buffers all rows in memory to compute headers before writing
+  - Memory usage is proportional to the number of exported rows and selected fields
+  - Recommended for datasets where this memory footprint is acceptable
 
 ### Speed
 
