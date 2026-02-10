@@ -113,9 +113,16 @@ public class ExportRequest {
      * @return true if the field should be included, false otherwise
      */
     public boolean shouldIncludeField(String fieldPath) {
-        // Exclusions take precedence
-        if (excludeFields != null && excludeFields.contains(fieldPath)) {
-            return false;
+        // Exclusions take precedence - check both exact match and parent exclusions
+        if (excludeFields != null) {
+            // Check exact match
+            if (excludeFields.contains(fieldPath)) {
+                return false;
+            }
+            // Check if any parent path is excluded (e.g., "author" excludes "author.name")
+            if (isParentExcluded(fieldPath)) {
+                return false;
+            }
         }
         
         // If no inclusions specified, include everything (except exclusions)
@@ -125,6 +132,35 @@ public class ExportRequest {
         
         // Check if field or any parent path is in inclusions
         return includeFields.contains(fieldPath) || isParentIncluded(fieldPath);
+    }
+
+    /**
+     * Checks if any parent path of the given field is excluded.
+     * For example, if "author" is excluded, then "author.name" should also be excluded.
+     *
+     * @param fieldPath the field path to check
+     * @return true if a parent path is excluded
+     */
+    private boolean isParentExcluded(String fieldPath) {
+        if (excludeFields == null) {
+            return false;
+        }
+        
+        String[] parts = fieldPath.split("\\.");
+        StringBuilder parentPath = new StringBuilder();
+        
+        for (int i = 0; i < parts.length - 1; i++) {
+            if (i > 0) {
+                parentPath.append(".");
+            }
+            parentPath.append(parts[i]);
+            
+            if (excludeFields.contains(parentPath.toString())) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**

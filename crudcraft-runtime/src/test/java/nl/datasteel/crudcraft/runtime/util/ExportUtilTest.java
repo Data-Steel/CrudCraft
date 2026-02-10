@@ -316,4 +316,22 @@ class ExportUtilTest {
         
         assertEquals(3, exportRequest.getEffectiveMaxDepth());
     }
+    
+    @Test
+    void exportRequestExcludeParentExcludesDescendants() {
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java"));
+        ExportRequest exportRequest = new ExportRequest();
+        exportRequest.setExcludeFields(Set.of("author"));  // Exclude entire author subtree
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamCsv(List.of(post).iterator(), out, exportRequest);
+        String text = out.toString(StandardCharsets.UTF_8);
+        
+        assertTrue(text.contains("title"));
+        assertTrue(text.contains("Java Tips"));
+        // With author excluded, should not have author.name or author.email
+        assertFalse(text.contains("author.name"));
+        assertFalse(text.contains("author.email"));
+        assertFalse(text.contains("John Doe"));
+    }
 }
