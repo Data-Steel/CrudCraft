@@ -390,14 +390,21 @@ public final class ExportUtil {
             String fullPath = prefix.isEmpty() ? key : prefix + "." + key;
             Object value = entry.getValue();
             
-            // Check if this field should be included
-            if (!exportRequest.shouldIncludeField(fullPath)) {
+            // Check if this field or any of its descendants should be included
+            boolean shouldInclude = exportRequest.shouldIncludeField(fullPath);
+            boolean hasIncludedDescendants = exportRequest.hasIncludedDescendants(fullPath);
+            
+            // Skip if this field is not included and has no included descendants
+            if (!shouldInclude && !hasIncludedDescendants) {
                 continue;
             }
             
             // Process the value
             if (value == null) {
-                result.put(key, null);
+                // Only include null if the field itself is included (not just descendants)
+                if (shouldInclude) {
+                    result.put(key, null);
+                }
             } else if (value instanceof Map) {
                 // Recursively filter nested maps
                 Map<String, Object> nestedMap = (Map<String, Object>) value;
@@ -418,18 +425,26 @@ public final class ExportUtil {
                                 filteredList.add(filteredItem);
                             }
                         } else {
-                            filteredList.add(item);
+                            // Scalar items in collection: only include if parent is included
+                            if (shouldInclude) {
+                                filteredList.add(item);
+                            }
                         }
                     }
                     if (!filteredList.isEmpty()) {
                         result.put(key, filteredList);
                     }
                 } else {
-                    result.put(key, collection);
+                    // Empty collection: only include if the field itself is included
+                    if (shouldInclude) {
+                        result.put(key, collection);
+                    }
                 }
             } else {
-                // Scalar value
-                result.put(key, value);
+                // Scalar value: only include if the field itself is included
+                if (shouldInclude) {
+                    result.put(key, value);
+                }
             }
         }
         

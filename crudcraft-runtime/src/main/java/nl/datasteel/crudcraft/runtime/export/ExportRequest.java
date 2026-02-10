@@ -193,6 +193,29 @@ public class ExportRequest {
     }
 
     /**
+     * Checks if any descendant path of the given field is included.
+     * For example, if "author.name" is included, then when checking "author",
+     * this will return true because "author" has an included descendant.
+     *
+     * @param fieldPath the field path to check
+     * @return true if any descendant path is included
+     */
+    public boolean hasIncludedDescendants(String fieldPath) {
+        if (includeFields == null || includeFields.isEmpty()) {
+            return false;
+        }
+        
+        String prefix = fieldPath + ".";
+        for (String includedField : includeFields) {
+            if (includedField.startsWith(prefix)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
      * Gets the effective max depth, using a default of 1 if not specified.
      * Negative values are treated as 0 (no nesting).
      *

@@ -95,4 +95,31 @@ class ExportRequestTest {
         request.setIncludeAllFields(true);
         assertTrue(request.isIncludeAllFieldsEnabled());
     }
+    
+    @Test
+    void hasIncludedDescendantsReturnsTrueWhenDescendantIncluded() {
+        ExportRequest request = new ExportRequest();
+        request.setIncludeFields(Set.of("author.name", "author.email"));
+        
+        assertTrue(request.hasIncludedDescendants("author"));
+        assertFalse(request.hasIncludedDescendants("author.name"));
+        assertFalse(request.hasIncludedDescendants("title"));
+    }
+    
+    @Test
+    void hasIncludedDescendantsReturnsFalseWhenNoIncludeFields() {
+        ExportRequest request = new ExportRequest();
+        
+        assertFalse(request.hasIncludedDescendants("author"));
+        assertFalse(request.hasIncludedDescendants("title"));
+    }
+    
+    @Test
+    void hasIncludedDescendantsReturnsFalseWhenNoDescendantsIncluded() {
+        ExportRequest request = new ExportRequest();
+        request.setIncludeFields(Set.of("title", "author"));
+        
+        assertFalse(request.hasIncludedDescendants("author"));
+        assertFalse(request.hasIncludedDescendants("title"));
+    }
 }

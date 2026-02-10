@@ -385,4 +385,46 @@ class ExportUtilTest {
         // Verify it's structured JSON, not flattened
         assertFalse(text.contains("author.name"));
     }
+    
+    @Test
+    void streamJsonWithNestedFieldInclusionWithoutParent() {
+        // Test that including "author.name" works even without explicitly including "author"
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java", "spring"));
+        ExportRequest exportRequest = new ExportRequest();
+        exportRequest.setIncludeFields(Set.of("title", "author.name"));
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamJson(List.of(post).iterator(), out, exportRequest);
+        String text = out.toString(StandardCharsets.UTF_8);
+        
+        assertTrue(text.contains("title"));
+        assertTrue(text.contains("Java Tips"));
+        assertTrue(text.contains("author"));  // Author object should be included
+        assertTrue(text.contains("name"));
+        assertTrue(text.contains("John Doe"));
+        // Email should NOT be included since only author.name is in includeFields
+        assertFalse(text.contains("email"));
+        assertFalse(text.contains("john@example.com"));
+        // Tags should NOT be included
+        assertFalse(text.contains("tags"));
+    }
+    
+    @Test
+    void streamJsonWithNestedFieldExclusionExcludesDescendants() {
+        // Test that excluding "author" also excludes "author.name"
+        Post post = new Post("Java Tips", new Author("John Doe", "john@example.com"), List.of("java"));
+        ExportRequest exportRequest = new ExportRequest();
+        exportRequest.setExcludeFields(Set.of("author"));
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamJson(List.of(post).iterator(), out, exportRequest);
+        String text = out.toString(StandardCharsets.UTF_8);
+        
+        assertTrue(text.contains("title"));
+        assertTrue(text.contains("Java Tips"));
+        // Author and all its nested fields should be excluded
+        assertFalse(text.contains("author"));
+        assertFalse(text.contains("John Doe"));
+        assertFalse(text.contains("john@example.com"));
+    }
 }
