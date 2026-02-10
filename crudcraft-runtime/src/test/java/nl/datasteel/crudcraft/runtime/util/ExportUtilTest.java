@@ -17,6 +17,7 @@ package nl.datasteel.crudcraft.runtime.util;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,6 +26,8 @@ import org.junit.jupiter.api.Test;
 class ExportUtilTest {
 
     record Person(String name, int age) {}
+
+    record Event(String title, Instant timestamp) {}
 
     @Test
     void toCsvReturnsEmptyForEmptyList() {
@@ -92,6 +95,60 @@ class ExportUtilTest {
     void streamXlsxWritesWorkbook() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         ExportUtil.streamXlsx(List.of(new Person("Alice", 30)).iterator(), out);
+        assertTrue(out.toByteArray().length > 0);
+    }
+
+    @Test
+    void toCsvHandlesInstantFields() {
+        Instant now = Instant.parse("2024-01-15T10:30:00Z");
+        byte[] csv = ExportUtil.toCsv(List.of(new Event("Meeting", now)));
+        String text = new String(csv, StandardCharsets.UTF_8);
+        assertTrue(text.contains("title,timestamp"));
+        assertTrue(text.contains("Meeting"));
+        assertTrue(text.contains("2024-01-15T10:30:00Z"));
+    }
+
+    @Test
+    void toJsonHandlesInstantFields() {
+        Instant now = Instant.parse("2024-01-15T10:30:00Z");
+        byte[] json = ExportUtil.toJson(List.of(new Event("Meeting", now)));
+        String text = new String(json, StandardCharsets.UTF_8);
+        assertTrue(text.contains("Meeting"));
+        assertTrue(text.contains("2024-01-15T10:30:00Z"));
+    }
+
+    @Test
+    void toXlsxHandlesInstantFields() {
+        Instant now = Instant.parse("2024-01-15T10:30:00Z");
+        byte[] xlsx = ExportUtil.toXlsx(List.of(new Event("Meeting", now)));
+        assertTrue(xlsx.length > 0);
+    }
+
+    @Test
+    void streamCsvHandlesInstantFields() {
+        Instant now = Instant.parse("2024-01-15T10:30:00Z");
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamCsv(List.of(new Event("Meeting", now)).iterator(), out);
+        String text = out.toString(StandardCharsets.UTF_8);
+        assertTrue(text.contains("Meeting"));
+        assertTrue(text.contains("2024-01-15T10:30:00Z"));
+    }
+
+    @Test
+    void streamJsonHandlesInstantFields() {
+        Instant now = Instant.parse("2024-01-15T10:30:00Z");
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamJson(List.of(new Event("Meeting", now)).iterator(), out);
+        String text = out.toString(StandardCharsets.UTF_8);
+        assertTrue(text.contains("Meeting"));
+        assertTrue(text.contains("2024-01-15T10:30:00Z"));
+    }
+
+    @Test
+    void streamXlsxHandlesInstantFields() {
+        Instant now = Instant.parse("2024-01-15T10:30:00Z");
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ExportUtil.streamXlsx(List.of(new Event("Meeting", now)).iterator(), out);
         assertTrue(out.toByteArray().length > 0);
     }
 }

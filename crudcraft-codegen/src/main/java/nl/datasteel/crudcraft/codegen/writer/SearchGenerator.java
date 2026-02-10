@@ -222,6 +222,16 @@ public class SearchGenerator implements Generator {
                 .addParameter(cb, "cb")
                 .addStatement("Predicate p = cb.conjunction()");
 
+        // Check if any field path contains a join, which indicates a relationship traversal
+        boolean hasJoins = fields.stream()
+                .anyMatch(sf -> sf.path().contains(".join("));
+
+        // Set distinct to true when joins are present to avoid duplicate results
+        // in many-to-many and one-to-many relationships
+        if (hasJoins) {
+            method.addStatement("query.distinct(true)");
+        }
+
         for (SearchField sf : fields) {
             CodeBlock block = PredicateGeneratorRegistry
                     .of(sf.operator())

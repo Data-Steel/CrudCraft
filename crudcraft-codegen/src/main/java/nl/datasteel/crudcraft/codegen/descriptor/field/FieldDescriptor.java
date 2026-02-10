@@ -157,6 +157,16 @@ public class FieldDescriptor {
     }
 
     /**
+     * Returns whether the field is a large object (Jakarta @Lob).
+     * LOB fields should be lazy loaded and excluded from request DTOs.
+     *
+     * @return true if the field is a LOB, false otherwise
+     */
+    public boolean isLob() {
+        return dtoOptions.isLob();
+    }
+
+    /**
      * Returns the names of additional response DTO variants this field participates in.
      *
      * @return array of custom DTO identifiers

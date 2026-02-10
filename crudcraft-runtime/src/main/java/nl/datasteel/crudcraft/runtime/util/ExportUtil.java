@@ -18,6 +18,8 @@ package nl.datasteel.crudcraft.runtime.util;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -38,7 +40,9 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 public final class ExportUtil {
 
     /** The ObjectMapper instance used for JSON serialization. */
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     /**
      * Private constructor to prevent instantiation.
