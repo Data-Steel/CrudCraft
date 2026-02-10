@@ -36,7 +36,7 @@ public class BeforePredicateGenerator
                         SearchOperator.class
                 )
                 .addStatement(
-                        "p = cb.and(p, cb.lessThan($L, request.get$L()))",
+                        combinePredicateStatement("cb.lessThan($L, request.get$L())"),
                         f.path(),
                         m
                 )

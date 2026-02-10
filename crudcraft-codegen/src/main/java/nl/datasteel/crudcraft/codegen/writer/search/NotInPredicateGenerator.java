@@ -36,7 +36,7 @@ public class NotInPredicateGenerator
                         SearchOperator.class
                 )
                 .addStatement(
-                        "p = cb.and(p, cb.not($L.in(request.get$L())))",
+                        combinePredicateStatement("cb.not($L.in(request.get$L()))"),
                         f.path(),
                         m
                 )

@@ -32,4 +32,17 @@ public abstract class AbstractPredicateGenerator {
         }
         return Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
+    
+    /**
+     * Returns a code statement that combines the given predicate with the base predicate
+     * using the appropriate logic mode (AND or OR).
+     *
+     * @param predicateExpression the predicate expression to combine
+     * @return the code statement for combining predicates
+     */
+    protected String combinePredicateStatement(String predicateExpression) {
+        return "p = logic == nl.datasteel.crudcraft.runtime.search.SearchLogic.AND "
+                + "? cb.and(p, " + predicateExpression + ") "
+                + ": cb.or(p, " + predicateExpression + ")";
+    }
 }

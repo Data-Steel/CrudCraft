@@ -38,7 +38,7 @@ public class NotEmptyPredicateGenerator
                         m,
                         SearchOperator.class
                 )
-                .addStatement("p = cb.and(p, cb.isNotEmpty($L))", f.path())
+                .addStatement(combinePredicateStatement("cb.isNotEmpty($L)"), f.path())
                 .endControlFlow()
                 .build();
     }

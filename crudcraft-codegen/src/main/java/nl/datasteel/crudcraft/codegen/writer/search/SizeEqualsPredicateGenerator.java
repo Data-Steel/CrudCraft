@@ -45,7 +45,7 @@ public class SizeEqualsPredicateGenerator
                         m,
                         SearchOperator.class)
                 .addStatement(
-                        "p = cb.and(p, cb.equal(cb.size($L), request.get$L()))",
+                        combinePredicateStatement("cb.equal(cb.size($L), request.get$L())"),
                         f.path(),
                         m)
                 .endControlFlow()

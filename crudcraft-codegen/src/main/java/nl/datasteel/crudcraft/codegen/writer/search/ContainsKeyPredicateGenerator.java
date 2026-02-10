@@ -36,7 +36,7 @@ public class ContainsKeyPredicateGenerator
                         SearchOperator.class
                 )
                 .addStatement(
-                        "p = cb.and(p, cb.isMember(request.get$L(), $L.keySet()))",
+                        combinePredicateStatement("cb.isMember(request.get$L(), $L.keySet())"),
                         m,
                         f.path()
                 )

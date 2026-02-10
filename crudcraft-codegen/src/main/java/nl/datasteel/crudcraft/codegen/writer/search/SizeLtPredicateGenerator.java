@@ -45,7 +45,7 @@ public class SizeLtPredicateGenerator
                         m,
                         SearchOperator.class)
                 .addStatement(
-                        "p = cb.and(p, cb.lessThan(cb.size($L), request.get$L()))",
+                        combinePredicateStatement("cb.lessThan(cb.size($L), request.get$L())"),
                         f.path(),
                         m)
                 .endControlFlow()

@@ -42,7 +42,7 @@ public class SizeGtPredicateGenerator
                         "if (request.get$L() != null && request.get$LOp() == $T.SIZE_GT)",
                         m, m, SearchOperator.class)
                 .addStatement(
-                        "p = cb.and(p, cb.greaterThan(cb.size($L), request.get$L()))",
+                        combinePredicateStatement("cb.greaterThan(cb.size($L), request.get$L())"),
                         f.path(),
                         m)
                 .endControlFlow()

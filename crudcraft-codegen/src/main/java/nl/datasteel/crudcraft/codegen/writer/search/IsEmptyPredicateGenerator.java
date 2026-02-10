@@ -29,7 +29,7 @@ public class IsEmptyPredicateGenerator
         String m = cap(f.property());
         return CodeBlock.builder()
                 .beginControlFlow("if (request.get$LOp() == $T.IS_EMPTY)", m, SearchOperator.class)
-                .addStatement("p = cb.and(p, cb.isEmpty($L))", f.path())
+                .addStatement(combinePredicateStatement("cb.isEmpty($L)"), f.path())
                 .endControlFlow()
                 .build();
     }

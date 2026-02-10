@@ -37,7 +37,7 @@ public class ContainsAllPredicateGenerator
                 )
                 .beginControlFlow("for (var item : request.get$L())", prop)
                 .addStatement(
-                        "p = cb.and(p, cb.isMember(item, $L))",
+                        combinePredicateStatement("cb.isMember(item, $L)"),
                         collPath
                 )
                 .endControlFlow()

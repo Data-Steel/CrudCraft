@@ -36,7 +36,7 @@ public class GreaterThanOrEqualPredicateGenerator
                         SearchOperator.class
                 )
                 .addStatement(
-                        "p = cb.and(p, cb.greaterThanOrEqualTo($L, request.get$L()))",
+                        combinePredicateStatement("cb.greaterThanOrEqualTo($L, request.get$L())"),
                         f.path(),
                         m
                 )

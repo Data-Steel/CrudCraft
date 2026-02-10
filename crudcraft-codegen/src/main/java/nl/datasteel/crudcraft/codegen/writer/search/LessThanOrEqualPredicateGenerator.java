@@ -36,7 +36,7 @@ public class LessThanOrEqualPredicateGenerator
                         SearchOperator.class
                 )
                 .addStatement(
-                        "p = cb.and(p, cb.lessThanOrEqualTo($L, request.get$L()))",
+                        combinePredicateStatement("cb.lessThanOrEqualTo($L, request.get$L())"),
                         f.path(),
                         m
                 )

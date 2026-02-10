@@ -38,7 +38,7 @@ public class BetweenPredicateGenerator
                         SearchOperator.class
                 )
                 .addStatement(
-                        "p = cb.and(p, cb.between($L, request.get$LStart(), request.get$LEnd()))",
+                        combinePredicateStatement("cb.between($L, request.get$LStart(), request.get$LEnd())"),
                         f.path(),
                         m,
                         m

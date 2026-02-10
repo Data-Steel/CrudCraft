@@ -43,7 +43,7 @@ public class RegexPredicateGenerator
                         m,
                         m,
                         SearchOperator.class)
-                .addStatement("p = cb.and(p, cb.like($L, request.get$L()))",
+                .addStatement(combinePredicateStatement("cb.like($L, request.get$L())"),
                         f.path(),
                         m)
                 .endControlFlow()

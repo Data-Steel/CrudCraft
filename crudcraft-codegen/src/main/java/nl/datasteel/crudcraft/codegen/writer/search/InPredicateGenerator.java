@@ -36,7 +36,7 @@ public class InPredicateGenerator
                         SearchOperator.class
                 )
                 .addStatement(
-                        "p = cb.and(p, $L.in(request.get$L()))",
+                        combinePredicateStatement("$L.in(request.get$L())"),
                         f.path(),
                         m
                 )
