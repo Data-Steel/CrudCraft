@@ -192,10 +192,10 @@ All export functionality respects existing security constraints:
 
 ## Performance Characteristics
 
-- **Memory Efficient**: Streaming-based export (data never fully loaded in memory)
+- **Memory Efficient**: Exports are processed in pages to avoid loading unbounded result sets into memory at once
 - **Pagination**: Data fetched page-by-page
 - **Lazy Processing**: DTOs are filtered and flattened on-the-fly
-- **Configurable Limits**: Format-specific row limits prevent excessive exports
+- **Configurable Limits**: Format-specific row limits bound export size and memory usage
   - CSV: 100,000 rows (configurable)
   - JSON: 50,000 rows (configurable)
   - XLSX: 25,000 rows (configurable)
