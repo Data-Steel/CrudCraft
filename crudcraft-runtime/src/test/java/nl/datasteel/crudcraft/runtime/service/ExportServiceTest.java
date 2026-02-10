@@ -55,7 +55,7 @@ class ExportServiceTest {
     }
 
     @Test
-    void exportReturns400ForZeroLimit() {
+    void exportReturnsOkForZeroLimit() {
         ExportService.ExportConfig config = new ExportService.ExportConfig(1000, 500, 250, 100);
         ExportService<TestDto, TestSearchRequest> service = new ExportService<>(config);
 
@@ -71,7 +71,8 @@ class ExportServiceTest {
                 securityFilter
         );
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
     }
 
     @Test

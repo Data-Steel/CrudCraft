@@ -119,8 +119,8 @@ public class ExportService<R, S> {
             Function<PageRequest, Page<R>> searchFunction,
             Function<R, R> securityFilter) {
 
-        // Validate limit parameter
-        if (limit != null && limit <= 0) {
+        // Validate limit parameter - reject negative values, but allow 0 for empty export
+        if (limit != null && limit < 0) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -131,6 +131,20 @@ public class ExportService<R, S> {
         FormatInfo formatInfo = getFormatInfo(lower);
         if (formatInfo == null) {
             return ResponseEntity.badRequest().build();
+        }
+
+        // Handle limit == 0 as empty export
+        if (effectiveLimit == 0) {
+            // Create empty iterator for empty export
+            Iterator<R> emptyIterator = java.util.Collections.emptyIterator();
+            BiConsumer<Iterator<R>, OutputStream> exporter = getExporter(lower);
+            StreamingResponseBody body = out -> exporter.accept(emptyIterator, out);
+            
+            String filename = "export-" + System.currentTimeMillis() + "." + formatInfo.extension;
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, formatInfo.contentType)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                    .body(body);
         }
 
         // Clamp limit to format maximum
