@@ -60,5 +60,22 @@ class DtoOptionsExtractorTest {
         assertFalse(opts.isInRequest());
         assertFalse(opts.isInRef());
         assertArrayEquals(new String[0], opts.getResponseDtos());
+        assertFalse(opts.isLob());
+    }
+
+    @Test
+    void detectsLobAnnotation() {
+        String src = "package t; import jakarta.persistence.Lob; " +
+                "import nl.datasteel.crudcraft.annotations.fields.Dto; " +
+                "class C { @Dto @Lob byte[] f; }";
+        Elements elements = CompilationTestUtils.elements("t.C", src);
+        TypeElement type = elements.getTypeElement("t.C");
+        VariableElement ve = (VariableElement) type.getEnclosedElements().stream()
+                .filter(e -> e.getSimpleName().contentEquals("f"))
+                .findFirst().orElseThrow();
+        DtoOptions opts = DtoOptionsExtractor.INSTANCE.extract(ve, new TestUtils.ProcessingEnvStub(elements));
+        assertTrue(opts.isInDto());
+        assertFalse(opts.isInRequest());
+        assertTrue(opts.isLob());
     }
 }

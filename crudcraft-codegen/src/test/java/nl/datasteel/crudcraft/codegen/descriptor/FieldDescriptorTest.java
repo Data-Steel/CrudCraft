@@ -56,7 +56,7 @@ class FieldDescriptorTest {
     private FieldDescriptor sample() {
         TypeMirror tm = stringType();
         Identity id = new Identity("field", tm, null, SchemaMetadata.empty());
-        DtoOptions dto = new DtoOptions(true, true, false, new String[]{"X"});
+        DtoOptions dto = new DtoOptions(true, true, false, new String[]{"X"}, false);
         EnumOptions eo = new EnumOptions(false, List.of());
         Relationship rel = new Relationship(RelationshipType.NONE, "", "java.lang.String", false, false, false);
         Validation val = new Validation(List.of(AnnotationSpec.builder(Deprecated.class).build()));
@@ -102,7 +102,7 @@ class FieldDescriptorTest {
         FieldDescriptor a = sample();
         TypeMirror tm = stringType();
         Identity otherId = new Identity("other", tm, null, SchemaMetadata.empty());
-        DtoOptions dto = new DtoOptions(true, true, false, new String[]{"X"});
+        DtoOptions dto = new DtoOptions(true, true, false, new String[]{"X"}, false);
         EnumOptions eo = new EnumOptions(false, List.of());
         Relationship rel = new Relationship(RelationshipType.NONE, "", "java.lang.String", false, false, false);
         Validation val = new Validation(List.of(AnnotationSpec.builder(Deprecated.class).build()));

@@ -44,6 +44,7 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Dto
+    @Searchable
     private UUID id;
 
     @NotBlank
@@ -84,10 +85,12 @@ public class Post {
 
     @Dto
     @Request
+    @Searchable
     @Column(name = "published_at")
     private OffsetDateTime publishedAt;
 
     @Dto
+    @Searchable
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private PostStatus status = PostStatus.DRAFT;
