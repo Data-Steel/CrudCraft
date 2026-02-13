@@ -97,7 +97,10 @@ public class EntitySerializer {
             Object value = getFieldValue(entity, fieldMetadata.getField());
             
             if (value == null) {
-                result.put(fieldName, null);
+                if (includeField) {
+                    result.put(fieldName, null);
+                }
+                continue;
             } else if (fieldMetadata.isCollection()) {
                 // Handle collections
                 List<Object> serializedList = new ArrayList<>();
