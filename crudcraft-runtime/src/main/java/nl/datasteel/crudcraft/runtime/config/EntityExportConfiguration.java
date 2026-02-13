@@ -25,8 +25,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Auto-configuration for CrudCraft entity export functionality.
- * This configuration is only enabled when JPA is present on the classpath.
+ * Configuration for CrudCraft entity export functionality.
+ * This configuration must be explicitly imported or component-scanned to be activated.
  */
 @Configuration
 @ConditionalOnClass(EntityManager.class)
