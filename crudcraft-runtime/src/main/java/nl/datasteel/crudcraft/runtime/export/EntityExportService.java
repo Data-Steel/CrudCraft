@@ -155,7 +155,7 @@ public class EntityExportService {
                 root.fetch(field.getName(), JoinType.LEFT);
                 
                 // Filter to only our entities
-                query.where(root.in((Collection<T>) entities));
+                query.where(root.in(entities));
                 query.select(root);
                 
                 entityManager.createQuery(query).getResultList();
