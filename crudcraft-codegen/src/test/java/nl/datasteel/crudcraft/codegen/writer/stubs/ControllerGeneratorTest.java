@@ -238,11 +238,11 @@ class ControllerGeneratorTest {
                 "Should use @RequestPart instead of @RequestBody");
         assertTrue(code.contains("\"data\""),
                 "Should have data part for the request DTO");
-        assertTrue(code.contains("\"file\""),
-                "Should have file part for the multipart file");
+        assertTrue(code.contains("\"attachment\""),
+                "Should have part named after the LOB field");
         assertTrue(code.contains("MultipartFile"),
                 "Should reference MultipartFile type");
-        assertTrue(code.contains("setAttachment(file.getBytes())"),
+        assertTrue(code.contains("setAttachment(attachment.getBytes())"),
                 "Should set LOB field from file bytes");
     }
 

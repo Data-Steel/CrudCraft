@@ -54,16 +54,8 @@ public class CreateEndpoint implements EndpointSpecProvider {
                 md -> ParameterizedTypeName.get(EndpointSupport.RESP_ENTITY,
                         ClassName.get(dtoRespPkg, dtoFull)),
                 hasLob
-                        ? List.of(
-                        md -> ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
-                                .addAnnotation(AnnotationSpec.builder(EndpointSupport.REQUEST_PART)
-                                        .addMember("value", "$S", "data").build())
-                                .build(),
-                        md -> ParameterSpec.builder(EndpointSupport.MULTIPART_FILE, "file")
-                                .addAnnotation(AnnotationSpec.builder(EndpointSupport.REQUEST_PART)
-                                        .addMember("value", "$S", "file")
-                                        .addMember("required", "$L", false).build())
-                                .build())
+                        ? EndpointSupport.lobParams(
+                                ClassName.get(dtoReqPkg, dtoReq), modelDescriptor)
                         : List.of(md -> ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
                         .addAnnotation(EndpointSupport.REQUEST_BODY)
                         .build()),

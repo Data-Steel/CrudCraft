@@ -48,15 +48,8 @@ public class UpdateEndpoint implements EndpointSpecProvider {
                         .addMember("value", "$S", "id").build())
                 .build());
         if (hasLob) {
-            params.add(md -> ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
-                    .addAnnotation(AnnotationSpec.builder(EndpointSupport.REQUEST_PART)
-                            .addMember("value", "$S", "data").build())
-                    .build());
-            params.add(md -> ParameterSpec.builder(EndpointSupport.MULTIPART_FILE, "file")
-                    .addAnnotation(AnnotationSpec.builder(EndpointSupport.REQUEST_PART)
-                            .addMember("value", "$S", "file")
-                            .addMember("required", "$L", false).build())
-                    .build());
+            params.addAll(EndpointSupport.lobParams(
+                    ClassName.get(dtoReqPkg, dtoReq), modelDescriptor));
         } else {
             params.add(md -> ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
                     .addAnnotation(EndpointSupport.REQUEST_BODY)
