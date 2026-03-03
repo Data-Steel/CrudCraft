@@ -73,7 +73,7 @@ class DtoGeneratorTest {
     }
 
     @Test
-    void lobFieldInRequestDtoHasNoJsonIgnore() {
+    void lobFieldInRequestDtoAllowsJsonDeserialization() {
         // Use real TypeMirrors from compiler
         javax.lang.model.util.Elements elems = nl.datasteel.crudcraft.codegen.CompilationTestUtils.elements(
                 "t.C", "package t; class C { byte[] attachment; String title; }");
