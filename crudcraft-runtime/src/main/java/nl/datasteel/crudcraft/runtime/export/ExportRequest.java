@@ -44,34 +44,43 @@ public class ExportRequest {
     private Integer maxDepth;
     
     /**
-     * Whether to include all entity fields (not just DTO fields). Default is false.
+     * Export mode: DTO-based (default) or entity-based.
+     */
+    public enum ExportMode {
+        /** Export only DTO fields (default, backward compatible) */
+        DTO,
+        /** Export entity fields dynamically with full relationship support */
+        ENTITY
+    }
+    
+    /**
+     * The export mode to use. Default is DTO mode for backward compatibility.
      * 
-     * <p><strong>Note:</strong> This is currently a placeholder for future implementation.
-     * Full entity-based export requires significant architectural work including:
      * <ul>
-     *   <li>Entity metadata introspection</li>
-     *   <li>Dynamic query building with projections</li>
-     *   <li>Efficient relationship hydration (avoiding N+1 queries)</li>
-     *   <li>Transaction management for lazy loading</li>
+     *   <li><strong>DTO mode</strong>: Exports only fields marked with @Dto annotation</li>
+     *   <li><strong>ENTITY mode</strong>: Exports any entity field dynamically, with efficient 
+     *       relationship loading and field-level security</li>
      * </ul>
      * 
-     * <p>See {@code guides/dynamic-entity-export-plan.md} for the implementation plan.
-     * 
-     * <p>Current behavior: This flag is recognized but not fully implemented. 
-     * Exports still work with Response DTO fields. To export specific fields,
-     * ensure they are marked with {@code @Dto} annotation on the entity.
+     * <p>ENTITY mode supports:
+     * <ul>
+     *   <li>Dynamic field selection from entity at runtime</li>
+     *   <li>All relationship types with optimized batch loading</li>
+     *   <li>Nested field access via dot notation</li>
+     *   <li>@ExportExclude annotation enforcement</li>
+     * </ul>
      */
-    private Boolean includeAllFields;
+    private ExportMode exportMode;
 
     public ExportRequest() {
     }
 
     public ExportRequest(Set<String> includeFields, Set<String> excludeFields, 
-                        Integer maxDepth, Boolean includeAllFields) {
+                        Integer maxDepth, ExportMode exportMode) {
         this.includeFields = includeFields == null ? null : new HashSet<>(includeFields);
         this.excludeFields = excludeFields == null ? null : new HashSet<>(excludeFields);
         this.maxDepth = maxDepth;
-        this.includeAllFields = includeAllFields;
+        this.exportMode = exportMode;
     }
 
     public Set<String> getIncludeFields() {
@@ -98,12 +107,12 @@ public class ExportRequest {
         this.maxDepth = maxDepth;
     }
 
-    public Boolean getIncludeAllFields() {
-        return includeAllFields;
+    public ExportMode getExportMode() {
+        return exportMode;
     }
 
-    public void setIncludeAllFields(Boolean includeAllFields) {
-        this.includeAllFields = includeAllFields;
+    public void setExportMode(ExportMode exportMode) {
+        this.exportMode = exportMode;
     }
 
     /**
@@ -229,11 +238,20 @@ public class ExportRequest {
     }
 
     /**
-     * Gets whether to include all entity fields, using a default of false if not specified.
+     * Gets the effective export mode, using DTO mode as default if not specified.
      *
-     * @return true to include all entity fields, false to use only DTO fields
+     * @return the export mode to use
      */
-    public boolean isIncludeAllFieldsEnabled() {
-        return includeAllFields != null && includeAllFields;
+    public ExportMode getEffectiveExportMode() {
+        return exportMode != null ? exportMode : ExportMode.DTO;
+    }
+    
+    /**
+     * Checks if entity mode is enabled.
+     *
+     * @return true if entity mode is enabled
+     */
+    public boolean isEntityModeEnabled() {
+        return getEffectiveExportMode() == ExportMode.ENTITY;
     }
 }
