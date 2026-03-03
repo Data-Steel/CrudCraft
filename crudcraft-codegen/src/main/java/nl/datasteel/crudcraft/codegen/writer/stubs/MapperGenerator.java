@@ -328,7 +328,7 @@ public class MapperGenerator implements StubGenerator {
                     .build());
         }
         // Force-load LOB fields so lazy-loaded bytes are present in the response DTO
-        for (FieldDescriptor fd : modelDescriptor.getLobFields()) {
+        for (FieldDescriptor fd : modelDescriptor.getResponseLobFields()) {
             String getter = "get" + Character.toUpperCase(fd.getName().charAt(0))
                     + fd.getName().substring(1);
             builder.addAnnotation(AnnotationSpec.builder(mapping)

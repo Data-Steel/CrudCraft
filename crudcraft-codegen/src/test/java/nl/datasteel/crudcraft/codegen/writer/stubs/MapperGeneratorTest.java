@@ -202,4 +202,31 @@ class MapperGeneratorTest {
         assertTrue(code.contains("target = \"attachment\""),
                 "Should target the attachment field");
     }
+
+    @Test
+    void buildSkipsForceLoadMappingForLobFieldNotInDto() {
+        MapperGenerator gen = new MapperGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        // LOB field NOT in response DTO (inDto=false)
+        FieldDescriptor lobFieldNotInDto = new FieldDescriptor(
+                new Identity("rawData", tf.type(String.class), null, SchemaMetadata.empty()),
+                new DtoOptions(false, true, false, new String[0], true),
+                new EnumOptions(false, List.of()),
+                new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                new Validation(List.of()),
+                new SearchOptions(false, List.of(), 0),
+                new Security(false, null, null)
+        );
+
+        FieldDescriptor simpleF = simpleField(tf.type(String.class));
+        ModelDescriptor md = descriptor(List.of(simpleF, lobFieldNotInDto));
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertFalse(code.contains("expression = \"java(entity.getRawData())\""),
+                "Should NOT force-load LOB field not in response DTO");
+    }
 }

@@ -15,7 +15,6 @@
  */
 package nl.datasteel.crudcraft.codegen.writer;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
@@ -194,7 +193,7 @@ public class DtoGenerator implements Generator {
                         b,
                         fieldName,
                         typeName,
-                        fd.isLob() ? withJsonIgnore(fd.getValidations()) : fd.getValidations(),
+                        fd.getValidations(),
                         schemaAnnotation,
                         security
                 );
@@ -572,17 +571,6 @@ public class DtoGenerator implements Generator {
         }
         cb.add("}");
         return cb.build();
-    }
-
-    /**
-     * Returns a new list containing the original validations plus a {@code @JsonIgnore}
-     * annotation. Used for LOB fields in request DTOs where the binary data arrives
-     * via a multipart file upload rather than in the JSON body.
-     */
-    private List<AnnotationSpec> withJsonIgnore(List<AnnotationSpec> validations) {
-        List<AnnotationSpec> result = new ArrayList<>(validations);
-        result.add(AnnotationSpec.builder(JsonIgnore.class).build());
-        return result;
     }
 
 }

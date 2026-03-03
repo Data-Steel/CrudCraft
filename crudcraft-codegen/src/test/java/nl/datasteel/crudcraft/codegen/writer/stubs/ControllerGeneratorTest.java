@@ -244,6 +244,43 @@ class ControllerGeneratorTest {
                 "Should reference MultipartFile type");
         assertTrue(code.contains("setAttachment(attachment.getBytes())"),
                 "Should set LOB field from file bytes");
+        // Empty file upload should clear the field (set to null)
+        assertTrue(code.contains("setAttachment(null)"),
+                "Empty file upload should clear the LOB field");
+    }
+
+    @Test
+    void lobFieldNotInRequestIsNotMultipart() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        // LOB field NOT in request DTO (inRequest=false)
+        FieldDescriptor lobFieldNotInRequest = new FieldDescriptor(
+                new Identity("attachment", tf.type(String.class), null, SchemaMetadata.empty()),
+                new DtoOptions(true, false, false, new String[0], true),
+                new EnumOptions(false, List.of()),
+                new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                new Validation(List.of()),
+                new SearchOptions(false, List.of(), 0),
+                new Security(false, null, null)
+        );
+        ModelIdentity id = new ModelIdentity("ReadOnlyDoc", "com.example",
+                List.of(lobFieldNotInRequest), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep = new EndpointOptions(CrudTemplate.FULL,
+                new CrudEndpoint[0], new CrudEndpoint[0], CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertFalse(code.contains("MULTIPART_FORM_DATA_VALUE"),
+                "LOB field not in request should not trigger multipart");
+        assertFalse(code.contains("MultipartFile"),
+                "LOB field not in request should not generate MultipartFile param");
     }
 
     @Test

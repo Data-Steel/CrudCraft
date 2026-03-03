@@ -75,15 +75,19 @@ public final class EndpointSupport {
 
     /**
      * Generates code that reads bytes from MultipartFile parameters and sets them
-     * on the request DTO for each {@code @Lob} field. Each LOB field has its own
-     * MultipartFile parameter named after the field.
+     * on the request DTO for each writable {@code @Lob} field. Each LOB field has its own
+     * MultipartFile parameter named after the field. An empty file upload explicitly
+     * sets the field to {@code null}, allowing LOB clearing via PATCH.
      */
     public static void addFileToRequestCode(MethodSpec.Builder mb, ModelDescriptor md) {
-        for (FieldDescriptor lf : md.getLobFields()) {
+        for (FieldDescriptor lf : md.getRequestLobFields()) {
             String fieldName = lf.getName();
             String setter = "set" + Character.toUpperCase(fieldName.charAt(0))
                     + fieldName.substring(1);
-            mb.beginControlFlow("if ($L != null && !$L.isEmpty())", fieldName, fieldName);
+            mb.beginControlFlow("if ($L != null)", fieldName);
+            mb.beginControlFlow("if ($L.isEmpty())", fieldName);
+            mb.addStatement("request.$L(null)", setter);
+            mb.nextControlFlow("else");
             mb.beginControlFlow("try");
             mb.addStatement("request.$L($L.getBytes())", setter, fieldName);
             mb.nextControlFlow("catch ($T e)", IO_EXCEPTION);
@@ -94,12 +98,13 @@ public final class EndpointSupport {
                     fieldName);
             mb.endControlFlow();
             mb.endControlFlow();
+            mb.endControlFlow();
         }
     }
 
     /**
      * Builds the list of parameter functions for multipart LOB endpoints.
-     * Includes the request DTO part and a MultipartFile part for each LOB field.
+     * Includes the request DTO part and a MultipartFile part for each writable LOB field.
      */
     public static List<java.util.function.Function<ModelDescriptor, ParameterSpec>> lobParams(
             ClassName requestDtoClass, ModelDescriptor modelDescriptor) {
@@ -108,7 +113,7 @@ public final class EndpointSupport {
                 .addAnnotation(AnnotationSpec.builder(REQUEST_PART)
                         .addMember("value", "$S", "data").build())
                 .build());
-        for (FieldDescriptor lf : modelDescriptor.getLobFields()) {
+        for (FieldDescriptor lf : modelDescriptor.getRequestLobFields()) {
             String fieldName = lf.getName();
             params.add(md -> ParameterSpec.builder(MULTIPART_FILE, fieldName)
                     .addAnnotation(AnnotationSpec.builder(REQUEST_PART)

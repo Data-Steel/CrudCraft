@@ -73,7 +73,7 @@ class DtoGeneratorTest {
     }
 
     @Test
-    void lobFieldInRequestDtoHasJsonIgnore() {
+    void lobFieldInRequestDtoHasNoJsonIgnore() {
         // Use real TypeMirrors from compiler
         javax.lang.model.util.Elements elems = nl.datasteel.crudcraft.codegen.CompilationTestUtils.elements(
                 "t.C", "package t; class C { byte[] attachment; String title; }");
@@ -113,12 +113,13 @@ class DtoGeneratorTest {
         DtoGenerator gen = new DtoGenerator();
         List<JavaFile> files = gen.generate(md, ctx);
 
-        // Request DTO is first
+        // Request DTO should NOT have @JsonIgnore on LOB fields
+        // because bulk/validate endpoints still use @RequestBody and need JSON LOB data
         String requestCode = files.get(0).toString();
-        assertTrue(requestCode.contains("@JsonIgnore"),
-                "LOB field in request DTO should have @JsonIgnore");
+        assertFalse(requestCode.contains("@JsonIgnore"),
+                "LOB field in request DTO should not have @JsonIgnore");
 
-        // Response DTO is second
+        // Response DTO should also not have @JsonIgnore
         String responseCode = files.get(1).toString();
         assertFalse(responseCode.contains("@JsonIgnore"),
                 "Response DTO should not have @JsonIgnore on LOB fields");
