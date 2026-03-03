@@ -209,6 +209,52 @@ public class ModelDescriptor {
     }
 
     /**
+     * Returns whether any writable field (included in the request DTO)
+     * in this model is annotated with {@code @Lob}.
+     *
+     * @return true if at least one request-writable field is a LOB, false otherwise
+     */
+    public boolean hasLobFields() {
+        return identity.getFields().stream()
+                .anyMatch(fd -> fd.isLob() && fd.inRequest());
+    }
+
+    /**
+     * Returns all fields annotated with {@code @Lob}.
+     *
+     * @return list of LOB field descriptors
+     */
+    public List<FieldDescriptor> getLobFields() {
+        return identity.getFields().stream()
+                .filter(FieldDescriptor::isLob)
+                .toList();
+    }
+
+    /**
+     * Returns LOB fields that are included in the request DTO.
+     * Used by controller generation to create multipart file parameters.
+     *
+     * @return list of writable LOB field descriptors
+     */
+    public List<FieldDescriptor> getRequestLobFields() {
+        return identity.getFields().stream()
+                .filter(fd -> fd.isLob() && fd.inRequest())
+                .toList();
+    }
+
+    /**
+     * Returns LOB fields that are included in the response DTO.
+     * Used by mapper generation to force-load lazy LOBs.
+     *
+     * @return list of response LOB field descriptors
+     */
+    public List<FieldDescriptor> getResponseLobFields() {
+        return identity.getFields().stream()
+                .filter(fd -> fd.isLob() && fd.inDto())
+                .toList();
+    }
+
+    /**
      * Returns the identity of the model, which includes its name, package, and fields.
      *
      * @return the ModelIdentity object representing the model's identity

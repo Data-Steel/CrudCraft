@@ -19,6 +19,7 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import nl.datasteel.crudcraft.annotations.CrudEndpoint;
@@ -39,27 +40,48 @@ public class UpdateEndpoint implements EndpointSpecProvider {
         String dtoReqPkg = modelDescriptor.getPackageName() + ".dto.request";
         String dtoFull = modelDescriptor.getName() + "ResponseDto";
         String dtoReq = modelDescriptor.getName() + "RequestDto";
+        boolean hasLob = modelDescriptor.hasLobFields();
+
+        List<java.util.function.Function<ModelDescriptor, ParameterSpec>> params = new ArrayList<>();
+        params.add(md -> ParameterSpec.builder(EndpointSupport.UUID_CLASS, "id")
+                .addAnnotation(AnnotationSpec.builder(EndpointSupport.PATH_VAR)
+                        .addMember("value", "$S", "id").build())
+                .build());
+        if (hasLob) {
+            params.addAll(EndpointSupport.lobParams(
+                    ClassName.get(dtoReqPkg, dtoReq), modelDescriptor));
+        } else {
+            params.add(md -> ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
+                    .addAnnotation(EndpointSupport.REQUEST_BODY)
+                    .build());
+        }
+
         return new EndpointSpec(
                 CrudEndpoint.PUT,
                 "update",
-                md -> AnnotationSpec.builder(EndpointSupport.PUT_MAPPING)
-                        .addMember("value", "$S", "/{id}").build(),
+                md -> {
+                    AnnotationSpec.Builder mapping = AnnotationSpec.builder(EndpointSupport.PUT_MAPPING)
+                            .addMember("value", "$S", "/{id}");
+                    if (md.hasLobFields()) {
+                        mapping.addMember("consumes", "$T.MULTIPART_FORM_DATA_VALUE",
+                                EndpointSupport.MEDIA_TYPE);
+                    }
+                    return mapping.build();
+                },
                 md -> ParameterizedTypeName.get(EndpointSupport.RESP_ENTITY,
                         ClassName.get(dtoRespPkg, dtoFull)),
-                List.of(
-                        md -> ParameterSpec.builder(EndpointSupport.UUID_CLASS, "id")
-                                .addAnnotation(AnnotationSpec.builder(EndpointSupport.PATH_VAR)
-                                        .addMember("value", "$S", "id").build())
-                                .build(),
-                        md -> ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
-                                .addAnnotation(EndpointSupport.REQUEST_BODY)
-                                .build()),
-                (mb, md) -> mb.addCode(
-                        "FieldSecurityUtil.filterWrite(request);\n" +
-                                "$T updated = service.update(id, request);\n" +
-                                "return ResponseEntity.ok(FieldSecurityUtil.filterRead(updated));\n",
-                        ClassName.get(dtoRespPkg, dtoFull)
-                )
+                params,
+                (mb, md) -> {
+                    if (md.hasLobFields()) {
+                        EndpointSupport.addFileToRequestCode(mb, md);
+                    }
+                    mb.addCode(
+                            "FieldSecurityUtil.filterWrite(request);\n" +
+                                    "$T updated = service.update(id, request);\n" +
+                                    "return ResponseEntity.ok(FieldSecurityUtil.filterRead(updated));\n",
+                            ClassName.get(dtoRespPkg, dtoFull)
+                    );
+                }
         );
     }
 }

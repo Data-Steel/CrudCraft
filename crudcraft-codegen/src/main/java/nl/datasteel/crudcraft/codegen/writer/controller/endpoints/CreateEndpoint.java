@@ -39,23 +39,39 @@ public class CreateEndpoint implements EndpointSpecProvider {
         String dtoReqPkg = modelDescriptor.getPackageName() + ".dto.request";
         String dtoFull = modelDescriptor.getName() + "ResponseDto";
         String dtoReq = modelDescriptor.getName() + "RequestDto";
+        boolean hasLob = modelDescriptor.hasLobFields();
         return new EndpointSpec(
                 CrudEndpoint.POST,
                 "create",
-                md -> AnnotationSpec.builder(EndpointSupport.POST_MAPPING).build(),
+                md -> {
+                    AnnotationSpec.Builder mapping = AnnotationSpec.builder(EndpointSupport.POST_MAPPING);
+                    if (md.hasLobFields()) {
+                        mapping.addMember("consumes", "$T.MULTIPART_FORM_DATA_VALUE",
+                                EndpointSupport.MEDIA_TYPE);
+                    }
+                    return mapping.build();
+                },
                 md -> ParameterizedTypeName.get(EndpointSupport.RESP_ENTITY,
                         ClassName.get(dtoRespPkg, dtoFull)),
-                List.of(md -> ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
+                hasLob
+                        ? EndpointSupport.lobParams(
+                                ClassName.get(dtoReqPkg, dtoReq), modelDescriptor)
+                        : List.of(md -> ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
                         .addAnnotation(EndpointSupport.REQUEST_BODY)
                         .build()),
-                (mb, md) -> mb.addCode(
-                        "$T.filterWrite(request);\n" +
-                                "$T created = service.create(request);\n" +
-                                "return $T.status(201).body($T.filterRead(created));\n",
-                        EndpointSupport.FIELD_SECURITY_UTIL,
-                        ClassName.get(dtoRespPkg, dtoFull),
-                        EndpointSupport.RESP_ENTITY,
-                        EndpointSupport.FIELD_SECURITY_UTIL)
+                (mb, md) -> {
+                    if (md.hasLobFields()) {
+                        EndpointSupport.addFileToRequestCode(mb, md);
+                    }
+                    mb.addCode(
+                            "$T.filterWrite(request);\n" +
+                                    "$T created = service.create(request);\n" +
+                                    "return $T.status(201).body($T.filterRead(created));\n",
+                            EndpointSupport.FIELD_SECURITY_UTIL,
+                            ClassName.get(dtoRespPkg, dtoFull),
+                            EndpointSupport.RESP_ENTITY,
+                            EndpointSupport.FIELD_SECURITY_UTIL);
+                }
         );
     }
 }

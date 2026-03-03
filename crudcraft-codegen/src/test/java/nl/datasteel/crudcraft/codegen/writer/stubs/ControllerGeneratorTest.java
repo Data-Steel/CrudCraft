@@ -23,6 +23,16 @@ import nl.datasteel.crudcraft.annotations.CrudEndpoint;
 import nl.datasteel.crudcraft.annotations.CrudEndpointPolicy;
 import nl.datasteel.crudcraft.annotations.CrudTemplate;
 import nl.datasteel.crudcraft.annotations.security.CrudSecurityPolicy;
+import nl.datasteel.crudcraft.codegen.descriptor.RelationshipType;
+import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.DtoOptions;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.EnumOptions;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.Identity;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.Relationship;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.SchemaMetadata;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.SearchOptions;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.Security;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.Validation;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.model.part.EndpointOptions;
 import nl.datasteel.crudcraft.codegen.descriptor.model.part.ModelFlags;
@@ -193,5 +203,102 @@ class ControllerGeneratorTest {
         ControllerGenerator gen = new ControllerGenerator();
         assertTrue(gen.requiresCrudEntity());
         assertEquals(4, gen.order());
+    }
+
+    @Test
+    void lobEntityUsesMultipartForCreateUpdatePatch() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        FieldDescriptor lobField = new FieldDescriptor(
+                new Identity("attachment", tf.type(String.class), null, SchemaMetadata.empty()),
+                new DtoOptions(true, true, false, new String[0], true),
+                new EnumOptions(false, List.of()),
+                new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                new Validation(List.of()),
+                new SearchOptions(false, List.of(), 0),
+                new Security(false, null, null)
+        );
+        ModelIdentity id = new ModelIdentity("Document", "com.example", List.of(lobField), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep = new EndpointOptions(CrudTemplate.FULL,
+                new CrudEndpoint[0], new CrudEndpoint[0], CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        // Create endpoint should use multipart
+        assertTrue(code.contains("MULTIPART_FORM_DATA_VALUE"),
+                "Should contain multipart consumes");
+        assertTrue(code.contains("@RequestPart"),
+                "Should use @RequestPart instead of @RequestBody");
+        assertTrue(code.contains("\"data\""),
+                "Should have data part for the request DTO");
+        assertTrue(code.contains("\"attachment\""),
+                "Should have part named after the LOB field");
+        assertTrue(code.contains("MultipartFile"),
+                "Should reference MultipartFile type");
+        assertTrue(code.contains("setAttachment(attachment.getBytes())"),
+                "Should set LOB field from file bytes");
+        // Empty file upload should clear the field (set to null)
+        assertTrue(code.contains("setAttachment(null)"),
+                "Empty file upload should clear the LOB field");
+    }
+
+    @Test
+    void lobFieldNotInRequestIsNotMultipart() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        // LOB field NOT in request DTO (inRequest=false)
+        FieldDescriptor lobFieldNotInRequest = new FieldDescriptor(
+                new Identity("attachment", tf.type(String.class), null, SchemaMetadata.empty()),
+                new DtoOptions(true, false, false, new String[0], true),
+                new EnumOptions(false, List.of()),
+                new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                new Validation(List.of()),
+                new SearchOptions(false, List.of(), 0),
+                new Security(false, null, null)
+        );
+        ModelIdentity id = new ModelIdentity("ReadOnlyDoc", "com.example",
+                List.of(lobFieldNotInRequest), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep = new EndpointOptions(CrudTemplate.FULL,
+                new CrudEndpoint[0], new CrudEndpoint[0], CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertFalse(code.contains("MULTIPART_FORM_DATA_VALUE"),
+                "LOB field not in request should not trigger multipart");
+        assertFalse(code.contains("MultipartFile"),
+                "LOB field not in request should not generate MultipartFile param");
+    }
+
+    @Test
+    void nonLobEntityUsesRequestBody() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+
+        ModelDescriptor md = descriptor(false, CrudTemplate.FULL,
+                new CrudEndpoint[0], new CrudEndpoint[0], CrudTemplate.class, false, null);
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertFalse(code.contains("MULTIPART_FORM_DATA_VALUE"),
+                "Non-LOB entity should not use multipart");
+        assertTrue(code.contains("@RequestBody"),
+                "Non-LOB entity should use @RequestBody");
+        assertFalse(code.contains("MultipartFile"),
+                "Non-LOB entity should not reference MultipartFile");
     }
 }
