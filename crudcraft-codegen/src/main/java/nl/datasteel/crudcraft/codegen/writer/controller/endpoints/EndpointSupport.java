@@ -76,6 +76,11 @@ public final class EndpointSupport {
     public static final ClassName MEDIA_TYPE = ClassName.get("org.springframework.http", "MediaType");
     public static final ClassName IO_EXCEPTION = ClassName.get("java.io", "IOException");
     public static final ClassName ARRAY_LIST = ClassName.get("java.util", "ArrayList");
+    public static final ClassName HASH_SET = ClassName.get("java.util", "HashSet");
+    public static final ClassName SET = ClassName.get("java.util", "Set");
+
+    private static final String JAKARTA_NOT_NULL = "jakarta.validation.constraints.NotNull";
+    private static final String JAVAX_NOT_NULL = "javax.validation.constraints.NotNull";
 
     /**
      * Returns {@code true} if the LOB field's type is a {@link java.util.List},
@@ -93,11 +98,41 @@ public final class EndpointSupport {
     }
 
     /**
+     * Returns {@code true} if the LOB field's collection type is {@link java.util.Set}.
+     * Used to select the right concrete collection type when generating bytes conversion code.
+     */
+    private static boolean isSetLobField(FieldDescriptor fd) {
+        if (!(fd.getType() instanceof DeclaredType dt)) {
+            return false;
+        }
+        return ((TypeElement) dt.asElement()).getQualifiedName().toString()
+                .equals("java.util.Set");
+    }
+
+    /**
+     * Returns {@code true} if the LOB field carries a {@code @NotNull} validation annotation,
+     * indicating the file part is mandatory and the generated {@code @RequestPart} should use
+     * {@code required = true}.
+     */
+    static boolean isRequiredLobField(FieldDescriptor fd) {
+        return fd.getValidations().stream()
+                .anyMatch(as -> as.type.toString().equals(JAKARTA_NOT_NULL)
+                        || as.type.toString().equals(JAVAX_NOT_NULL));
+    }
+
+    /**
      * Generates code that reads bytes from MultipartFile parameters and sets them
      * on the request DTO for each writable {@code @Lob} field. Each LOB field has its own
      * MultipartFile (or {@code List<MultipartFile>} for collection-typed fields) parameter
-     * named after the field. An empty file upload explicitly sets the field to {@code null},
-     * allowing LOB clearing via PATCH.
+     * named after the field.
+     *
+     * <p>Behavior by parameter presence:
+     * <ul>
+     *   <li>Part absent (parameter is {@code null}): no change to the DTO field.</li>
+     *   <li>Part present but file(s) empty: sets the DTO field to {@code null}, allowing
+     *       LOB clearing via PATCH.</li>
+     *   <li>Part present with file data: sets the DTO field to the uploaded byte(s).</li>
+     * </ul>
      */
     public static void addFileToRequestCode(MethodSpec.Builder mb, ModelDescriptor md) {
         for (FieldDescriptor lf : md.getRequestLobFields()) {
@@ -105,9 +140,12 @@ public final class EndpointSupport {
             String setter = "set" + Character.toUpperCase(fieldName.charAt(0))
                     + fieldName.substring(1);
             if (isCollectionLobField(lf)) {
-                // List<MultipartFile> → List<byte[]>
-                mb.beginControlFlow("if ($L != null && !$L.isEmpty())", fieldName, fieldName);
-                mb.addStatement("$T<byte[]> $LBytes = new $T<>()", LIST, fieldName, ARRAY_LIST);
+                boolean isSet = isSetLobField(lf);
+                ClassName iface = isSet ? SET : LIST;
+                ClassName impl = isSet ? HASH_SET : ARRAY_LIST;
+                // Only act when the part was actually submitted (non-null)
+                mb.beginControlFlow("if ($L != null)", fieldName);
+                mb.addStatement("$T<byte[]> $LBytes = new $T<>()", iface, fieldName, impl);
                 mb.beginControlFlow("for ($T _file : $L)", MULTIPART_FILE, fieldName);
                 mb.beginControlFlow("if (!_file.isEmpty())");
                 mb.beginControlFlow("try");
@@ -121,9 +159,9 @@ public final class EndpointSupport {
                 mb.endControlFlow();
                 mb.endControlFlow();
                 mb.endControlFlow();
-                mb.addStatement("request.$L($LBytes)", setter, fieldName);
-                mb.nextControlFlow("else");
-                mb.addStatement("request.$L(null)", setter);
+                // Empty collection (all files empty) clears the field; non-empty sets it
+                mb.addStatement("request.$L($LBytes.isEmpty() ? null : $LBytes)",
+                        setter, fieldName, fieldName);
                 mb.endControlFlow();
             } else {
                 mb.beginControlFlow("if ($L != null)", fieldName);
@@ -149,6 +187,10 @@ public final class EndpointSupport {
      * Builds the list of parameter functions for multipart LOB endpoints.
      * Includes the request DTO part and a MultipartFile (or {@code List<MultipartFile>}
      * for collection-typed fields) part for each writable LOB field.
+     *
+     * <p>The {@code required} attribute on each {@code @RequestPart} is derived from
+     * the field's validation annotations: a {@code @NotNull} constraint causes
+     * {@code required = true}; otherwise {@code required = false} is used.
      */
     public static List<java.util.function.Function<ModelDescriptor, ParameterSpec>> lobParams(
             ClassName requestDtoClass, ModelDescriptor modelDescriptor) {
@@ -159,18 +201,19 @@ public final class EndpointSupport {
                 .build());
         for (FieldDescriptor lf : modelDescriptor.getRequestLobFields()) {
             String fieldName = lf.getName();
+            boolean required = isRequiredLobField(lf);
             if (isCollectionLobField(lf)) {
                 params.add(md -> ParameterSpec.builder(
                                 ParameterizedTypeName.get(LIST, MULTIPART_FILE), fieldName)
                         .addAnnotation(AnnotationSpec.builder(REQUEST_PART)
                                 .addMember("value", "$S", fieldName)
-                                .addMember("required", "$L", false).build())
+                                .addMember("required", "$L", required).build())
                         .build());
             } else {
                 params.add(md -> ParameterSpec.builder(MULTIPART_FILE, fieldName)
                         .addAnnotation(AnnotationSpec.builder(REQUEST_PART)
                                 .addMember("value", "$S", fieldName)
-                                .addMember("required", "$L", false).build())
+                                .addMember("required", "$L", required).build())
                         .build());
             }
         }

@@ -15,6 +15,8 @@
  */
 package nl.datasteel.crudcraft.codegen.writer.stubs;
 
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import java.util.EnumSet;
 import java.util.List;
@@ -382,8 +384,95 @@ class ControllerGeneratorTest {
         // Should set the list of bytes on the request DTO
         assertTrue(code.contains("setAttachments("),
                 "Should call setter for the collection LOB field");
-        // Should handle null/empty list by setting null
-        assertTrue(code.contains("setAttachments(null)"),
-                "Empty or null list should clear the collection LOB field");
+        // Empty-files collection clears the field via ternary; absent part does nothing
+        assertTrue(code.contains("attachmentsBytes.isEmpty() ? null :"),
+                "All-empty file collection should clear the LOB field via ternary");
+        // Part absent (null) leaves DTO unchanged - no top-level else setting null
+        assertTrue(code.contains("if (attachments != null)"),
+                "Part absent should leave DTO field unchanged");
+        // No standalone setAttachments(null) call - null is only set via ternary when bytes list is empty
+        assertFalse(code.contains("setAttachments(null)"),
+                "Absent part should not trigger a standalone setAttachments(null) call");
+        // Non-@NotNull field: the @RequestPart for this field uses required = false
+        assertTrue(code.contains("\"attachments\", required = false"),
+                "Non-@NotNull field should produce @RequestPart with required = false");
+    }
+
+    @Test
+    void setLobFieldUsesHashSet() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        // LOB field with a Set type
+        FieldDescriptor setLob = new FieldDescriptor(
+                new Identity("tags", tf.setOf(String.class), null, SchemaMetadata.empty()),
+                new DtoOptions(true, true, false, new String[0], true),
+                new EnumOptions(false, List.of()),
+                new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                new Validation(List.of()),
+                new SearchOptions(false, List.of(), 0),
+                new Security(false, null, null)
+        );
+        ModelIdentity id = new ModelIdentity("Tagged", "com.example",
+                List.of(setLob), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep = new EndpointOptions(CrudTemplate.FULL,
+                new CrudEndpoint[0], new CrudEndpoint[0], CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        // Controller parameter is always List<MultipartFile> (Spring MVC constraint)
+        assertTrue(code.contains("List<MultipartFile>"),
+                "Set LOB field controller parameter should still use List<MultipartFile>");
+        // Bytes container must match the DTO field type (Set<byte[]> / HashSet)
+        assertTrue(code.contains("Set<byte[]>"),
+                "Set LOB field should use Set<byte[]> as bytes container");
+        assertTrue(code.contains("new HashSet<>()"),
+                "Set LOB field should instantiate a HashSet");
+    }
+
+    @Test
+    void notNullLobFieldUsesRequiredTrue() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        AnnotationSpec notNullSpec = AnnotationSpec.builder(
+                ClassName.get("jakarta.validation.constraints", "NotNull")).build();
+        FieldDescriptor requiredLob = new FieldDescriptor(
+                new Identity("document", tf.type(String.class), null, SchemaMetadata.empty()),
+                new DtoOptions(true, true, false, new String[0], true),
+                new EnumOptions(false, List.of()),
+                new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                new Validation(List.of(notNullSpec)),
+                new SearchOptions(false, List.of(), 0),
+                new Security(false, null, null)
+        );
+        ModelIdentity id = new ModelIdentity("Contract", "com.example",
+                List.of(requiredLob), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep = new EndpointOptions(CrudTemplate.FULL,
+                new CrudEndpoint[0], new CrudEndpoint[0], CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertTrue(code.contains("required = true"),
+                "@NotNull LOB field should generate @RequestPart(required = true)");
+        // Check specifically that the document part uses required = true (not just any required = true)
+        assertTrue(code.contains("\"document\", required = true"),
+                "@NotNull LOB field's @RequestPart should use required = true");
+        // Verify that a single-file LOB field without @NotNull still defaults to required = false
+        // (covered by other tests; sanity check: required = true appears for THIS field)
+        assertFalse(code.contains("\"document\", required = false"),
+                "@NotNull LOB field should not have required = false in its @RequestPart");
     }
 }
