@@ -174,4 +174,32 @@ class MapperGeneratorTest {
         assertTrue(code.contains("SampleMapResponseDto toMapResponse(Sample entity)"), 
                 "Should generate toMapResponse method");
     }
+
+    @Test
+    void buildAddsForceLoadMappingForLobFields() {
+        MapperGenerator gen = new MapperGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        FieldDescriptor lobField = new FieldDescriptor(
+                new Identity("attachment", tf.type(String.class), null, SchemaMetadata.empty()),
+                new DtoOptions(true, true, false, new String[0], true),
+                new EnumOptions(false, List.of()),
+                new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                new Validation(List.of()),
+                new SearchOptions(false, List.of(), 0),
+                new Security(false, null, null)
+        );
+
+        FieldDescriptor simpleF = simpleField(tf.type(String.class));
+        ModelDescriptor md = descriptor(List.of(simpleF, lobField));
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertTrue(code.contains("expression = \"java(entity.getAttachment())\""),
+                "Should force-load LOB field via explicit expression mapping");
+        assertTrue(code.contains("target = \"attachment\""),
+                "Should target the attachment field");
+    }
 }

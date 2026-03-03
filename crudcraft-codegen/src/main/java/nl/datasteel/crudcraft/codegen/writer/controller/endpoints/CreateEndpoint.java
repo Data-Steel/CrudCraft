@@ -19,11 +19,9 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import nl.datasteel.crudcraft.annotations.CrudEndpoint;
-import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.writer.controller.EndpointSpec;
 
