@@ -301,4 +301,89 @@ class ControllerGeneratorTest {
         assertFalse(code.contains("MultipartFile"),
                 "Non-LOB entity should not reference MultipartFile");
     }
+
+    @Test
+    void multipleLobFieldsEachGetSeparateRequestPart() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        FieldDescriptor lob1 = new FieldDescriptor(
+                new Identity("avatar", tf.type(String.class), null, SchemaMetadata.empty()),
+                new DtoOptions(true, true, false, new String[0], true),
+                new EnumOptions(false, List.of()),
+                new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                new Validation(List.of()),
+                new SearchOptions(false, List.of(), 0),
+                new Security(false, null, null)
+        );
+        FieldDescriptor lob2 = new FieldDescriptor(
+                new Identity("resume", tf.type(String.class), null, SchemaMetadata.empty()),
+                new DtoOptions(true, true, false, new String[0], true),
+                new EnumOptions(false, List.of()),
+                new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                new Validation(List.of()),
+                new SearchOptions(false, List.of(), 0),
+                new Security(false, null, null)
+        );
+        ModelIdentity id = new ModelIdentity("Profile", "com.example",
+                List.of(lob1, lob2), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep = new EndpointOptions(CrudTemplate.FULL,
+                new CrudEndpoint[0], new CrudEndpoint[0], CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertTrue(code.contains("\"avatar\""), "Should have @RequestPart for avatar field");
+        assertTrue(code.contains("\"resume\""), "Should have @RequestPart for resume field");
+        assertTrue(code.contains("setAvatar("), "Should set avatar field from file bytes");
+        assertTrue(code.contains("setResume("), "Should set resume field from file bytes");
+    }
+
+    @Test
+    void collectionLobFieldUsesListOfMultipartFile() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        // LOB field with a List type (simulating List<byte[]>)
+        FieldDescriptor collectionLob = new FieldDescriptor(
+                new Identity("attachments", tf.listOf(String.class), null, SchemaMetadata.empty()),
+                new DtoOptions(true, true, false, new String[0], true),
+                new EnumOptions(false, List.of()),
+                new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                new Validation(List.of()),
+                new SearchOptions(false, List.of(), 0),
+                new Security(false, null, null)
+        );
+        ModelIdentity id = new ModelIdentity("Gallery", "com.example",
+                List.of(collectionLob), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep = new EndpointOptions(CrudTemplate.FULL,
+                new CrudEndpoint[0], new CrudEndpoint[0], CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertTrue(code.contains("List<MultipartFile>"),
+                "Collection LOB field should use List<MultipartFile> parameter");
+        assertTrue(code.contains("\"attachments\""),
+                "Should have @RequestPart named after the collection LOB field");
+        // Should iterate through the list
+        assertTrue(code.contains("for (MultipartFile _file :"),
+                "Should iterate through List<MultipartFile>");
+        // Should set the list of bytes on the request DTO
+        assertTrue(code.contains("setAttachments("),
+                "Should call setter for the collection LOB field");
+        // Should handle null/empty list by setting null
+        assertTrue(code.contains("setAttachments(null)"),
+                "Empty or null list should clear the collection LOB field");
+    }
 }

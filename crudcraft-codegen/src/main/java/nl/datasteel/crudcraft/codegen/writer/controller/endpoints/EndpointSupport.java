@@ -19,10 +19,13 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 
@@ -72,39 +75,80 @@ public final class EndpointSupport {
     public static final ClassName MULTIPART_FILE = ClassName.get("org.springframework.web.multipart", "MultipartFile");
     public static final ClassName MEDIA_TYPE = ClassName.get("org.springframework.http", "MediaType");
     public static final ClassName IO_EXCEPTION = ClassName.get("java.io", "IOException");
+    public static final ClassName ARRAY_LIST = ClassName.get("java.util", "ArrayList");
+
+    /**
+     * Returns {@code true} if the LOB field's type is a {@link java.util.List},
+     * {@link java.util.Collection}, or {@link java.util.Set}, meaning it holds
+     * multiple files rather than a single byte array.
+     */
+    static boolean isCollectionLobField(FieldDescriptor fd) {
+        if (!(fd.getType() instanceof DeclaredType dt)) {
+            return false;
+        }
+        String qualifiedName = ((TypeElement) dt.asElement()).getQualifiedName().toString();
+        return qualifiedName.equals("java.util.List")
+                || qualifiedName.equals("java.util.Collection")
+                || qualifiedName.equals("java.util.Set");
+    }
 
     /**
      * Generates code that reads bytes from MultipartFile parameters and sets them
      * on the request DTO for each writable {@code @Lob} field. Each LOB field has its own
-     * MultipartFile parameter named after the field. An empty file upload explicitly
-     * sets the field to {@code null}, allowing LOB clearing via PATCH.
+     * MultipartFile (or {@code List<MultipartFile>} for collection-typed fields) parameter
+     * named after the field. An empty file upload explicitly sets the field to {@code null},
+     * allowing LOB clearing via PATCH.
      */
     public static void addFileToRequestCode(MethodSpec.Builder mb, ModelDescriptor md) {
         for (FieldDescriptor lf : md.getRequestLobFields()) {
             String fieldName = lf.getName();
             String setter = "set" + Character.toUpperCase(fieldName.charAt(0))
                     + fieldName.substring(1);
-            mb.beginControlFlow("if ($L != null)", fieldName);
-            mb.beginControlFlow("if ($L.isEmpty())", fieldName);
-            mb.addStatement("request.$L(null)", setter);
-            mb.nextControlFlow("else");
-            mb.beginControlFlow("try");
-            mb.addStatement("request.$L($L.getBytes())", setter, fieldName);
-            mb.nextControlFlow("catch ($T e)", IO_EXCEPTION);
-            mb.addStatement("throw new $T($T.BAD_REQUEST, $S + $S, e)",
-                    ClassName.get("org.springframework.web.server", "ResponseStatusException"),
-                    ClassName.get("org.springframework.http", "HttpStatus"),
-                    "Failed to read uploaded file for field: ",
-                    fieldName);
-            mb.endControlFlow();
-            mb.endControlFlow();
-            mb.endControlFlow();
+            if (isCollectionLobField(lf)) {
+                // List<MultipartFile> → List<byte[]>
+                mb.beginControlFlow("if ($L != null && !$L.isEmpty())", fieldName, fieldName);
+                mb.addStatement("$T<byte[]> $LBytes = new $T<>()", LIST, fieldName, ARRAY_LIST);
+                mb.beginControlFlow("for ($T _file : $L)", MULTIPART_FILE, fieldName);
+                mb.beginControlFlow("if (!_file.isEmpty())");
+                mb.beginControlFlow("try");
+                mb.addStatement("$LBytes.add(_file.getBytes())", fieldName);
+                mb.nextControlFlow("catch ($T e)", IO_EXCEPTION);
+                mb.addStatement("throw new $T($T.BAD_REQUEST, $S + $S, e)",
+                        ClassName.get("org.springframework.web.server", "ResponseStatusException"),
+                        ClassName.get("org.springframework.http", "HttpStatus"),
+                        "Failed to read uploaded file for field: ",
+                        fieldName);
+                mb.endControlFlow();
+                mb.endControlFlow();
+                mb.endControlFlow();
+                mb.addStatement("request.$L($LBytes)", setter, fieldName);
+                mb.nextControlFlow("else");
+                mb.addStatement("request.$L(null)", setter);
+                mb.endControlFlow();
+            } else {
+                mb.beginControlFlow("if ($L != null)", fieldName);
+                mb.beginControlFlow("if ($L.isEmpty())", fieldName);
+                mb.addStatement("request.$L(null)", setter);
+                mb.nextControlFlow("else");
+                mb.beginControlFlow("try");
+                mb.addStatement("request.$L($L.getBytes())", setter, fieldName);
+                mb.nextControlFlow("catch ($T e)", IO_EXCEPTION);
+                mb.addStatement("throw new $T($T.BAD_REQUEST, $S + $S, e)",
+                        ClassName.get("org.springframework.web.server", "ResponseStatusException"),
+                        ClassName.get("org.springframework.http", "HttpStatus"),
+                        "Failed to read uploaded file for field: ",
+                        fieldName);
+                mb.endControlFlow();
+                mb.endControlFlow();
+                mb.endControlFlow();
+            }
         }
     }
 
     /**
      * Builds the list of parameter functions for multipart LOB endpoints.
-     * Includes the request DTO part and a MultipartFile part for each writable LOB field.
+     * Includes the request DTO part and a MultipartFile (or {@code List<MultipartFile>}
+     * for collection-typed fields) part for each writable LOB field.
      */
     public static List<java.util.function.Function<ModelDescriptor, ParameterSpec>> lobParams(
             ClassName requestDtoClass, ModelDescriptor modelDescriptor) {
@@ -115,11 +159,20 @@ public final class EndpointSupport {
                 .build());
         for (FieldDescriptor lf : modelDescriptor.getRequestLobFields()) {
             String fieldName = lf.getName();
-            params.add(md -> ParameterSpec.builder(MULTIPART_FILE, fieldName)
-                    .addAnnotation(AnnotationSpec.builder(REQUEST_PART)
-                            .addMember("value", "$S", fieldName)
-                            .addMember("required", "$L", false).build())
-                    .build());
+            if (isCollectionLobField(lf)) {
+                params.add(md -> ParameterSpec.builder(
+                                ParameterizedTypeName.get(LIST, MULTIPART_FILE), fieldName)
+                        .addAnnotation(AnnotationSpec.builder(REQUEST_PART)
+                                .addMember("value", "$S", fieldName)
+                                .addMember("required", "$L", false).build())
+                        .build());
+            } else {
+                params.add(md -> ParameterSpec.builder(MULTIPART_FILE, fieldName)
+                        .addAnnotation(AnnotationSpec.builder(REQUEST_PART)
+                                .addMember("value", "$S", fieldName)
+                                .addMember("required", "$L", false).build())
+                        .build());
+            }
         }
         return params;
     }
