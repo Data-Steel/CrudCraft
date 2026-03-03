@@ -121,7 +121,7 @@ public class MapperGenerator implements StubGenerator {
         MethodSpec fromRequest = fromRequest(modelName, entity, requestDto, mapping, relFields, abstractRelFields);
         MethodSpec update = update(modelName, entity, requestDto, mappingTarget, mapping, relFields, abstractRelFields);
         MethodSpec patch = patch(modelName, entity, requestDto, mappingTarget, beanMapping, nvStrategy, mapping, relFields, abstractRelFields);
-        MethodSpec toResponse = toResponse(modelName, entity, responseDto, mapping, manyToOne, abstractRelFields);
+        MethodSpec toResponse = toResponse(modelName, entity, responseDto, mapping, manyToOne, abstractRelFields, modelDescriptor);
         MethodSpec toRef = toRef(entity, refDto);
         MethodSpec getIdFromRequest = getIdFromRequest(requestDto, beanWrapper, uuidClass, exceptionCls);
         List<MethodSpec> refHelpers = manyToOneRefHelpers(modelName, manyToOne);
@@ -305,7 +305,8 @@ public class MapperGenerator implements StubGenerator {
     }
 
     private MethodSpec toResponse(String modelName, ClassName entity, ClassName responseDto, ClassName mapping,
-                                  List<FieldDescriptor> manyToOne, List<FieldDescriptor> abstractRelFields) {
+                                  List<FieldDescriptor> manyToOne, List<FieldDescriptor> abstractRelFields,
+                                  ModelDescriptor modelDescriptor) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("toResponse")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
@@ -324,6 +325,15 @@ public class MapperGenerator implements StubGenerator {
             builder.addAnnotation(AnnotationSpec.builder(mapping)
                     .addMember("target", "$S", fd.getName())
                     .addMember("ignore", "$L", true)
+                    .build());
+        }
+        // Force-load LOB fields so lazy-loaded bytes are present in the response DTO
+        for (FieldDescriptor fd : modelDescriptor.getLobFields()) {
+            String getter = "get" + Character.toUpperCase(fd.getName().charAt(0))
+                    + fd.getName().substring(1);
+            builder.addAnnotation(AnnotationSpec.builder(mapping)
+                    .addMember("target", "$S", fd.getName())
+                    .addMember("expression", "$S", "java(entity." + getter + "())")
                     .build());
         }
         return builder.build();

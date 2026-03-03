@@ -19,9 +19,11 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import nl.datasteel.crudcraft.annotations.CrudEndpoint;
+import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.writer.controller.EndpointSpec;
 
@@ -39,23 +41,47 @@ public class CreateEndpoint implements EndpointSpecProvider {
         String dtoReqPkg = modelDescriptor.getPackageName() + ".dto.request";
         String dtoFull = modelDescriptor.getName() + "ResponseDto";
         String dtoReq = modelDescriptor.getName() + "RequestDto";
+        boolean hasLob = modelDescriptor.hasLobFields();
         return new EndpointSpec(
                 CrudEndpoint.POST,
                 "create",
-                md -> AnnotationSpec.builder(EndpointSupport.POST_MAPPING).build(),
+                md -> {
+                    AnnotationSpec.Builder mapping = AnnotationSpec.builder(EndpointSupport.POST_MAPPING);
+                    if (md.hasLobFields()) {
+                        mapping.addMember("consumes", "$T.MULTIPART_FORM_DATA_VALUE",
+                                EndpointSupport.MEDIA_TYPE);
+                    }
+                    return mapping.build();
+                },
                 md -> ParameterizedTypeName.get(EndpointSupport.RESP_ENTITY,
                         ClassName.get(dtoRespPkg, dtoFull)),
-                List.of(md -> ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
+                hasLob
+                        ? List.of(
+                        md -> ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
+                                .addAnnotation(AnnotationSpec.builder(EndpointSupport.REQUEST_PART)
+                                        .addMember("value", "$S", "data").build())
+                                .build(),
+                        md -> ParameterSpec.builder(EndpointSupport.MULTIPART_FILE, "file")
+                                .addAnnotation(AnnotationSpec.builder(EndpointSupport.REQUEST_PART)
+                                        .addMember("value", "$S", "file")
+                                        .addMember("required", "$L", false).build())
+                                .build())
+                        : List.of(md -> ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
                         .addAnnotation(EndpointSupport.REQUEST_BODY)
                         .build()),
-                (mb, md) -> mb.addCode(
-                        "$T.filterWrite(request);\n" +
-                                "$T created = service.create(request);\n" +
-                                "return $T.status(201).body($T.filterRead(created));\n",
-                        EndpointSupport.FIELD_SECURITY_UTIL,
-                        ClassName.get(dtoRespPkg, dtoFull),
-                        EndpointSupport.RESP_ENTITY,
-                        EndpointSupport.FIELD_SECURITY_UTIL)
+                (mb, md) -> {
+                    if (md.hasLobFields()) {
+                        EndpointSupport.addFileToRequestCode(mb, md);
+                    }
+                    mb.addCode(
+                            "$T.filterWrite(request);\n" +
+                                    "$T created = service.create(request);\n" +
+                                    "return $T.status(201).body($T.filterRead(created));\n",
+                            EndpointSupport.FIELD_SECURITY_UTIL,
+                            ClassName.get(dtoRespPkg, dtoFull),
+                            EndpointSupport.RESP_ENTITY,
+                            EndpointSupport.FIELD_SECURITY_UTIL);
+                }
         );
     }
 }

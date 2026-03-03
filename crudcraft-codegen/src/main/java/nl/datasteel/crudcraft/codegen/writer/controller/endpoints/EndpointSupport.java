@@ -16,10 +16,13 @@
 package nl.datasteel.crudcraft.codegen.writer.controller.endpoints;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
+import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 
 /**
  * Common {@link ClassName} constants used by endpoint generators.
@@ -63,4 +66,30 @@ public final class EndpointSupport {
     public static final ClassName OUTPUT_STREAM = ClassName.get("java.io", "OutputStream");
     public static final ClassName BI_CONSUMER = ClassName.get("java.util.function", "BiConsumer");
     public static final ClassName HTTP_HEADERS = ClassName.get("org.springframework.http", "HttpHeaders");
+    public static final ClassName REQUEST_PART = ClassName.get("org.springframework.web.bind.annotation", "RequestPart");
+    public static final ClassName MULTIPART_FILE = ClassName.get("org.springframework.web.multipart", "MultipartFile");
+    public static final ClassName MEDIA_TYPE = ClassName.get("org.springframework.http", "MediaType");
+    public static final ClassName IO_EXCEPTION = ClassName.get("java.io", "IOException");
+
+    /**
+     * Generates code that reads bytes from the {@code file} MultipartFile parameter
+     * and sets them on the request DTO for each {@code @Lob} field.
+     */
+    public static void addFileToRequestCode(MethodSpec.Builder mb, ModelDescriptor md) {
+        List<FieldDescriptor> lobFields = md.getLobFields();
+        mb.beginControlFlow("if (file != null && !file.isEmpty())");
+        mb.beginControlFlow("try");
+        for (FieldDescriptor lf : lobFields) {
+            String setter = "set" + Character.toUpperCase(lf.getName().charAt(0))
+                    + lf.getName().substring(1);
+            mb.addStatement("request.$L(file.getBytes())", setter);
+        }
+        mb.nextControlFlow("catch ($T e)", IO_EXCEPTION);
+        mb.addStatement("throw new $T($T.BAD_REQUEST, $S, e)",
+                ClassName.get("org.springframework.web.server", "ResponseStatusException"),
+                ClassName.get("org.springframework.http", "HttpStatus"),
+                "Failed to read uploaded file");
+        mb.endControlFlow();
+        mb.endControlFlow();
+    }
 }

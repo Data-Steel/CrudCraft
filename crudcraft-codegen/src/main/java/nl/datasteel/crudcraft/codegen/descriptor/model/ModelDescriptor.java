@@ -209,6 +209,26 @@ public class ModelDescriptor {
     }
 
     /**
+     * Returns whether any field in this model is annotated with {@code @Lob}.
+     *
+     * @return true if at least one field is a LOB, false otherwise
+     */
+    public boolean hasLobFields() {
+        return identity.getFields().stream().anyMatch(FieldDescriptor::isLob);
+    }
+
+    /**
+     * Returns all fields annotated with {@code @Lob}.
+     *
+     * @return list of LOB field descriptors
+     */
+    public List<FieldDescriptor> getLobFields() {
+        return identity.getFields().stream()
+                .filter(FieldDescriptor::isLob)
+                .toList();
+    }
+
+    /**
      * Returns the identity of the model, which includes its name, package, and fields.
      *
      * @return the ModelIdentity object representing the model's identity
