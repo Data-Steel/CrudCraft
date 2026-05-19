@@ -1,0 +1,884 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-01-01T00:00:00Z",
+  "__export_source": "crudcraft-codegen",
+  "resources": [
+{
+        "_id": "wrk_crudcraft",
+        "parentId": null,
+        "_type": "workspace",
+        "name": "CrudCraft Generated API",
+        "scope": "collection"
+},
+    {
+      "_id": "env_base",
+      "parentId": "wrk_crudcraft",
+      "_type": "environment",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "jwt_token": "",
+        "create_only_task_id": "",
+        "custom_policy_report_id": "",
+        "light_public_page_id": "",
+        "no_batch_ticket_id": "",
+        "no_delete_record_id": "",
+        "search_only_event_id": "",
+        "secure_internal_secret_id": "",
+        "validation_only_draft_id": ""
+      }
+    },
+{
+        "_id": "fld_create_only_tasks",
+        "parentId": "wrk_crudcraft",
+        "_type": "request_group",
+        "name": "Create Only Tasks"
+},
+{
+        "_id": "req_create_only_tasks_create",
+        "parentId": "fld_create_only_tasks",
+        "_type": "request",
+        "name": "Create",
+        "method": "POST",
+        "url": "{{ base_url }}/create-only-tasks",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"name\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ],
+        "settingTestScript": "const resp = JSON.parse(response.body); if(resp.id){insomnia.environment.set('create_only_task_id', resp.id);}"
+},
+{
+        "_id": "req_create_only_tasks_bulk_create",
+        "parentId": "fld_create_only_tasks",
+        "_type": "request",
+        "name": "Bulk Create",
+        "method": "POST",
+        "url": "{{ base_url }}/create-only-tasks/batch",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[{\\\"name\\\": \\\"\\\"}]"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_create_only_tasks_bulk_upsert",
+        "parentId": "fld_create_only_tasks",
+        "_type": "request",
+        "name": "Bulk Upsert",
+        "method": "POST",
+        "url": "{{ base_url }}/create-only-tasks/batch",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[{\\\"name\\\": \\\"\\\"}]"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "fld_custom_policy_reports",
+        "parentId": "wrk_crudcraft",
+        "_type": "request_group",
+        "name": "Custom Policy Reports"
+},
+{
+        "_id": "req_custom_policy_reports_get",
+        "parentId": "fld_custom_policy_reports",
+        "_type": "request",
+        "name": "Get",
+        "method": "GET",
+        "url": "{{ base_url }}/custom-policy-reports/{{ custom_policy_report_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_custom_policy_reports_exists",
+        "parentId": "fld_custom_policy_reports",
+        "_type": "request",
+        "name": "Exists",
+        "method": "GET",
+        "url": "{{ base_url }}/custom-policy-reports/exists/{{ custom_policy_report_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_custom_policy_reports_count",
+        "parentId": "fld_custom_policy_reports",
+        "_type": "request",
+        "name": "Count",
+        "method": "GET",
+        "url": "{{ base_url }}/custom-policy-reports/count",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_custom_policy_reports_validate",
+        "parentId": "fld_custom_policy_reports",
+        "_type": "request",
+        "name": "Validate",
+        "method": "POST",
+        "url": "{{ base_url }}/custom-policy-reports/validate",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"name\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_custom_policy_reports_export",
+        "parentId": "fld_custom_policy_reports",
+        "_type": "request",
+        "name": "Export",
+        "method": "GET",
+        "url": "{{ base_url }}/custom-policy-reports/export?format=csv&limit=100",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "fld_light_public_pages",
+        "parentId": "wrk_crudcraft",
+        "_type": "request_group",
+        "name": "Light Public Pages"
+},
+{
+        "_id": "req_light_public_pages_list_ref",
+        "parentId": "fld_light_public_pages",
+        "_type": "request",
+        "name": "List Ref",
+        "method": "GET",
+        "url": "{{ base_url }}/light-public-pages/ref",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_light_public_pages_get",
+        "parentId": "fld_light_public_pages",
+        "_type": "request",
+        "name": "Get",
+        "method": "GET",
+        "url": "{{ base_url }}/light-public-pages/{{ light_public_page_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "fld_no_batch_tickets",
+        "parentId": "wrk_crudcraft",
+        "_type": "request_group",
+        "name": "No Batch Tickets"
+},
+{
+        "_id": "req_no_batch_tickets_list",
+        "parentId": "fld_no_batch_tickets",
+        "_type": "request",
+        "name": "List",
+        "method": "GET",
+        "url": "{{ base_url }}/no-batch-tickets",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "settingTestScript": "const resp = JSON.parse(response.body); if(Array.isArray(resp) && resp.length){insomnia.environment.set('no_batch_ticket_id', resp[0].id);}"
+},
+{
+        "_id": "req_no_batch_tickets_list_ref",
+        "parentId": "fld_no_batch_tickets",
+        "_type": "request",
+        "name": "List Ref",
+        "method": "GET",
+        "url": "{{ base_url }}/no-batch-tickets/ref",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_no_batch_tickets_get",
+        "parentId": "fld_no_batch_tickets",
+        "_type": "request",
+        "name": "Get",
+        "method": "GET",
+        "url": "{{ base_url }}/no-batch-tickets/{{ no_batch_ticket_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_no_batch_tickets_create",
+        "parentId": "fld_no_batch_tickets",
+        "_type": "request",
+        "name": "Create",
+        "method": "POST",
+        "url": "{{ base_url }}/no-batch-tickets",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"subject\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ],
+        "settingTestScript": "const resp = JSON.parse(response.body); if(resp.id){insomnia.environment.set('no_batch_ticket_id', resp.id);}"
+},
+{
+        "_id": "req_no_batch_tickets_update",
+        "parentId": "fld_no_batch_tickets",
+        "_type": "request",
+        "name": "Update",
+        "method": "PUT",
+        "url": "{{ base_url }}/no-batch-tickets/{{ no_batch_ticket_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"subject\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_no_batch_tickets_patch",
+        "parentId": "fld_no_batch_tickets",
+        "_type": "request",
+        "name": "Patch",
+        "method": "PATCH",
+        "url": "{{ base_url }}/no-batch-tickets/{{ no_batch_ticket_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"subject\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_no_batch_tickets_delete",
+        "parentId": "fld_no_batch_tickets",
+        "_type": "request",
+        "name": "Delete",
+        "method": "DELETE",
+        "url": "{{ base_url }}/no-batch-tickets/{{ no_batch_ticket_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_no_batch_tickets_exists",
+        "parentId": "fld_no_batch_tickets",
+        "_type": "request",
+        "name": "Exists",
+        "method": "GET",
+        "url": "{{ base_url }}/no-batch-tickets/exists/{{ no_batch_ticket_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_no_batch_tickets_count",
+        "parentId": "fld_no_batch_tickets",
+        "_type": "request",
+        "name": "Count",
+        "method": "GET",
+        "url": "{{ base_url }}/no-batch-tickets/count",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_no_batch_tickets_validate",
+        "parentId": "fld_no_batch_tickets",
+        "_type": "request",
+        "name": "Validate",
+        "method": "POST",
+        "url": "{{ base_url }}/no-batch-tickets/validate",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"subject\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "fld_no_delete_records",
+        "parentId": "wrk_crudcraft",
+        "_type": "request_group",
+        "name": "No Delete Records"
+},
+{
+        "_id": "req_no_delete_records_list",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "List",
+        "method": "GET",
+        "url": "{{ base_url }}/no-delete-records",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "settingTestScript": "const resp = JSON.parse(response.body); if(Array.isArray(resp) && resp.length){insomnia.environment.set('no_delete_record_id', resp[0].id);}"
+},
+{
+        "_id": "req_no_delete_records_list_ref",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "List Ref",
+        "method": "GET",
+        "url": "{{ base_url }}/no-delete-records/ref",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_no_delete_records_get",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Get",
+        "method": "GET",
+        "url": "{{ base_url }}/no-delete-records/{{ no_delete_record_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_no_delete_records_create",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Create",
+        "method": "POST",
+        "url": "{{ base_url }}/no-delete-records",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"title\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ],
+        "settingTestScript": "const resp = JSON.parse(response.body); if(resp.id){insomnia.environment.set('no_delete_record_id', resp.id);}"
+},
+{
+        "_id": "req_no_delete_records_update",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Update",
+        "method": "PUT",
+        "url": "{{ base_url }}/no-delete-records/{{ no_delete_record_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"title\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_no_delete_records_patch",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Patch",
+        "method": "PATCH",
+        "url": "{{ base_url }}/no-delete-records/{{ no_delete_record_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"title\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_no_delete_records_bulk_create",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Bulk Create",
+        "method": "POST",
+        "url": "{{ base_url }}/no-delete-records/batch",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[{\\\"title\\\": \\\"\\\"}]"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_no_delete_records_bulk_update",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Bulk Update",
+        "method": "PUT",
+        "url": "{{ base_url }}/no-delete-records/batch",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[{\\\"id\\\": \\\"{{ no_delete_record_id }}\\\", \\\"data\\\": {\\\"title\\\": \\\"\\\"}}]"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_no_delete_records_bulk_patch",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Bulk Patch",
+        "method": "PATCH",
+        "url": "{{ base_url }}/no-delete-records/batch",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[{\\\"id\\\": \\\"{{ no_delete_record_id }}\\\", \\\"data\\\": {\\\"title\\\": \\\"\\\"}}]"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_no_delete_records_bulk_upsert",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Bulk Upsert",
+        "method": "POST",
+        "url": "{{ base_url }}/no-delete-records/batch",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[{\\\"title\\\": \\\"\\\"}]"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_no_delete_records_bulk_ids",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Bulk Ids",
+        "method": "POST",
+        "url": "{{ base_url }}/no-delete-records/batch/ids",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[\\\"{{ no_delete_record_id }}\\\"]"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_no_delete_records_exists",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Exists",
+        "method": "GET",
+        "url": "{{ base_url }}/no-delete-records/exists/{{ no_delete_record_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_no_delete_records_count",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Count",
+        "method": "GET",
+        "url": "{{ base_url }}/no-delete-records/count",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_no_delete_records_search",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Search",
+        "method": "GET",
+        "url": "{{ base_url }}/no-delete-records/search",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_no_delete_records_validate",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Validate",
+        "method": "POST",
+        "url": "{{ base_url }}/no-delete-records/validate",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"title\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_no_delete_records_export",
+        "parentId": "fld_no_delete_records",
+        "_type": "request",
+        "name": "Export",
+        "method": "GET",
+        "url": "{{ base_url }}/no-delete-records/export?format=csv&limit=100",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "fld_search_only_events",
+        "parentId": "wrk_crudcraft",
+        "_type": "request_group",
+        "name": "Search Only Events"
+},
+{
+        "_id": "req_search_only_events_search",
+        "parentId": "fld_search_only_events",
+        "_type": "request",
+        "name": "Search",
+        "method": "GET",
+        "url": "{{ base_url }}/search-only-events/search",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "fld_secure_internal_secrets",
+        "parentId": "wrk_crudcraft",
+        "_type": "request_group",
+        "name": "Secure Internal Secrets"
+},
+{
+        "_id": "req_secure_internal_secrets_list",
+        "parentId": "fld_secure_internal_secrets",
+        "_type": "request",
+        "name": "List",
+        "method": "GET",
+        "url": "{{ base_url }}/secure-internal-secrets",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "settingTestScript": "const resp = JSON.parse(response.body); if(Array.isArray(resp) && resp.length){insomnia.environment.set('secure_internal_secret_id', resp[0].id);}"
+},
+{
+        "_id": "req_secure_internal_secrets_list_ref",
+        "parentId": "fld_secure_internal_secrets",
+        "_type": "request",
+        "name": "List Ref",
+        "method": "GET",
+        "url": "{{ base_url }}/secure-internal-secrets/ref",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_secure_internal_secrets_get",
+        "parentId": "fld_secure_internal_secrets",
+        "_type": "request",
+        "name": "Get",
+        "method": "GET",
+        "url": "{{ base_url }}/secure-internal-secrets/{{ secure_internal_secret_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_secure_internal_secrets_create",
+        "parentId": "fld_secure_internal_secrets",
+        "_type": "request",
+        "name": "Create",
+        "method": "POST",
+        "url": "{{ base_url }}/secure-internal-secrets",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"secret\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ],
+        "settingTestScript": "const resp = JSON.parse(response.body); if(resp.id){insomnia.environment.set('secure_internal_secret_id', resp.id);}"
+},
+{
+        "_id": "req_secure_internal_secrets_update",
+        "parentId": "fld_secure_internal_secrets",
+        "_type": "request",
+        "name": "Update",
+        "method": "PUT",
+        "url": "{{ base_url }}/secure-internal-secrets/{{ secure_internal_secret_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"secret\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_secure_internal_secrets_patch",
+        "parentId": "fld_secure_internal_secrets",
+        "_type": "request",
+        "name": "Patch",
+        "method": "PATCH",
+        "url": "{{ base_url }}/secure-internal-secrets/{{ secure_internal_secret_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"secret\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_secure_internal_secrets_delete",
+        "parentId": "fld_secure_internal_secrets",
+        "_type": "request",
+        "name": "Delete",
+        "method": "DELETE",
+        "url": "{{ base_url }}/secure-internal-secrets/{{ secure_internal_secret_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_secure_internal_secrets_exists",
+        "parentId": "fld_secure_internal_secrets",
+        "_type": "request",
+        "name": "Exists",
+        "method": "GET",
+        "url": "{{ base_url }}/secure-internal-secrets/exists/{{ secure_internal_secret_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_secure_internal_secrets_count",
+        "parentId": "fld_secure_internal_secrets",
+        "_type": "request",
+        "name": "Count",
+        "method": "GET",
+        "url": "{{ base_url }}/secure-internal-secrets/count",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_secure_internal_secrets_validate",
+        "parentId": "fld_secure_internal_secrets",
+        "_type": "request",
+        "name": "Validate",
+        "method": "POST",
+        "url": "{{ base_url }}/secure-internal-secrets/validate",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"secret\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "fld_validation_only_drafts",
+        "parentId": "wrk_crudcraft",
+        "_type": "request_group",
+        "name": "Validation Only Drafts"
+},
+{
+        "_id": "req_validation_only_drafts_validate",
+        "parentId": "fld_validation_only_drafts",
+        "_type": "request",
+        "name": "Validate",
+        "method": "POST",
+        "url": "{{ base_url }}/validation-only-drafts/validate",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{\\\"content\\\": \\\"\\\"}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+}
+  ]
+}

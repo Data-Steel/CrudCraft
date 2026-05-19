@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Data-Steel/CrudCraft/security/advisories/new
+    about: Report suspected vulnerabilities privately.
+  - name: Documentation
+    url: https://github.com/Data-Steel/CrudCraft/tree/main/docs
+    about: Check maintainer and user documentation before opening an issue.

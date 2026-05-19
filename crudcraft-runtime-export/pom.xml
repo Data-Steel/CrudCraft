@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.datasteel.crudcraft</groupId>
+        <artifactId>crudcraft-parent</artifactId>
+        <version>1.0.10</version>
+    </parent>
+    <artifactId>crudcraft-runtime-export</artifactId>
+    <packaging>jar</packaging>
+    <name>CrudCraft Runtime Export</name>
+
+    <properties>
+        <crudcraft.automatic.module.name>nl.datasteel.crudcraft.runtime.export</crudcraft.automatic.module.name>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.datasteel.crudcraft</groupId>
+            <artifactId>crudcraft-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.datasteel.crudcraft</groupId>
+            <artifactId>crudcraft-runtime-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>1.17.4</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-junit5-plugin</artifactId>
+                        <version>1.2.2</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <targetClasses>
+                        <param>nl.datasteel.crudcraft.runtime.export.*</param>
+                        <param>nl.datasteel.crudcraft.runtime.export.service.*</param>
+                        <param>nl.datasteel.crudcraft.runtime.export.util.*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>nl.datasteel.crudcraft.runtime.export.*</param>
+                        <param>nl.datasteel.crudcraft.runtime.service.*</param>
+                        <param>nl.datasteel.crudcraft.runtime.util.*</param>
+                    </targetTests>
+                    <avoidCallsTo>
+                        <!-- Keep PIT's usual logging-call exclusions explicit when overriding this list. -->
+                        <avoidCallsTo>java.util.logging</avoidCallsTo>
+                        <avoidCallsTo>org.apache.log4j</avoidCallsTo>
+                        <avoidCallsTo>org.slf4j</avoidCallsTo>
+                        <avoidCallsTo>org.apache.commons.logging</avoidCallsTo>
+                        <!-- Equivalent mutants in stream writers: close semantics make these call removals non-actionable. -->
+                        <avoidCallsTo>org.apache.commons.csv</avoidCallsTo>
+                        <avoidCallsTo>com.fasterxml.jackson.core</avoidCallsTo>
+                    </avoidCallsTo>
+                    <threads>4</threads>
+                    <outputFormats>
+                        <param>XML</param>
+                        <param>HTML</param>
+                    </outputFormats>
+                    <timestampedReports>false</timestampedReports>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>pitest</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>mutationCoverage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

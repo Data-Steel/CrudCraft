@@ -1,0 +1,989 @@
+/*
+ * Copyright (c) 2026 CrudCraft contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package nl.datasteel.crudcraft.codegen.writer.stubs;
+
+import com.palantir.javapoet.AnnotationSpec;
+import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.JavaFile;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import nl.datasteel.crudcraft.annotations.CrudEndpoint;
+import nl.datasteel.crudcraft.annotations.CrudEndpointPolicy;
+import nl.datasteel.crudcraft.annotations.CrudTemplate;
+import nl.datasteel.crudcraft.annotations.security.CrudSecurityPolicy;
+import nl.datasteel.crudcraft.codegen.descriptor.RelationshipType;
+import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.DtoOptions;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.EnumOptions;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.Identity;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.Relationship;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.SchemaMetadata;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.SearchOptions;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.Security;
+import nl.datasteel.crudcraft.codegen.descriptor.field.part.Validation;
+import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
+import nl.datasteel.crudcraft.codegen.descriptor.model.part.EndpointOptions;
+import nl.datasteel.crudcraft.codegen.descriptor.model.part.ModelFlags;
+import nl.datasteel.crudcraft.codegen.descriptor.model.part.ModelIdentity;
+import nl.datasteel.crudcraft.codegen.descriptor.model.part.ModelSecurity;
+import nl.datasteel.crudcraft.codegen.writer.WriteContext;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+
+class ControllerGeneratorTest {
+
+    private ModelDescriptor descriptor(
+            boolean editable,
+            CrudTemplate template,
+            CrudEndpoint[] omit,
+            CrudEndpoint[] include,
+            Class<? extends CrudEndpointPolicy> policy,
+            boolean secure,
+            Class<? extends CrudSecurityPolicy> secPolicy) {
+        ModelIdentity id = new ModelIdentity("Order", "com.example", List.of(), "com.example");
+        ModelFlags flags = new ModelFlags(editable, true, false, false);
+        EndpointOptions ep = new EndpointOptions(template, omit, include, policy);
+        ModelSecurity sec = new ModelSecurity(secure, secPolicy, List.of());
+        return new ModelDescriptor(id, flags, ep, sec);
+    }
+
+    static class OnlyGetOnePolicy implements CrudEndpointPolicy {
+        @Override
+        public Set<CrudEndpoint> resolveEndpoints() {
+            return EnumSet.of(CrudEndpoint.GET_ONE);
+        }
+
+        /**
+         * Returns the name of the policy. This name is used to identify the policy in generated
+         * code.
+         *
+         * @return the name of the policy.
+         */
+        @Override
+        public String name() {
+            return null;
+        }
+    }
+
+    static class BadPolicy implements CrudEndpointPolicy {
+        private BadPolicy() {}
+
+        @Override
+        public Set<CrudEndpoint> resolveEndpoints() {
+            return EnumSet.of(CrudEndpoint.GET_ALL);
+        }
+
+        /**
+         * Returns the name of the policy. This name is used to identify the policy in generated
+         * code.
+         *
+         * @return the name of the policy.
+         */
+        @Override
+        public String name() {
+            return null;
+        }
+    }
+
+    static class BadSecurity implements CrudSecurityPolicy {
+        private BadSecurity() {}
+
+        @Override
+        public String getSecurityExpression(CrudEndpoint endpoint) {
+            return "permitAll()";
+        }
+    }
+
+    static class UserSecurity implements CrudSecurityPolicy {
+        @Override
+        public String getSecurityExpression(CrudEndpoint endpoint) {
+            return "hasRole('USER')";
+        }
+    }
+
+    @Test
+    void writeEditableAddsCommentForDisabledEndpoint() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        true,
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[] {CrudEndpoint.POST},
+                        new CrudEndpoint[0],
+                        CrudTemplate.class,
+                        false,
+                        null);
+        gen.write(md, ctx);
+        String code = ((TestUtils.RecordingFiler) env.getFiler()).jfo.written;
+        assertTrue(code.contains("Endpoint omitted by generation template"));
+    }
+
+    @Test
+    void writeNonEditableDoesNotAddComment() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[] {CrudEndpoint.POST},
+                        new CrudEndpoint[0],
+                        CrudTemplate.class,
+                        false,
+                        null);
+        gen.write(md, ctx);
+        String code = ((TestUtils.RecordingFiler) env.getFiler()).jfo.written;
+        assertFalse(code.contains("Endpoint omitted"));
+    }
+
+    @Test
+    void includesEndpointsFromCustomPolicy() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        OnlyGetOnePolicy.class,
+                        false,
+                        null);
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+        assertTrue(code.contains("getOne"));
+        assertFalse(code.contains("getAll"));
+    }
+
+    @Test
+    void includeEndpointsAreRespected() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.READ_ONLY,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[] {CrudEndpoint.POST},
+                        CrudTemplate.class,
+                        false,
+                        null);
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+        assertTrue(code.contains("post"));
+    }
+
+    @Test
+    void buildAddsRequestMappingAndClampPageable() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class,
+                        false,
+                        null);
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+        assertTrue(code.contains("@RequestMapping(\"/orders\")"));
+        assertTrue(code.contains("clampPageable"));
+        assertTrue(code.contains("private static final Logger LOG"));
+        assertTrue(code.contains("ObjectProvider<MeterRegistry> meterRegistry"));
+        assertTrue(code.contains("Timer.builder(\"crudcraft.generated.operation\")"));
+        assertTrue(code.contains("long _crudcraftStarted = System.nanoTime();"));
+        assertTrue(code.contains("recordOperation(\"GET_ALL\", _crudcraftOutcome, _crudcraftStarted);"));
+        assertTrue(
+                env.messager.notes.stream()
+                        .anyMatch(note -> note.contains("Generating controller for Order")));
+    }
+
+    @Test
+    void endpointPolicyInstantiationFailureThrows() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        BadPolicy.class,
+                        false,
+                        null);
+        assertThrows(IllegalStateException.class, () -> gen.build(md, ctx));
+        assertTrue(
+                env.messager.errors.stream()
+                        .anyMatch(
+                                error ->
+                                        error.contains(
+                                                "Could not instantiate policy for Order")));
+    }
+
+    @Test
+    void securityPolicyInstantiationFailureThrows() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class,
+                        true,
+                        BadSecurity.class);
+        assertThrows(IllegalStateException.class, () -> gen.build(md, ctx));
+        assertTrue(
+                env.messager.errors.stream()
+                        .anyMatch(
+                                error ->
+                                        error.contains(
+                                                "Could not instantiate security policy for"
+                                                        + " Order")));
+    }
+
+    @Test
+    void secureMarkerPolicyDefaultsToAuthenticatedExpression() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class,
+                        true,
+                        CrudSecurityPolicy.class);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertTrue(code.contains("@PreAuthorize(\"isAuthenticated()\")"));
+    }
+
+    @Test
+    void secureCustomPolicyUsesPolicyExpression() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class,
+                        true,
+                        UserSecurity.class);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertTrue(code.contains("@PreAuthorize(\"hasRole('USER')\")"));
+    }
+
+    @Test
+    void filerExceptionIsHandled() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(true, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class,
+                        false,
+                        null);
+        gen.write(md, ctx);
+        assertTrue(
+                env.messager.notes.stream()
+                        .anyMatch(
+                                note ->
+                                        note.contains(
+                                                "Skipping generation of existing type"
+                                                        + " com.example.controller.OrderController")));
+    }
+
+    @Test
+    void ioExceptionIsReported() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, true));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class,
+                        false,
+                        null);
+        gen.write(md, ctx);
+        assertFalse(env.messager.errors.isEmpty());
+    }
+
+    @Test
+    void requiresCrudEntityAndOrder() {
+        ControllerGenerator gen = new ControllerGenerator();
+        assertTrue(gen.requiresCrudEntity());
+        assertEquals(4, gen.order());
+    }
+
+    @Test
+    void generateReturnsEmptyForInvalidAndAbstractModel() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+
+        assertTrue(gen.generate(null, ctx).isEmpty());
+
+        ModelIdentity id =
+                new ModelIdentity("AbstractDoc", "com.example", List.of(), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, true);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor abstractModel = new ModelDescriptor(id, flags, ep, sec);
+
+        assertTrue(gen.generate(abstractModel, ctx).isEmpty());
+        assertTrue(
+                env.messager.notes.stream()
+                        .anyMatch(
+                                note ->
+                                        note.contains(
+                                                "Skipping controller generation for abstract"
+                                                        + " entity: AbstractDoc")));
+    }
+
+    @Test
+    void generateReturnsControllerForConcreteModel() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.READ_ONLY,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class,
+                        false,
+                        null);
+
+        List<JavaFile> files = gen.generate(md, ctx);
+
+        assertEquals(1, files.size());
+        assertEquals("OrderController", files.getFirst().typeSpec().name());
+    }
+
+    @Test
+    void writeSkipsAbstractModel() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelIdentity id =
+                new ModelIdentity("AbstractDoc", "com.example", List.of(), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, true);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor abstractModel = new ModelDescriptor(id, flags, ep, sec);
+
+        gen.write(abstractModel, ctx);
+
+        assertTrue(((TestUtils.RecordingFiler) env.getFiler()).jfo.written.isEmpty());
+        assertTrue(
+                env.messager.notes.stream()
+                        .anyMatch(
+                                note ->
+                                        note.contains(
+                                                "Skipping controller generation for abstract"
+                                                        + " entity: AbstractDoc")));
+
+        gen.write(null, ctx);
+        assertTrue(((TestUtils.RecordingFiler) env.getFiler()).jfo.written.isEmpty());
+    }
+
+    @Test
+    void buildWithExportEndpointAddsExportInfrastructure() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        FieldDescriptor searchable =
+                new FieldDescriptor(
+                        new Identity("name", tf.type(String.class), null, SchemaMetadata.empty()),
+                        new DtoOptions(true, true, true, new String[0], false),
+                        new EnumOptions(false, List.of()),
+                        new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                        new Validation(List.of()),
+                        new SearchOptions(true, List.of(), 1),
+                        new Security(false, null, null));
+        ModelIdentity id =
+                new ModelIdentity("Exportable", "com.example", List.of(searchable), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.READ_ONLY,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[] {CrudEndpoint.EXPORT},
+                        CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        String code = gen.build(md, ctx).toString();
+        assertTrue(
+                code.contains(
+                        "EnhancedExportService<ExportableResponseDto, Exportable,"
+                                + " ExportableSearchRequest>"));
+        assertTrue(
+                code.contains(
+                        "ObjectProvider<EnhancedExportServiceFactory> exportServiceFactoryProvider"));
+        assertTrue(code.contains("createExportService(exportServiceFactoryProvider"));
+        assertTrue(code.contains("factory.create(maxRows, maxCsvRows, maxJsonRows"));
+        assertTrue(code.contains("new EnhancedExportService<>("));
+        assertTrue(code.contains("maxCsvRows"));
+        assertTrue(code.contains("export("));
+    }
+
+    @Test
+    void buildWithExportEndpointWithoutSearchUsesObjectRequestType() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.READ_ONLY,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[] {CrudEndpoint.EXPORT},
+                        CrudTemplate.class,
+                        false,
+                        null);
+
+        String code = gen.build(md, ctx).toString();
+
+        assertTrue(code.contains("EnhancedExportService<OrderResponseDto, Order, Object>"));
+        assertFalse(code.contains("OrderSearchRequest"));
+    }
+
+    @Test
+    void lobEntityUsesMultipartForCreateUpdatePatch() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        FieldDescriptor lobField =
+                new FieldDescriptor(
+                        new Identity(
+                                "attachment", tf.type(String.class), null, SchemaMetadata.empty()),
+                        new DtoOptions(true, true, false, new String[0], true),
+                        new EnumOptions(false, List.of()),
+                        new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                        new Validation(List.of()),
+                        new SearchOptions(false, List.of(), 0),
+                        new Security(false, null, null));
+        ModelIdentity id =
+                new ModelIdentity("Document", "com.example", List.of(lobField), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        // Create endpoint should use multipart
+        assertTrue(code.contains("MULTIPART_FORM_DATA_VALUE"), "Should contain multipart consumes");
+        assertTrue(
+                code.contains("@RequestPart"), "Should use @RequestPart instead of @RequestBody");
+        assertTrue(code.contains("\"data\""), "Should have data part for the request DTO");
+        assertTrue(code.contains("\"attachment\""), "Should have part named after the LOB field");
+        assertTrue(code.contains("MultipartFile"), "Should reference MultipartFile type");
+        assertTrue(
+                code.contains("request = request.withAttachment(attachment.getBytes())"),
+                "Should set LOB field from file bytes");
+        // Empty file upload should clear the field (set to null)
+        assertTrue(
+                code.contains("request = request.withAttachment(null)"),
+                "Empty file upload should clear the LOB field");
+    }
+
+    @Test
+    void lobFieldNotInRequestIsNotMultipart() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        // LOB field NOT in request DTO (inRequest=false)
+        FieldDescriptor lobFieldNotInRequest =
+                new FieldDescriptor(
+                        new Identity(
+                                "attachment", tf.type(String.class), null, SchemaMetadata.empty()),
+                        new DtoOptions(true, false, false, new String[0], true),
+                        new EnumOptions(false, List.of()),
+                        new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                        new Validation(List.of()),
+                        new SearchOptions(false, List.of(), 0),
+                        new Security(false, null, null));
+        ModelIdentity id =
+                new ModelIdentity(
+                        "ReadOnlyDoc", "com.example", List.of(lobFieldNotInRequest), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertFalse(
+                code.contains("MULTIPART_FORM_DATA_VALUE"),
+                "LOB field not in request should not trigger multipart");
+        assertFalse(
+                code.contains("MultipartFile"),
+                "LOB field not in request should not generate MultipartFile param");
+    }
+
+    @Test
+    void nonLobEntityUsesRequestBody() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+
+        ModelDescriptor md =
+                descriptor(
+                        false,
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class,
+                        false,
+                        null);
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertFalse(
+                code.contains("MULTIPART_FORM_DATA_VALUE"),
+                "Non-LOB entity should not use multipart");
+        assertTrue(code.contains("@RequestBody"), "Non-LOB entity should use @RequestBody");
+        assertFalse(
+                code.contains("MultipartFile"),
+                "Non-LOB entity should not reference MultipartFile");
+        assertFalse(code.contains("search("), "Non-searchable entity should not expose search");
+    }
+
+    @Test
+    void omittedEndpointIsRemovedAndSearchableFieldAddsSearchEndpoint() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+        FieldDescriptor searchable =
+                new FieldDescriptor(
+                        new Identity("name", tf.type(String.class), null, SchemaMetadata.empty()),
+                        new DtoOptions(true, true, true, new String[0], false),
+                        new EnumOptions(false, List.of()),
+                        new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                        new Validation(List.of()),
+                        new SearchOptions(true, List.of(), 1),
+                        new Security(false, null, null));
+        ModelIdentity id =
+                new ModelIdentity(
+                        "SearchableOrder", "com.example", List.of(searchable), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[] {CrudEndpoint.POST},
+                        new CrudEndpoint[0],
+                        CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        String code = gen.build(md, ctx).toString();
+
+        assertFalse(code.contains("post("));
+        assertTrue(code.contains("search("));
+    }
+
+    @Test
+    void buildGeneratesSpecializedDtoEndpointsWhenResponseDtoVariantsExist() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        FieldDescriptor variantField =
+                new FieldDescriptor(
+                        new Identity("title", tf.type(String.class), null, SchemaMetadata.empty()),
+                        new DtoOptions(true, true, true, new String[] {"List", "Map"}, false),
+                        new EnumOptions(false, List.of()),
+                        new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                        new Validation(List.of()),
+                        new SearchOptions(false, List.of(), 0),
+                        new Security(false, null, null));
+        ModelIdentity id =
+                new ModelIdentity("Book", "com.example", List.of(variantField), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertTrue(code.contains("getAllList("));
+        assertTrue(code.contains("getListById("));
+        assertTrue(code.contains("getAllMap("));
+        assertTrue(code.contains("getMapById("));
+        assertTrue(
+                code.contains(
+                        "ResponseEntity<PaginatedResponse<BookListResponseDto>> getAllList("));
+        assertTrue(code.contains("ResponseEntity<BookListResponseDto> getListById("));
+        assertTrue(code.contains("BookListResponseDto.class"));
+        assertTrue(code.contains("BookMapResponseDto.class"));
+    }
+
+    @Test
+    void specializedDtoEndpointsInSecureModelAlsoReceivePreAuthorize() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        FieldDescriptor variantField =
+                new FieldDescriptor(
+                        new Identity("title", tf.type(String.class), null, SchemaMetadata.empty()),
+                        new DtoOptions(true, true, true, new String[] {"List", "Map"}, false),
+                        new EnumOptions(false, List.of()),
+                        new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                        new Validation(List.of()),
+                        new SearchOptions(false, List.of(), 0),
+                        new Security(false, null, null));
+        ModelIdentity id =
+                new ModelIdentity("Book", "com.example", List.of(variantField), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(true, CrudSecurityPolicy.class, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        String code = gen.build(md, ctx).toString();
+
+        assertTrue(
+                code.contains(
+                        "@PreAuthorize(\"isAuthenticated()\")\n"
+                                + "    public ResponseEntity<PaginatedResponse<BookListResponseDto>>"
+                                + " getAllList("));
+        assertTrue(
+                code.contains(
+                        "@PreAuthorize(\"isAuthenticated()\")\n"
+                                + "    public ResponseEntity<BookListResponseDto> getListById("));
+        assertTrue(code.contains("recordOperation(\"GET_ALL_LIST\", _crudcraftOutcome, _crudcraftStarted);"));
+        assertTrue(code.contains("recordOperation(\"GET_ONE_LIST\", _crudcraftOutcome, _crudcraftStarted);"));
+    }
+
+    @Test
+    void buildUsesResolvedEndpointExpressionsForSecureModel() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+
+        ModelIdentity id =
+                new ModelIdentity("SecureOrder", "com.example", List.of(), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class);
+        ModelSecurity sec =
+                new ModelSecurity(
+                        true,
+                        BadSecurity.class,
+                        List.of(),
+                        List.of(),
+                        Map.of(CrudEndpoint.GET_ONE, "hasRole('USER')"));
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+        assertTrue(code.contains("SecureOrderController"));
+    }
+
+    @Test
+    void multipleLobFieldsEachGetSeparateRequestPart() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        FieldDescriptor lob1 =
+                new FieldDescriptor(
+                        new Identity("avatar", tf.type(String.class), null, SchemaMetadata.empty()),
+                        new DtoOptions(true, true, false, new String[0], true),
+                        new EnumOptions(false, List.of()),
+                        new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                        new Validation(List.of()),
+                        new SearchOptions(false, List.of(), 0),
+                        new Security(false, null, null));
+        FieldDescriptor lob2 =
+                new FieldDescriptor(
+                        new Identity("resume", tf.type(String.class), null, SchemaMetadata.empty()),
+                        new DtoOptions(true, true, false, new String[0], true),
+                        new EnumOptions(false, List.of()),
+                        new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                        new Validation(List.of()),
+                        new SearchOptions(false, List.of(), 0),
+                        new Security(false, null, null));
+        ModelIdentity id =
+                new ModelIdentity("Profile", "com.example", List.of(lob1, lob2), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertTrue(code.contains("\"avatar\""), "Should have @RequestPart for avatar field");
+        assertTrue(code.contains("\"resume\""), "Should have @RequestPart for resume field");
+        assertTrue(code.contains("withAvatar("), "Should set avatar field from file bytes");
+        assertTrue(code.contains("withResume("), "Should set resume field from file bytes");
+    }
+
+    @Test
+    void collectionLobFieldUsesListOfMultipartFile() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        // LOB field with a List type (simulating List<byte[]>)
+        FieldDescriptor collectionLob =
+                new FieldDescriptor(
+                        new Identity(
+                                "attachments",
+                                tf.listOf(String.class),
+                                null,
+                                SchemaMetadata.empty()),
+                        new DtoOptions(true, true, false, new String[0], true),
+                        new EnumOptions(false, List.of()),
+                        new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                        new Validation(List.of()),
+                        new SearchOptions(false, List.of(), 0),
+                        new Security(false, null, null));
+        ModelIdentity id =
+                new ModelIdentity("Gallery", "com.example", List.of(collectionLob), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertTrue(
+                code.contains("List<MultipartFile>"),
+                "Collection LOB field should use List<MultipartFile> parameter");
+        assertTrue(
+                code.contains("\"attachments\""),
+                "Should have @RequestPart named after the collection LOB field");
+        // Should iterate through the list
+        assertTrue(
+                code.contains("for (MultipartFile _file :"),
+                "Should iterate through List<MultipartFile>");
+        // Should set the list of bytes on the request DTO
+        assertTrue(
+                code.contains("request = request.withAttachments("),
+                "Should call wither for the collection LOB field");
+        // Empty-files collection clears the field via ternary; absent part does nothing
+        assertTrue(
+                code.contains("attachmentsBytes.isEmpty() ? null :"),
+                "All-empty file collection should clear the LOB field via ternary");
+        // Part absent (null) leaves DTO unchanged - no top-level else setting null
+        assertTrue(
+                code.contains("if (attachments != null)"),
+                "Part absent should leave DTO field unchanged");
+        // No standalone withAttachments(null) call - null is only set via ternary when bytes list is
+        // empty
+        assertFalse(
+                code.contains("withAttachments(null)"),
+                "Absent part should not trigger a standalone withAttachments(null) call");
+        // Non-@NotNull field: the @RequestPart for this field uses required = false
+        assertTrue(
+                code.contains("\"attachments\", required = false"),
+                "Non-@NotNull field should produce @RequestPart with required = false");
+    }
+
+    @Test
+    void setLobFieldUsesHashSet() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        // LOB field with a Set type
+        FieldDescriptor setLob =
+                new FieldDescriptor(
+                        new Identity("tags", tf.setOf(String.class), null, SchemaMetadata.empty()),
+                        new DtoOptions(true, true, false, new String[0], true),
+                        new EnumOptions(false, List.of()),
+                        new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                        new Validation(List.of()),
+                        new SearchOptions(false, List.of(), 0),
+                        new Security(false, null, null));
+        ModelIdentity id =
+                new ModelIdentity("Tagged", "com.example", List.of(setLob), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        // Controller parameter is always List<MultipartFile> (Spring MVC constraint)
+        assertTrue(
+                code.contains("List<MultipartFile>"),
+                "Set LOB field controller parameter should still use List<MultipartFile>");
+        // Bytes container must match the DTO field type (Set<byte[]> / HashSet)
+        assertTrue(
+                code.contains("Set<byte[]>"),
+                "Set LOB field should use Set<byte[]> as bytes container");
+        assertTrue(code.contains("new HashSet<>()"), "Set LOB field should instantiate a HashSet");
+    }
+
+    @Test
+    void notNullLobFieldUsesRequiredTrue() {
+        ControllerGenerator gen = new ControllerGenerator();
+        var env = new TestUtils.ProcessingEnvStub(new TestUtils.RecordingFiler(false, false));
+        WriteContext ctx = new WriteContext(env);
+        TypeFactory tf = new TypeFactory();
+
+        AnnotationSpec notNullSpec =
+                AnnotationSpec.builder(ClassName.get("jakarta.validation.constraints", "NotNull"))
+                        .build();
+        FieldDescriptor requiredLob =
+                new FieldDescriptor(
+                        new Identity(
+                                "document", tf.type(String.class), null, SchemaMetadata.empty()),
+                        new DtoOptions(true, true, false, new String[0], true),
+                        new EnumOptions(false, List.of()),
+                        new Relationship(RelationshipType.NONE, "", null, false, false, false),
+                        new Validation(List.of(notNullSpec)),
+                        new SearchOptions(false, List.of(), 0),
+                        new Security(false, null, null));
+        ModelIdentity id =
+                new ModelIdentity("Contract", "com.example", List.of(requiredLob), "com.example");
+        ModelFlags flags = new ModelFlags(false, true, false, false);
+        EndpointOptions ep =
+                new EndpointOptions(
+                        CrudTemplate.FULL,
+                        new CrudEndpoint[0],
+                        new CrudEndpoint[0],
+                        CrudTemplate.class);
+        ModelSecurity sec = new ModelSecurity(false, null, List.of());
+        ModelDescriptor md = new ModelDescriptor(id, flags, ep, sec);
+
+        JavaFile jf = gen.build(md, ctx);
+        String code = jf.toString();
+
+        assertTrue(
+                code.contains("required = true"),
+                "@NotNull LOB field should generate @RequestPart(required = true)");
+        // Check specifically that the document part uses required = true (not just any required =
+        // true)
+        assertTrue(
+                code.contains("\"document\", required = true"),
+                "@NotNull LOB field's @RequestPart should use required = true");
+        // Verify that a single-file LOB field without @NotNull still defaults to required = false
+        // (covered by other tests; sanity check: required = true appears for THIS field)
+        assertFalse(
+                code.contains("\"document\", required = false"),
+                "@NotNull LOB field should not have required = false in its @RequestPart");
+    }
+}

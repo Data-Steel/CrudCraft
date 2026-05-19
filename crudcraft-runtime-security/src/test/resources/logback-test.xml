@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <logger name="nl.datasteel.crudcraft.runtime.security.row.ClaimScopedRowSecurityHandler" level="OFF"/>
+    <logger name="nl.datasteel.crudcraft.runtime.security.row.OwnerBasedRowSecurity" level="OFF"/>
+    <logger name="org.springframework" level="ERROR"/>
+    <root level="ERROR"/>
+</configuration>

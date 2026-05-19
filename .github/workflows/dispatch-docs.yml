@@ -1,0 +1,65 @@
+name: Dispatch Docs Deploy
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Release tag to build docs from, e.g. v1.0.13"
+        required: true
+        type: string
+      release_url:
+        description: "GitHub Release URL"
+        required: true
+        type: string
+      release_sha:
+        description: "Commit SHA resolved from the release tag"
+        required: true
+        type: string
+    secrets:
+      DOCS_DISPATCH_TOKEN:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  trigger-deployer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send repository_dispatch to docs deployer
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_DISPATCH_TOKEN }}
+          OWNER: ${{ vars.DOCS_DEPLOY_OWNER }}
+          REPO: ${{ vars.DOCS_DEPLOY_REPO }}
+          EVENT: ${{ vars.DOCS_DEPLOY_EVENT_TYPE }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_URL: ${{ inputs.release_url }}
+          RELEASE_SHA: ${{ inputs.release_sha }}
+          SOURCE_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          : "${GH_TOKEN:?DOCS_DISPATCH_TOKEN is required}"
+          : "${OWNER:?DOCS_DEPLOY_OWNER variable is required}"
+          : "${REPO:?DOCS_DEPLOY_REPO variable is required}"
+
+          event_type="${EVENT:-crudcraft-release-published}"
+          version="${RELEASE_TAG#v}"
+
+          payload=$(cat <<JSON
+          {
+            "source_repo": "$SOURCE_REPO",
+            "release_tag": "$RELEASE_TAG",
+            "version": "$version",
+            "sha": "$RELEASE_SHA",
+            "docs_ref": "$RELEASE_TAG",
+            "release_url": "$RELEASE_URL"
+          }
+          JSON
+          )
+
+          curl -sS -X POST \
+            --fail-with-body \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/$OWNER/$REPO/dispatches" \
+            -d "{\"event_type\":\"$event_type\",\"client_payload\":$payload}"

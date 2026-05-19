@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <Match>
+        <Bug pattern="US_USELESS_SUPPRESSION_ON_CLASS" />
+    </Match>
+</FindBugsFilter>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.datasteel.crudcraft</groupId>
+        <artifactId>crudcraft-parent</artifactId>
+        <version>1.0.10</version>
+    </parent>
+    <artifactId>crudcraft-spring-boot-starter-search</artifactId>
+    <packaging>jar</packaging>
+    <name>CrudCraft Spring Boot Starter Search</name>
+
+    <properties>
+        <crudcraft.automatic.module.name>nl.datasteel.crudcraft.starter.search</crudcraft.automatic.module.name>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.datasteel.crudcraft</groupId>
+            <artifactId>crudcraft-runtime-search</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                    <targetClasses>
+                        <param>nl.datasteel.crudcraft.starter.search.*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>nl.datasteel.crudcraft.starter.search.*</param>
+                    </targetTests>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>pitest</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>mutationCoverage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

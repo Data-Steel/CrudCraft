@@ -1,0 +1,52 @@
+name: Feature request
+description: Propose a new feature or enhancement for CrudCraft
+title: "feat: "
+labels: ["feature"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: Explain the workflow or limitation this should solve.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the API, annotation, generated code, runtime behavior, or documentation change you expect.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Mention workarounds or simpler approaches if relevant.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: API annotations/contracts
+        - label: Code generation
+        - label: Runtime core
+        - label: Search
+        - label: Export
+        - label: Projection
+        - label: Security
+        - label: Spring Boot starters
+        - label: Sample app
+        - label: Tools
+        - label: Docs
+        - label: Build/CI
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: Compatibility impact
+      options:
+        - Backward compatible
+        - Possibly breaking
+        - Breaking change
+        - Unsure
+    validations:
+      required: true

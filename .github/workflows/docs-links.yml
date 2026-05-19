@@ -1,0 +1,34 @@
+name: Docs Link Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.md'
+      - '.github/workflows/docs-links.yml'
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.md'
+      - '.github/workflows/docs-links.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    name: markdown links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check markdown links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --verbose
+            --base .
+            --exclude-mail
+            --accept 200,429
+            "./**/*.md"

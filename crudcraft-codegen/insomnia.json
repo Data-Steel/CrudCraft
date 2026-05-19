@@ -1,0 +1,262 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-04-29T13:06:17.214486300Z",
+  "__export_source": "crudcraft-codegen",
+  "resources": [
+{
+        "_id": "wrk_crudcraft",
+        "parentId": null,
+        "_type": "workspace",
+        "name": "CrudCraft Generated API",
+        "scope": "collection"
+},
+    {
+      "_id": "env_base",
+      "parentId": "wrk_crudcraft",
+      "_type": "environment",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "jwt_token": "",
+        "book_id": ""
+      }
+    },
+{
+        "_id": "fld_books",
+        "parentId": "wrk_crudcraft",
+        "_type": "request_group",
+        "name": "Books"
+},
+{
+        "_id": "req_books_list",
+        "parentId": "fld_books",
+        "_type": "request",
+        "name": "List",
+        "method": "GET",
+        "url": "{{ base_url }}/books",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "settingTestScript": "const resp = JSON.parse(response.body); if(Array.isArray(resp) && resp.length){insomnia.environment.set('book_id', resp[0].id);}"
+},
+{
+        "_id": "req_books_get",
+        "parentId": "fld_books",
+        "_type": "request",
+        "name": "Get",
+        "method": "GET",
+        "url": "{{ base_url }}/books/{{ book_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_books_create",
+        "parentId": "fld_books",
+        "_type": "request",
+        "name": "Create",
+        "method": "POST",
+        "url": "{{ base_url }}/books",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ],
+        "settingTestScript": "const resp = JSON.parse(response.body); if(resp.id){insomnia.environment.set('book_id', resp.id);}"
+},
+{
+        "_id": "req_books_update",
+        "parentId": "fld_books",
+        "_type": "request",
+        "name": "Update",
+        "method": "PUT",
+        "url": "{{ base_url }}/books/{{ book_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_books_patch",
+        "parentId": "fld_books",
+        "_type": "request",
+        "name": "Patch",
+        "method": "PATCH",
+        "url": "{{ base_url }}/books/{{ book_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "{}"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_books_delete",
+        "parentId": "fld_books",
+        "_type": "request",
+        "name": "Delete",
+        "method": "DELETE",
+        "url": "{{ base_url }}/books/{{ book_id }}",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        }
+},
+{
+        "_id": "req_books_bulk_create",
+        "parentId": "fld_books",
+        "_type": "request",
+        "name": "Bulk Create",
+        "method": "POST",
+        "url": "{{ base_url }}/books/batch",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[{}]"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_books_bulk_update",
+        "parentId": "fld_books",
+        "_type": "request",
+        "name": "Bulk Update",
+        "method": "PUT",
+        "url": "{{ base_url }}/books/batch",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[{\\\"id\\\": \\\"{{ book_id }}\\\", \\\"data\\\": {}}]"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_books_bulk_patch",
+        "parentId": "fld_books",
+        "_type": "request",
+        "name": "Bulk Patch",
+        "method": "PATCH",
+        "url": "{{ base_url }}/books/batch",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[{\\\"id\\\": \\\"{{ book_id }}\\\", \\\"data\\\": {}}]"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_books_bulk_upsert",
+        "parentId": "fld_books",
+        "_type": "request",
+        "name": "Bulk Upsert",
+        "method": "POST",
+        "url": "{{ base_url }}/books/batch",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[{}]"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_books_bulk_ids",
+        "parentId": "fld_books",
+        "_type": "request",
+        "name": "Bulk Ids",
+        "method": "POST",
+        "url": "{{ base_url }}/books/batch/ids",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[\\\"{{ book_id }}\\\"]"
+        },
+        "headers": [
+                {
+                        "name": "Content-Type",
+                        "value": "application/json"
+                }
+        ]
+},
+{
+        "_id": "req_books_bulk_delete",
+        "parentId": "fld_books",
+        "_type": "request",
+        "name": "Bulk Delete",
+        "method": "DELETE",
+        "url": "{{ base_url }}/books/batch",
+        "authentication": {
+                "type": "bearer",
+                "token": "{{ jwt_token }}"
+        },
+        "body": {
+                "mimeType": "application/json",
+                "text": "[\\\"{{ book_id }}\\\"]"
+        }
+}
+  ]
+}

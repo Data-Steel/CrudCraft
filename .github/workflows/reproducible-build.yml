@@ -1,0 +1,44 @@
+name: Reproducible Build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Compare two clean package builds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: First package build
+        run: |
+          mvn -B clean verify -Dreproducible-builds=true -DskipTests -Dpit.skip=true
+          mkdir -p /tmp/crudcraft-repro/first
+          find . -path './*/target/*.jar' -type f -print0 \
+            | sort -z \
+            | xargs -0 sha256sum > /tmp/crudcraft-repro/first/checksums.txt
+
+      - name: Second package build
+        run: |
+          mvn -B clean verify -Dreproducible-builds=true -DskipTests -Dpit.skip=true
+          mkdir -p /tmp/crudcraft-repro/second
+          find . -path './*/target/*.jar' -type f -print0 \
+            | sort -z \
+            | xargs -0 sha256sum > /tmp/crudcraft-repro/second/checksums.txt
+
+      - name: Compare package artifacts
+        run: diff -u /tmp/crudcraft-repro/first/checksums.txt /tmp/crudcraft-repro/second/checksums.txt

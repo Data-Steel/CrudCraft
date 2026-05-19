@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.datasteel.crudcraft</groupId>
+        <artifactId>crudcraft-parent</artifactId>
+        <version>1.0.10</version>
+    </parent>
+    <name>CrudCraft Spring Boot Starter</name>
+
+    <artifactId>crudcraft-spring-boot-starter</artifactId>
+    <packaging>jar</packaging>
+
+    <properties>
+        <crudcraft.automatic.module.name>nl.datasteel.crudcraft.starter</crudcraft.automatic.module.name>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.datasteel.crudcraft</groupId>
+            <artifactId>crudcraft-spring-boot-starter-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.datasteel.crudcraft</groupId>
+            <artifactId>crudcraft-spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.datasteel.crudcraft</groupId>
+            <artifactId>crudcraft-spring-boot-starter-search</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.datasteel.crudcraft</groupId>
+            <artifactId>crudcraft-spring-boot-starter-export</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.datasteel.crudcraft</groupId>
+            <artifactId>crudcraft-spring-boot-starter-projection</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.datasteel.crudcraft</groupId>
+            <artifactId>crudcraft-spring-boot-starter-extensions</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.datasteel.crudcraft</groupId>
+            <artifactId>crudcraft-spring-boot-starter-observability</artifactId>
+        </dependency>
+
+        <!-- Keep compile-time tools out of the default runtime dependency graph. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                    <targetClasses>
+                        <param>nl.datasteel.crudcraft.starter.*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>nl.datasteel.crudcraft.starter.*</param>
+                    </targetTests>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>pitest</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>mutationCoverage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <!-- can package a demo application here -->
+    </build>
+
+</project>

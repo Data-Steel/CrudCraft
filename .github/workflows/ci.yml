@@ -1,0 +1,247 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Verify Maven reactor
+        run: >
+          mvn -B -U -Dstyle.color=always
+          -Dcrudcraft.tck.postgres.required=true
+          -Dpit.skip=true
+          -Djavadoc.fail.on.warnings=true
+          verify
+
+      - name: Upload TCK coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-app-tck-coverage
+          path: crudcraft-sample-app/target/tck-coverage.md
+          if-no-files-found: error
+
+      - name: Golden generated-source check
+        run: >
+          mvn -B -U -pl crudcraft-codegen -am -Dstyle.color=always
+          -Dtest=GoldenTestRunner -Dsurefire.failIfNoSpecifiedTests=false test
+          || (echo "Generator output changed. Run 'mvn test -pl crudcraft-codegen -Pgolden-update -Dtest=GoldenTestRunner' and review the diff in expected/." && exit 1)
+
+      - name: License header check
+        run: mvn -B -Dstyle.color=always license:check
+
+      - name: Javadoc aggregate gate
+        run: mvn -B -Dstyle.color=always -DskipTests -Djavadoc.fail.on.warnings=true javadoc:aggregate
+
+      - name: Verify quality reports
+        shell: pwsh
+        run: ./scripts/verify-quality-reports.ps1
+
+      - name: OWASP Dependency-Check
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: >
+          mvn -B -U -Dstyle.color=always
+          org.owasp:dependency-check-maven:12.2.1:aggregate
+          -DnvdApiKey="${NVD_API_KEY}"
+          -Dformats=HTML,JSON
+          -DfailBuildOnCVSS=7
+
+      - name: Validate docs index
+        shell: pwsh
+        run: ./scripts/update-doc-index.ps1
+
+      - name: Doc drift gate
+        shell: pwsh
+        run: ./scripts/check-doc-drift.ps1 -BaseRef "origin/${{ github.base_ref }}"
+
+      - name: Upload JaCoCo XML
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-xml
+          path: '**/target/site/jacoco/jacoco.xml'
+          if-no-files-found: error
+
+  jpms:
+    name: jpms module boundaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Compile reactor on module path
+        run: >
+          mvn -B -U -Dstyle.color=always
+          -DskipTests
+          -Dpit.skip=true
+          -Dcheckstyle.skip=true
+          -Dpmd.skip=true
+          -Dspotbugs.skip=true
+          -Dmaven.javadoc.skip=true
+          clean compile
+
+  pit:
+    name: pit / ${{ matrix.execution }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        execution:
+          - descriptor-field
+          - descriptor-model
+          - exception
+          - fileheader
+          - util
+          - reader
+          - processors
+          - writer-dto
+          - writer-search-generator
+          - writer-infra
+          - writer-controller
+          - writer-search
+          - writer-stubs
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: PIT mutation gate
+        run: >
+          mvn -B -U -pl crudcraft-codegen -Dstyle.color=always
+          -Dpit.skip=false
+          test-compile
+          org.pitest:pitest-maven:mutationCoverage@pitest-codegen-${{ matrix.execution }}
+
+  benchmarks:
+    name: jmh benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build JMH benchmarks
+        run: mvn -B -U -f benchmarks/pom.xml -Dstyle.color=always clean package
+
+      - name: Run paging benchmarks
+        run: >
+          java -jar benchmarks/target/crudcraft-benchmarks-1.0.10.jar
+          KeysetPagingBenchmark
+          -wi 1 -i 3 -f 1 -r 200ms -w 200ms
+          -rf json -rff benchmarks/target/jmh-results.json
+
+      - name: Upload JMH results
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmh-results
+          path: benchmarks/target/jmh-results.json
+          if-no-files-found: error
+
+  pit-generated:
+    name: pit / generated roundtrip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: PIT generated roundtrip gate
+        run: |
+          mvn -B -U -pl crudcraft-sample-app -am -Dstyle.color=always -DskipTests -Dpit.skip=true -Dcheckstyle.skip=true -Dpmd.skip=true -Dspotbugs.skip=true -Dmaven.javadoc.skip=true install
+          mvn -B -pl crudcraft-sample-app -Dstyle.color=always -Dpit.skip=false test-compile org.pitest:pitest-maven:mutationCoverage@pitest-generated-roundtrip
+
+  sonar:
+    name: sonar
+    runs-on: ubuntu-latest
+    needs: [ci, jpms, pit, benchmarks, pit-generated]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Download JaCoCo XML
+        uses: actions/download-artifact@v4
+        with:
+          name: jacoco-xml
+          path: coverage-reports
+
+      - name: Compile for Sonar
+        run: mvn -B -U -Dstyle.color=always -DskipTests -Dcheckstyle.skip -Dpmd.skip -Dspotbugs.skip -Dmaven.javadoc.skip=true test-compile
+
+      - name: Sonar PR analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
+          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL || 'https://sonarcloud.io' }}
+          SONAR_PR_KEY: ${{ github.event.pull_request.number }}
+          SONAR_PR_BRANCH: ${{ github.head_ref }}
+          SONAR_PR_BASE: ${{ github.base_ref }}
+        run: |
+          : "${SONAR_PROJECT_KEY:?SONAR_PROJECT_KEY variable is required}"
+          : "${SONAR_ORGANIZATION:?SONAR_ORGANIZATION variable is required}"
+          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+            -Dsonar.organization="$SONAR_ORGANIZATION" \
+            -Dsonar.host.url="$SONAR_HOST_URL" \
+            -Dsonar.coverage.jacoco.xmlReportPaths=coverage-reports/**/jacoco.xml \
+            -Dsonar.pullrequest.key="$SONAR_PR_KEY" \
+            -Dsonar.pullrequest.branch="$SONAR_PR_BRANCH" \
+            -Dsonar.pullrequest.base="$SONAR_PR_BASE"
+
+      - name: Wait for Sonar Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
+        with:
+          scanMetadataReportFile: target/sonar/report-task.txt
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL || 'https://sonarcloud.io' }}

@@ -1,0 +1,73 @@
+name: Bug report
+description: Report a reproducible problem in CrudCraft
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and why it looks wrong.
+      placeholder: Generated controller returns ..., but expected ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - crudcraft-api
+        - crudcraft-codegen
+        - crudcraft-runtime-core
+        - crudcraft-runtime-search
+        - crudcraft-runtime-export
+        - crudcraft-runtime-projection
+        - crudcraft-runtime-security
+        - crudcraft-starter
+        - crudcraft-sample-app
+        - crudcraft-tools
+        - docs
+        - build/ci
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Minimal steps, entity annotations, generated code, or sample project changes needed to reproduce.
+      placeholder: |
+        1. Add ...
+        2. Run ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: What should happen instead?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: CrudCraft version or commit
+      placeholder: e.g. 1.0.10 or commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Java, Maven, Spring Boot, OS, database, and relevant dependency versions.
+      placeholder: |
+        Java:
+        Maven:
+        Spring Boot:
+        OS:
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or generated output
+      render: shell
