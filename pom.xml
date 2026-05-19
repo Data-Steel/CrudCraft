@@ -392,6 +392,8 @@
                         <arg>-Xlint:-options</arg>
                         <arg>-Xlint:-requires-automatic</arg>
                         <arg>-Xlint:-requires-transitive-automatic</arg>
+                        <arg>-Amapstruct.suppressGeneratorTimestamp=true</arg>
+                        <arg>-Amapstruct.suppressGeneratorVersionInfoComment=true</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -622,6 +624,8 @@
                             <exclude>**/generated/**</exclude>
                             <exclude>**/target/**</exclude>
                             <exclude>**/build/**</exclude>
+                            <exclude>crudcraft-codegen/src/test/resources/golden/**</exclude>
+                            <exclude>src/test/resources/golden/**</exclude>
                             <exclude>**/*.imports</exclude>
                             <exclude>**/*.old</exclude>
                         </excludes>

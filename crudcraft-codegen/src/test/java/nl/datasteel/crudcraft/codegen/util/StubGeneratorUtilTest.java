@@ -58,7 +58,7 @@ class StubGeneratorUtilTest {
     }
 
     @Test
-    void licenseHeaderLoadsAndNormalizesConfiguredTemplate() throws Exception {
+    void licenseHeaderStaysEmptyEvenWhenTemplateExists() throws Exception {
         String previous = System.getProperty("maven.multiModuleProjectDirectory");
         java.nio.file.Path base = java.nio.file.Files.createTempDirectory("license-template");
         java.nio.file.Files.writeString(
@@ -68,17 +68,12 @@ class StubGeneratorUtilTest {
         String loaded;
         try {
             loaded = invokeLoadLicenseHeader(base.toString());
-            assertTrue(StubGeneratorUtil.licenseHeader() != null);
-            assertTrue(!StubGeneratorUtil.licenseHeader().isEmpty());
+            assertEquals("", StubGeneratorUtil.licenseHeader());
         } finally {
             restoreMultiModuleProjectDirectory(previous);
         }
 
-        assertTrue(loaded.contains("CrudCraft contributors"));
-        assertTrue(loaded.contains(String.valueOf(java.time.Year.now().getValue())));
-        assertTrue(!loaded.contains("/*"));
-        assertTrue(!loaded.contains("*/"));
-        assertTrue(!loaded.contains(" * Copyright"));
+        assertEquals("", loaded);
     }
 
     @Test

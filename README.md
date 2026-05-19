@@ -77,7 +77,6 @@ graph TD
 - `crudcraft-starter-*` change: retest starter module and sample bootstrapping.
 - Public API contract rules: [STABILITY.md](STABILITY.md).
 - Generated source contract rules: [docs/generated-code-contract.md](docs/generated-code-contract.md).
-- 2.x release readiness gates: [docs/2x-release-readiness.md](docs/2x-release-readiness.md).
 - Release history: [CHANGELOG.md](CHANGELOG.md).
 - Full matrix: [docs/governance/change-impact-matrix.md](docs/governance/change-impact-matrix.md)
 

@@ -23,6 +23,7 @@ jobs:
       security-events: write
     with:
       scan-args: |-
+        --config=./osv-scanner.toml
         --recursive
         ./
       fail-on-vuln: true

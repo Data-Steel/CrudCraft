@@ -356,7 +356,7 @@ class RepositoryGovernanceTest {
         assertContains("docs/architecture/module-boundaries.md", "split packages");
         assertContains("docs/architecture/module-boundaries.md", "module-info.java");
         assertContains("docs/migration-guides/README.md", "Deferred Breaking Changes");
-        assertContains(".github/workflows/dependency-scan.yml", "--fail-on-vuln");
+        assertContains(".github/workflows/dependency-scan.yml", "fail-on-vuln: true");
         assertContains(".github/workflows/reproducible-build.yml", "Compare two clean package builds");
         assertContains(".github/workflows/release.yml", "sigstore/cosign-installer");
         assertContains(".github/workflows/release.yml", "cyclonedx");

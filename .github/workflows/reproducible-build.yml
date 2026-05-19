@@ -26,7 +26,7 @@ jobs:
 
       - name: First package build
         run: |
-          mvn -B clean verify -Dreproducible-builds=true -DskipTests -Dpit.skip=true
+          mvn -B clean verify -Dreproducible-builds=true -DskipTests -Dpit.skip=true -Dexec.skip=true
           mkdir -p /tmp/crudcraft-repro/first
           find . -path './*/target/*.jar' -type f -print0 \
             | sort -z \
@@ -34,7 +34,7 @@ jobs:
 
       - name: Second package build
         run: |
-          mvn -B clean verify -Dreproducible-builds=true -DskipTests -Dpit.skip=true
+          mvn -B clean verify -Dreproducible-builds=true -DskipTests -Dpit.skip=true -Dexec.skip=true
           mkdir -p /tmp/crudcraft-repro/second
           find . -path './*/target/*.jar' -type f -print0 \
             | sort -z \
