@@ -57,7 +57,7 @@ class ProjectionServiceReadDeniedAuditTest {
                 (QueryExecutionStrategy<TestEntity>) mock(QueryExecutionStrategy.class);
         auditHook = mock(ReadDeniedAuditHook.class);
         service = new TestService(repository, new TestMapper());
-        service.queryExecutor = queryExecutionStrategy;
+        service.setQueryExecutorForTests(queryExecutionStrategy);
 
         ApplicationContext context = mock(ApplicationContext.class);
         when(context.getBeansOfType(ReadDeniedAuditHook.class))

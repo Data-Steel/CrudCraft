@@ -14,26 +14,15 @@
  * limitations under the License.
  */
 
-package nl.datasteel.crudcraft.codegen.writer;
-
-import com.palantir.javapoet.JavaFile;
-import java.util.List;
-import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
+package nl.datasteel.crudcraft.runtime.util.hiddenaccess.meta;
 
 
-/** Basic test generator that records write invocations. */
-public class TestBasicGenerator implements Generator {
-    public static int writes;
-    public static boolean written;
+/** Test fixture accessors for package-private generated metadata classes. */
+public final class HiddenAccessMetaFixtures {
 
-    @Override
-    public List<JavaFile> generate(ModelDescriptor model, WriteContext ctx) {
-        return List.of();
-    }
+    private HiddenAccessMetaFixtures() {}
 
-    @Override
-    public void write(ModelDescriptor model, WriteContext ctx) {
-        writes++;
-        written = true;
+    public static Class<?> hiddenAccessEntityRelationshipMetaType() {
+        return HiddenAccessEntityRelationshipMeta.class;
     }
 }

@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import nl.datasteel.crudcraft.annotations.security.FieldSecurity;
 import nl.datasteel.crudcraft.annotations.security.FieldSecurityMetadata;
 import nl.datasteel.crudcraft.annotations.security.WritePolicy;
+import nl.datasteel.crudcraft.runtime.security.hidden.HiddenSecurityFixtures;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -545,8 +546,7 @@ class FieldSecurityUtilTest {
     void resolveMetadataHandlesIllegalAccessByReturningEmptyUsingHiddenPackageClass()
             throws Exception {
         Class<?> hiddenType =
-                Class.forName(
-                        "nl.datasteel.crudcraft.runtime.security.hidden.HiddenMetadataCarrier");
+                Class.forName(HiddenSecurityFixtures.hiddenMetadataCarrierType().getName());
         assertNotNull(hiddenType);
         assertTrue(FieldSecurityUtil.canReadField(hiddenType, "secret"));
     }

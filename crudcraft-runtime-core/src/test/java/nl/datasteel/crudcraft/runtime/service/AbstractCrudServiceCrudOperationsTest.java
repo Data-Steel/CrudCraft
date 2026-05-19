@@ -100,7 +100,7 @@ class AbstractCrudServiceCrudOperationsTest {
         queryExecutionStrategy =
                 (QueryExecutionStrategy<TestEntity>) mock(QueryExecutionStrategy.class);
         service = new TestService(repository, new TestMapper());
-        service.queryExecutor = queryExecutionStrategy;
+        service.setQueryExecutorForTests(queryExecutionStrategy);
         service.extensions.add(new AppendingExtension());
     }
 
@@ -246,7 +246,7 @@ class AbstractCrudServiceCrudOperationsTest {
     void mapperCustomizerRunsAfterGeneratedMapperWithoutEditingMapper() {
         UUID id = UUID.randomUUID();
         TestService customService = new TestService(repository, new TestMapper());
-        customService.queryExecutor = queryExecutionStrategy;
+        customService.setQueryExecutorForTests(queryExecutionStrategy);
         customService.mapperCustomizer =
                 new EntityMapperCustomizer<>() {
                     @Override
@@ -302,7 +302,7 @@ class AbstractCrudServiceCrudOperationsTest {
     @Test
     void upsertCreatesWhenGeneratedRequestDtoHasNoReadableIdProperty() {
         TestService generatedDtoService = new TestService(repository, new MissingIdMapper());
-        generatedDtoService.queryExecutor = queryExecutionStrategy;
+        generatedDtoService.setQueryExecutorForTests(queryExecutionStrategy);
         when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         TestResponse response = generatedDtoService.upsert(new TestRequest(null, "generated"));
@@ -584,7 +584,7 @@ class AbstractCrudServiceCrudOperationsTest {
     @Test
     void defaultHookImplementationsExecuteWithoutOverrides() {
         PlainService plain = new PlainService(repository, new TestMapper());
-        plain.queryExecutor = queryExecutionStrategy;
+        plain.setQueryExecutorForTests(queryExecutionStrategy);
         UUID id = UUID.randomUUID();
         TestRequest request = new TestRequest(id, "plain");
         TestEntity entity = new TestEntity(id, "old");

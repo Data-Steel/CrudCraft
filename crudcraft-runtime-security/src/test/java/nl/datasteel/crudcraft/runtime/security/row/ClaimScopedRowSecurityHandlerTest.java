@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.UUID;
 import nl.datasteel.crudcraft.runtime.security.AccessDeniedException;
+import nl.datasteel.crudcraft.runtime.security.row.fixture.RowSecurityFixtures;
 import nl.datasteel.crudcraft.runtime.security.scope.PrincipalScopeAccessor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -309,8 +310,7 @@ class ClaimScopedRowSecurityHandlerTest {
     @Test
     void applyWrapsIllegalAccessForPackagePrivateForeignEntity() throws Exception {
         Class<?> type =
-                Class.forName(
-                        "nl.datasteel.crudcraft.runtime.security.row.fixture.PackagePrivateScopedEntity");
+                Class.forName(RowSecurityFixtures.packagePrivateScopedEntityType().getName());
         Constructor<?> ctor = type.getDeclaredConstructor();
         ctor.setAccessible(true);
         Object entity = ctor.newInstance();

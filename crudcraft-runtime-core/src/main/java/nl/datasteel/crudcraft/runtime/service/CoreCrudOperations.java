@@ -86,7 +86,7 @@ abstract class CoreCrudOperations<T, U, R, F, ID>
     protected final Class<T> entityClass;
     protected final Class<R> responseClass;
     protected final Class<F> refClass;
-    protected QueryExecutionStrategy<T> queryExecutor;
+    private volatile QueryExecutionStrategy<T> queryExecutor;
 
     /*
      * Published by Spring through @PersistenceContext before request handling.
@@ -207,6 +207,10 @@ abstract class CoreCrudOperations<T, U, R, F, ID>
     @Override
     protected QueryExecutionStrategy<T> queryExecutor() {
         return queryExecutor;
+    }
+
+    void setQueryExecutorForTests(QueryExecutionStrategy<T> queryExecutor) {
+        this.queryExecutor = queryExecutor;
     }
 
     @Override

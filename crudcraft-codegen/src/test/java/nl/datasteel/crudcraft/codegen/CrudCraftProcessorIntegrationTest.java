@@ -265,7 +265,9 @@ class CrudCraftProcessorIntegrationTest {
     void processorUsesRegisteredGeneratorsFromWriterRegistry() throws Exception {
         setWriterRegistry(List.of(new TestBasicGenerator()), List.of(new TestCrudGenerator()));
         TestBasicGenerator.writes = 0;
+        TestBasicGenerator.written = false;
         TestCrudGenerator.writes = 0;
+        TestCrudGenerator.written = false;
 
         try {
             Compilation compilation =
@@ -274,8 +276,8 @@ class CrudCraftProcessorIntegrationTest {
                             .compile(serviceLoaderProduct());
 
             assertSuccess(compilation);
-            assertTrue(TestBasicGenerator.writes > 0);
-            assertTrue(TestCrudGenerator.writes > 0);
+            assertTrue(TestBasicGenerator.written);
+            assertTrue(TestCrudGenerator.written);
         } finally {
             resetWriterRegistry();
         }
