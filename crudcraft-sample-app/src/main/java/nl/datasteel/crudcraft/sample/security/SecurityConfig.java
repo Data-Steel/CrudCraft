@@ -103,7 +103,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private static boolean isStatelessApiRequest(HttpServletRequest request) {
+    static boolean isStatelessApiRequest(HttpServletRequest request) {
         if (hasBearerToken(request)) {
             return true;
         }
@@ -113,7 +113,7 @@ public class SecurityConfig {
                 && !path.startsWith("/v3/api-docs");
     }
 
-    private static boolean hasBearerToken(HttpServletRequest request) {
+    static boolean hasBearerToken(HttpServletRequest request) {
         String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
         return authorization != null && authorization.startsWith("Bearer ");
     }
