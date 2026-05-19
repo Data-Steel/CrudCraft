@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -56,9 +57,7 @@ public class SecurityConfig {
                                 csrf.csrfTokenRepository(
                                                 CookieCsrfTokenRepository.withHttpOnlyFalse())
                                         .ignoringRequestMatchers(
-                                                PathPatternRequestMatcher.pathPattern(
-                                                        HttpMethod.POST, "/auth/login"),
-                                                SecurityConfig::hasBearerToken))
+                                                SecurityConfig::isStatelessApiRequest))
                 .headers(
                         h ->
                                 h.withObjectPostProcessor(new EagerHeaderWriterFilterProcessor())
@@ -104,8 +103,18 @@ public class SecurityConfig {
         return http.build();
     }
 
+    private static boolean isStatelessApiRequest(HttpServletRequest request) {
+        if (hasBearerToken(request)) {
+            return true;
+        }
+        String path = request.getRequestURI();
+        return !path.startsWith("/h2-console")
+                && !path.startsWith("/swagger-ui")
+                && !path.startsWith("/v3/api-docs");
+    }
+
     private static boolean hasBearerToken(HttpServletRequest request) {
-        String authorization = request.getHeader("Authorization");
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
         return authorization != null && authorization.startsWith("Bearer ");
     }
 
