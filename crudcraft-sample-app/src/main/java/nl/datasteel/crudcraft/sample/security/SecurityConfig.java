@@ -16,6 +16,7 @@
 
 package nl.datasteel.crudcraft.sample.security;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -35,6 +36,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.header.HeaderWriterFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
@@ -49,7 +51,14 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(
             HttpSecurity http, JwtAuthenticationConverter jwtAuthConverter) throws Exception {
 
-        http.csrf(csrf -> csrf.disable())
+        http.csrf(
+                        csrf ->
+                                csrf.csrfTokenRepository(
+                                                CookieCsrfTokenRepository.withHttpOnlyFalse())
+                                        .ignoringRequestMatchers(
+                                                PathPatternRequestMatcher.pathPattern(
+                                                        HttpMethod.POST, "/auth/login"),
+                                                SecurityConfig::hasBearerToken))
                 .headers(
                         h ->
                                 h.withObjectPostProcessor(new EagerHeaderWriterFilterProcessor())
@@ -93,6 +102,11 @@ public class SecurityConfig {
                                                         jwtAuthConverter)));
 
         return http.build();
+    }
+
+    private static boolean hasBearerToken(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+        return authorization != null && authorization.startsWith("Bearer ");
     }
 
     @Bean

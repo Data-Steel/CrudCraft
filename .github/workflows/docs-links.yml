@@ -29,6 +29,5 @@ jobs:
             --no-progress
             --verbose
             --base .
-            --exclude-mail
             --accept 200,429
             "./**/*.md"

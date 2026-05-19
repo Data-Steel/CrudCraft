@@ -147,9 +147,10 @@ public final class CollectionHydrator {
      * database.
      *
      * @param entityType the type of the entity being projected
-     * @param metadata the projection metadata for the DTO type
+     * @param attributes the projection metadata attributes
      * @param dtoMap a map of IDs to DTO instances to hydrate
      * @param fetcher a function that fetches collection data for the given entity type
+     * @param visited the already visited attributes
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static <T, D> void hydrateCollections(
