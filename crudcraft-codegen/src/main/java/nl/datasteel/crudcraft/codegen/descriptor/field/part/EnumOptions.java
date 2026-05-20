@@ -29,7 +29,7 @@ public record EnumOptions(boolean isEnum, List<String> values) {
 
     /** Unmodifiable constructor for EnumOptions. */
     public EnumOptions {
-        values = values == null ? List.of() : List.copyOf(values);
+        values = copyValues(values);
     }
 
     /**
@@ -92,5 +92,9 @@ public record EnumOptions(boolean isEnum, List<String> values) {
     @Override
     public String toString() {
         return "EnumOptions{" + "isEnum=" + isEnum + ", values=" + values + '}';
+    }
+
+    private static List<String> copyValues(List<String> values) {
+        return values == null ? List.of() : List.copyOf(values);
     }
 }

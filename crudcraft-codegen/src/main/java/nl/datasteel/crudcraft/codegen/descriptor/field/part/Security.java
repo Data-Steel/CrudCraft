@@ -41,9 +41,8 @@ public record Security(
      * @param writePolicy policy applied when writes are denied
      */
     public Security {
-        readRoles = readRoles == null ? new String[0] : Arrays.copyOf(readRoles, readRoles.length);
-        writeRoles =
-                writeRoles == null ? new String[0] : Arrays.copyOf(writeRoles, writeRoles.length);
+        readRoles = copyRoles(readRoles);
+        writeRoles = copyRoles(writeRoles);
         writePolicy = writePolicy == null ? WritePolicy.SKIP_ON_DENIED : writePolicy;
     }
 
@@ -167,5 +166,9 @@ public record Security(
                 + ", writePolicy="
                 + writePolicy
                 + '}';
+    }
+
+    private static String[] copyRoles(String[] roles) {
+        return roles == null ? new String[0] : Arrays.copyOf(roles, roles.length);
     }
 }

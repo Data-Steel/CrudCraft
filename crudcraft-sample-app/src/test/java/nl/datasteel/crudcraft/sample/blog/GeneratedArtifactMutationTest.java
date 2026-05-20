@@ -189,7 +189,7 @@ class GeneratedArtifactMutationTest extends PostgresIntegrationTestBase {
                 };
 
         BadRequestException depth =
-                assertThrows(BadRequestException.class, deepRequest::validate);
+                assertThrows(BadRequestException.class, () -> deepRequest.validate());
         assertTrue(depth.getMessage().contains("maximum depth of 2"));
 
         TagSearchRequest nullCriterionRequest =
@@ -201,7 +201,7 @@ class GeneratedArtifactMutationTest extends PostgresIntegrationTestBase {
                 };
 
         BadRequestException nullCriterion =
-                assertThrows(BadRequestException.class, nullCriterionRequest::validate);
+                assertThrows(BadRequestException.class, () -> nullCriterionRequest.validate());
         assertTrue(nullCriterion.getMessage().contains("criterion must not be null"));
 
         TagSearchRequest throwingValidateRequest =
@@ -213,7 +213,9 @@ class GeneratedArtifactMutationTest extends PostgresIntegrationTestBase {
                 };
 
         IllegalStateException thrown =
-                assertThrows(IllegalStateException.class, throwingValidateRequest::toSpecification);
+                assertThrows(
+                        IllegalStateException.class,
+                        () -> throwingValidateRequest.toSpecification());
         assertEquals("validated", thrown.getMessage());
     }
 

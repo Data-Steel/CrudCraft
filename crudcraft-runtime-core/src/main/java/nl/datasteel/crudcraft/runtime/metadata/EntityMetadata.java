@@ -52,7 +52,7 @@ public final class EntityMetadata {
      * @return immutable field metadata list
      */
     public List<EntityFieldMetadata> getFields() {
-        return fields;
+        return List.copyOf(fields);
     }
 
     /**

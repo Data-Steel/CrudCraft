@@ -349,11 +349,7 @@ public class CrudCraftProcessor extends AbstractProcessor {
         if (element.getAnnotation(Embeddable.class) == null) {
             return;
         }
-        int maxDepth =
-                        Integer.parseInt(
-                                processingEnv
-                                        .getOptions()
-                                        .getOrDefault("crudcraft.embeddable.maxDepth", "5"));
+        int maxDepth = embeddableMaxDepth(element);
         validateEmbeddableDepth((TypeElement) element, 0, maxDepth, new LinkedHashSet<>());
     }
 
@@ -383,6 +379,17 @@ public class CrudCraftProcessor extends AbstractProcessor {
                     && nested.getAnnotation(Embeddable.class) != null) {
                 validateEmbeddableDepth(nested, depth + 1, maxDepth, new LinkedHashSet<>(visited));
             }
+        }
+    }
+
+    private int embeddableMaxDepth(Element element) {
+        String raw = processingEnv.getOptions().getOrDefault("crudcraft.embeddable.maxDepth", "5");
+        try {
+            return Integer.parseInt(raw);
+        } catch (NumberFormatException ex) {
+            throw new CodegenValidationException(
+                    element.getSimpleName().toString(),
+                    "crudcraft.embeddable.maxDepth must be an integer: " + raw);
         }
     }
 
