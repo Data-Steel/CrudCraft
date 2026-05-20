@@ -69,11 +69,7 @@ public final class SearchRequestGenerator {
         Map<String, FieldDescriptor> propDesc = new LinkedHashMap<>();
         for (SearchField field : fields) {
             propOps.computeIfAbsent(
-                            field.property(),
-                            property -> {
-                                property.length();
-                                return EnumSet.noneOf(SearchOperator.class);
-                            })
+                            field.property(), ignored -> EnumSet.noneOf(SearchOperator.class))
                     .add(field.operator());
             propDesc.putIfAbsent(field.property(), field.descriptor());
         }

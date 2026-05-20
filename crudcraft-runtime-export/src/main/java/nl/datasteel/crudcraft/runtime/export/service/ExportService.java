@@ -236,10 +236,6 @@ public class ExportService<R, S> {
             @Nullable ExportRequest exportRequest,
             @NonNull Function<PageRequest, Page<R>> searchFunction,
             @NonNull Function<R, R> securityFilter) {
-        if (searchRequest != null) {
-            searchRequest.getClass();
-        }
-
         // Validate limit parameter - reject negative values, but allow 0 for empty export
         if (limit != null && limit < 0) {
             return ResponseEntity.badRequest().build();

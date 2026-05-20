@@ -70,7 +70,8 @@ public class ExportEndpoint extends AbstractEndpointSpecProvider {
                                 md,
                                 ParameterSpec.builder(ClassName.get(Integer.class), "limit")
                                         .addAnnotation(
-                                                AnnotationSpec.builder(EndpointSupport.REQUEST_PARAM)
+                                                AnnotationSpec.builder(
+                                                                EndpointSupport.REQUEST_PARAM)
                                                         .addMember("value", "$S", "limit")
                                                         .addMember("required", "$L", false)
                                                         .build())
@@ -81,7 +82,8 @@ public class ExportEndpoint extends AbstractEndpointSpecProvider {
                                 md,
                                 ParameterSpec.builder(ClassName.get(String.class), "format")
                                         .addAnnotation(
-                                                AnnotationSpec.builder(EndpointSupport.REQUEST_PARAM)
+                                                AnnotationSpec.builder(
+                                                                EndpointSupport.REQUEST_PARAM)
                                                         .addMember("value", "$S", "format")
                                                         .addMember("required", "$L", true)
                                                         .build())
@@ -90,7 +92,8 @@ public class ExportEndpoint extends AbstractEndpointSpecProvider {
                 md ->
                         EndpointSupport.withModel(
                                 md,
-                                ParameterSpec.builder(EndpointSupport.EXPORT_REQUEST, "exportRequest")
+                                ParameterSpec.builder(
+                                                EndpointSupport.EXPORT_REQUEST, "exportRequest")
                                         .addAnnotation(EndpointSupport.MODEL_ATTR)
                                         .build()));
 

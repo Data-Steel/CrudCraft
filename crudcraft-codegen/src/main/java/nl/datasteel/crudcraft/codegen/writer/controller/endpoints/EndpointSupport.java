@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.util.ModelIdTypeResolver;
@@ -31,6 +32,13 @@ import nl.datasteel.crudcraft.codegen.util.ModelIdTypeResolver;
 
 /** Common {@link ClassName} constants used by endpoint generators. */
 public final class EndpointSupport {
+    /** Shared sink for deliberate no-op value consumption. */
+    private static final class NoOpSink {
+        private static final AtomicReference<Object> LAST = new AtomicReference<>();
+
+        private NoOpSink() {}
+    }
+
     private EndpointSupport() {}
 
     /** Spring {@code ResponseEntity}. */
@@ -292,10 +300,7 @@ public final class EndpointSupport {
      * @param modelDescriptor descriptor supplied by endpoint generation pipeline
      */
     public static void touch(ModelDescriptor modelDescriptor) {
-        if (modelDescriptor == null) {
-            return;
-        }
-        modelDescriptor.getName();
+        NoOpSink.LAST.getAndSet(modelDescriptor);
     }
 
     /**

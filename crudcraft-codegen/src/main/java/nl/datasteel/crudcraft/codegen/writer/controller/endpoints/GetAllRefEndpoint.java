@@ -54,7 +54,12 @@ public class GetAllRefEndpoint extends AbstractEndpointSpecProvider {
 
         List<java.util.function.Function<ModelDescriptor, ParameterSpec>> params =
                 new java.util.ArrayList<>();
-        params.add(m -> EndpointSupport.withModel(m, ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable").build()));
+        params.add(
+                m ->
+                        EndpointSupport.withModel(
+                                m,
+                                ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable")
+                                        .build()));
 
         return new EndpointSpec(
                 CrudEndpoint.GET_ALL_REF,

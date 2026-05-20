@@ -16,6 +16,8 @@
 
 package nl.datasteel.crudcraft.runtime.mapper;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
  * Customizes entities and DTOs immediately after the generated {@link EntityMapper} has mapped
  * them.
@@ -107,15 +109,14 @@ public interface EntityMapperCustomizer<T, U, R, F> {
     }
 
     private static void consume(Object value) {
-        if (value != null) {
-            value.getClass();
-        }
+        NoOpHolder.PARAMETER_SINK.getAndSet(value);
     }
 
     /** Holder for the shared no-op instance. */
     final class NoOpHolder {
         private static final EntityMapperCustomizer<?, ?, ?, ?> INSTANCE =
                 new EntityMapperCustomizer<>() {};
+        private static final AtomicReference<Object> PARAMETER_SINK = new AtomicReference<>();
 
         private NoOpHolder() {}
     }

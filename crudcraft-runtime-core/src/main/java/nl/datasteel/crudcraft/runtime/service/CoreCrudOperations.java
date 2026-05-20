@@ -632,10 +632,16 @@ abstract class CoreCrudOperations<T, U, R, F, ID>
         return message == null || message.isBlank() ? ex.getClass().getSimpleName() : message;
     }
 
+    @SuppressFBWarnings(
+            value = "UC_USELESS_VOID_METHOD",
+            justification =
+                    "This helper intentionally consumes default-hook parameters in no-op base"
+                            + " implementations to keep extension signatures stable and static"
+                            + " analysis-friendly.")
     private static void consume(Object... values) {
         for (Object value : values) {
-            if (value != null) {
-                value.getClass();
+            if (value == null) {
+                return;
             }
         }
     }

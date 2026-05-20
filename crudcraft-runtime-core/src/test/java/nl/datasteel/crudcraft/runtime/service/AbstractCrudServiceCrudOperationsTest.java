@@ -32,6 +32,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +40,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import nl.datasteel.crudcraft.runtime.Identified;
 import nl.datasteel.crudcraft.runtime.InternalApi;
 import nl.datasteel.crudcraft.runtime.exception.BadRequestException;
@@ -62,6 +64,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -240,6 +245,88 @@ class AbstractCrudServiceCrudOperationsTest {
         assertEquals(10, extensionBeforeSaveCount.get());
         assertEquals(2, extensionBeforeDeleteCount.get());
         verify(repository, times(2)).delete(any());
+    }
+
+    @Test
+    void bulkResultHelpersCoverFailureAndTransactionBranches() throws Exception {
+        @SuppressWarnings("unchecked")
+        BulkResult<String> empty =
+                (BulkResult<String>)
+                        invoke(
+                                service,
+                                "bulkResult",
+                                new Class[] {Collection.class, Function.class},
+                                null,
+                                (Function<TestRequest, String>) request -> "ignored");
+        assertTrue(empty.succeeded().isEmpty());
+        assertTrue(empty.failed().isEmpty());
+
+        List<TestRequest> inputs =
+                List.of(
+                        new TestRequest(null, "ok"),
+                        new TestRequest(null, "blank"),
+                        new TestRequest(null, "null"));
+        Function<TestRequest, String> operation =
+                request -> {
+                    if ("blank".equals(request.value())) {
+                        throw new IllegalStateException("  ");
+                    }
+                    if ("null".equals(request.value())) {
+                        throw new IllegalArgumentException((String) null);
+                    }
+                    return request.value().toUpperCase();
+                };
+        @SuppressWarnings("unchecked")
+        BulkResult<String> mixed =
+                (BulkResult<String>)
+                        invoke(
+                                service,
+                                "bulkResult",
+                                new Class[] {Collection.class, Function.class},
+                                inputs,
+                                operation);
+        assertEquals(List.of("OK"), mixed.succeeded());
+        assertEquals(2, mixed.failed().size());
+        assertEquals(1, mixed.failed().get(0).index());
+        assertEquals("IllegalStateException", mixed.failed().get(0).message());
+        assertEquals(2, mixed.failed().get(1).index());
+        assertEquals("IllegalArgumentException", mixed.failed().get(1).message());
+
+        @SuppressWarnings("unchecked")
+        String withoutTx =
+                (String)
+                        invoke(
+                                service,
+                                "executeBulkItem",
+                                new Class[] {Function.class, Object.class},
+                                (Function<String, String>) value -> value + "-no-tx",
+                                "a");
+        assertEquals("a-no-tx", withoutTx);
+
+        PlatformTransactionManager transactionManager = mock(PlatformTransactionManager.class);
+        TransactionStatus txStatus = mock(TransactionStatus.class);
+        when(transactionManager.getTransaction(any(TransactionDefinition.class))).thenReturn(txStatus);
+        ApplicationContext context = mock(ApplicationContext.class);
+        when(context.getBean(PlatformTransactionManager.class)).thenReturn(transactionManager);
+        service.setApplicationContext(context);
+
+        @SuppressWarnings("unchecked")
+        String withTx =
+                (String)
+                        invoke(
+                                service,
+                                "executeBulkItem",
+                                new Class[] {Function.class, Object.class},
+                                (Function<String, String>) value -> value + "-tx",
+                                "b");
+        assertEquals("b-tx", withTx);
+        verify(transactionManager)
+                .getTransaction(
+                        argThat(
+                                definition ->
+                                        definition.getPropagationBehavior()
+                                                == TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        verify(transactionManager).commit(txStatus);
     }
 
     @Test

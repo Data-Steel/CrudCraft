@@ -71,7 +71,8 @@ public class PatchEndpoint extends AbstractEndpointSpecProvider {
                     md ->
                             EndpointSupport.withModel(
                                     md,
-                                    ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
+                                    ParameterSpec.builder(
+                                                    ClassName.get(dtoReqPkg, dtoReq), "request")
                                             .addAnnotation(EndpointSupport.NOT_NULL)
                                             .addAnnotation(EndpointSupport.REQUEST_BODY)
                                             .build()));
