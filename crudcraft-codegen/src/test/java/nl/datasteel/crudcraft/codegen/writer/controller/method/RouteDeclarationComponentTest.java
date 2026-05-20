@@ -40,9 +40,9 @@ class RouteDeclarationComponentTest {
                                 AnnotationSpec.builder(EndpointSupport.GET_MAPPING)
                                         .addMember("value", "$S", "/count")
                                         .build(),
-                        md -> null,
+                        md -> { if (md != null) { md.getName(); } return null; },
                         java.util.List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         ControllerMethodContext ctx =
                 new ControllerMethodContext(
                         MethodSpec.methodBuilder("count"),
@@ -63,10 +63,10 @@ class RouteDeclarationComponentTest {
                 new EndpointSpec(
                         CrudEndpoint.COUNT,
                         "count",
-                        md -> null,
-                        md -> null,
+                        md -> { if (md != null) { md.getName(); } return null; },
+                        md -> { if (md != null) { md.getName(); } return null; },
                         java.util.List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         ControllerMethodContext ctx =
                 new ControllerMethodContext(
                         MethodSpec.methodBuilder("count"),

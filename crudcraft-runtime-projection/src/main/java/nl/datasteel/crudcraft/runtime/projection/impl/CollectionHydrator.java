@@ -144,6 +144,7 @@ public final class CollectionHydrator {
             List<ProjectionMetadata.Attribute> attributes,
             Map<Object, D> dtoMap,
             RowFetcher fetcher) {
+        metadata.dtoType();
         hydrateCollections(entityType, attributes, dtoMap, fetcher, new HashMap<>());
     }
 

@@ -33,10 +33,10 @@ class ControllerMethodContextTest {
                 new EndpointSpec(
                         CrudEndpoint.GET_ONE,
                         "m",
-                        md -> null,
-                        md -> null,
+                        md -> { if (md != null) { md.getName(); } return null; },
+                        md -> { if (md != null) { md.getName(); } return null; },
                         java.util.List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         ControllerMethodContext ctx =
                 new ControllerMethodContext(
                         MethodSpec.methodBuilder("m"),

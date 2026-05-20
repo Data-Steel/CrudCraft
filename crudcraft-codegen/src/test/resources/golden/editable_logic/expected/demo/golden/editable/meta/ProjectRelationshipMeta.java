@@ -31,10 +31,12 @@ public final class ProjectRelationshipMeta {
     }
 
     public static void fix(Project entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(Project entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

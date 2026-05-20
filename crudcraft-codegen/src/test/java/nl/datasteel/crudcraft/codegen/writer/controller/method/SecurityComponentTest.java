@@ -40,9 +40,9 @@ class SecurityComponentTest {
                         CrudEndpoint.GET_ONE,
                         "m",
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
-                        md -> null,
+                        md -> { if (md != null) { md.getName(); } return null; },
                         java.util.List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         ControllerMethodContext ctx =
                 new ControllerMethodContext(
                         MethodSpec.methodBuilder("m"),
@@ -62,9 +62,9 @@ class SecurityComponentTest {
                         CrudEndpoint.GET_ONE,
                         "m",
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
-                        md -> null,
+                        md -> { if (md != null) { md.getName(); } return null; },
                         java.util.List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         ControllerMethodContext ctx =
                 new ControllerMethodContext(
                         MethodSpec.methodBuilder("m"),
@@ -84,9 +84,9 @@ class SecurityComponentTest {
                         CrudEndpoint.GET_ONE,
                         "m",
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
-                        md -> null,
+                        md -> { if (md != null) { md.getName(); } return null; },
                         java.util.List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         ControllerMethodContext ctx =
                 new ControllerMethodContext(
                         MethodSpec.methodBuilder("m"),

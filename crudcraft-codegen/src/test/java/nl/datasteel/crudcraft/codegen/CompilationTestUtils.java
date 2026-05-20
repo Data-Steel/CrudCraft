@@ -99,7 +99,12 @@ public final class CompilationTestUtils {
      */
     public static Elements elements(JavaFileObject... sources) {
         String key = cacheKey(sources);
-        return ELEMENTS_CACHE.computeIfAbsent(key, ignored -> compileElements(sources));
+        return ELEMENTS_CACHE.computeIfAbsent(
+                key,
+                cacheKey -> {
+                    cacheKey.length();
+                    return compileElements(sources);
+                });
     }
 
     /**

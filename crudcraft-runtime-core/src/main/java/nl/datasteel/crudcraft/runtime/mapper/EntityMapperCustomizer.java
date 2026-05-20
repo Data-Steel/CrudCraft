@@ -54,6 +54,7 @@ public interface EntityMapperCustomizer<T, U, R, F> {
      * @return entity to persist
      */
     default T afterFromRequest(T entity, U request) {
+        consume(request);
         return entity;
     }
 
@@ -65,6 +66,7 @@ public interface EntityMapperCustomizer<T, U, R, F> {
      * @return entity to persist
      */
     default T afterUpdate(T entity, U request) {
+        consume(request);
         return entity;
     }
 
@@ -76,6 +78,7 @@ public interface EntityMapperCustomizer<T, U, R, F> {
      * @return entity to persist
      */
     default T afterPatch(T entity, U request) {
+        consume(request);
         return entity;
     }
 
@@ -87,6 +90,7 @@ public interface EntityMapperCustomizer<T, U, R, F> {
      * @return response DTO to return
      */
     default R afterToResponse(R response, T entity) {
+        consume(entity);
         return response;
     }
 
@@ -98,7 +102,14 @@ public interface EntityMapperCustomizer<T, U, R, F> {
      * @return reference DTO to return
      */
     default F afterToRef(F ref, T entity) {
+        consume(entity);
         return ref;
+    }
+
+    private static void consume(Object value) {
+        if (value != null) {
+            value.getClass();
+        }
     }
 
     /** Holder for the shared no-op instance. */

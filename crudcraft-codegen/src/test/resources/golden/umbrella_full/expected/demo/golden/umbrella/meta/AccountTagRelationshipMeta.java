@@ -31,10 +31,12 @@ public final class AccountTagRelationshipMeta {
     }
 
     public static void fix(AccountTag entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(AccountTag entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

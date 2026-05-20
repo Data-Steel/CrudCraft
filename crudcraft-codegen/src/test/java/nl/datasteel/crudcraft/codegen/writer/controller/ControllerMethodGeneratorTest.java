@@ -75,7 +75,7 @@ class ControllerMethodGeneratorTest {
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
                         md -> ClassName.get(Void.class),
                         List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         gen.generate(spec, model, null);
         assertEquals(List.of("first", "second"), order);
     }
@@ -91,7 +91,7 @@ class ControllerMethodGeneratorTest {
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
                         md -> ClassName.get(Void.class),
                         List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         MethodSpec method = gen.generate(spec, model, policy);
         assertTrue(
                 method.annotations().stream().anyMatch(a -> a.toString().contains("PreAuthorize")));
@@ -107,7 +107,7 @@ class ControllerMethodGeneratorTest {
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
                         md -> ClassName.get(Void.class),
                         List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         MethodSpec method = gen.generate(spec, model, null);
         assertTrue(
                 method.annotations().stream().noneMatch(a -> a.toString().contains("PreAuthorize")));
@@ -123,7 +123,7 @@ class ControllerMethodGeneratorTest {
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
                         md -> ClassName.get(Void.class),
                         List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         MethodSpec method = gen.generate(spec, model, null);
         assertEquals(0, method.annotations().size());
         assertEquals(0, method.parameters().size());

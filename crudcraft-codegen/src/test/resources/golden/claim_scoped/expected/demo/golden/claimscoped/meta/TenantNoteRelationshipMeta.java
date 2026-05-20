@@ -31,10 +31,12 @@ public final class TenantNoteRelationshipMeta {
     }
 
     public static void fix(TenantNote entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(TenantNote entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

@@ -31,10 +31,12 @@ public final class AssetRelationshipMeta {
     }
 
     public static void fix(Asset entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(Asset entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

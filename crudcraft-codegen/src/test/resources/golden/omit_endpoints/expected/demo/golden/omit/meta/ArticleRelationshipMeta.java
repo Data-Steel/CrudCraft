@@ -31,10 +31,12 @@ public final class ArticleRelationshipMeta {
     }
 
     public static void fix(Article entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(Article entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

@@ -31,10 +31,12 @@ public final class DocumentRelationshipMeta {
     }
 
     public static void fix(Document entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(Document entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

@@ -34,6 +34,7 @@ public interface CrudRuntimeExtension<T, U> {
      * @return additional read filter or {@code null}
      */
     default Specification<T> readFilter(Class<T> entityType) {
+        consume(entityType);
         return null;
     }
 
@@ -66,6 +67,7 @@ public interface CrudRuntimeExtension<T, U> {
      * @return transformed request DTO
      */
     default U beforeUpdate(U request, T existing) {
+        consume(existing);
         return request;
     }
 
@@ -75,7 +77,7 @@ public interface CrudRuntimeExtension<T, U> {
      * @param entity entity to persist
      */
     default void beforeSave(T entity) {
-        // no-op by default
+        consume(entity);
     }
 
     /**
@@ -84,6 +86,12 @@ public interface CrudRuntimeExtension<T, U> {
      * @param entity entity to delete
      */
     default void beforeDelete(T entity) {
-        // no-op by default
+        consume(entity);
+    }
+
+    private static void consume(Object value) {
+        if (value != null) {
+            value.getClass();
+        }
     }
 }

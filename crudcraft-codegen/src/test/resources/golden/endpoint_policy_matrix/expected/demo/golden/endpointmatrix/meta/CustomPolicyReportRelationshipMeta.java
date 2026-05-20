@@ -31,10 +31,12 @@ public final class CustomPolicyReportRelationshipMeta {
     }
 
     public static void fix(CustomPolicyReport entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(CustomPolicyReport entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

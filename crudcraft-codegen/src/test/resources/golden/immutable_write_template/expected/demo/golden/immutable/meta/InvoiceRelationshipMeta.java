@@ -31,10 +31,12 @@ public final class InvoiceRelationshipMeta {
     }
 
     public static void fix(Invoice entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(Invoice entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

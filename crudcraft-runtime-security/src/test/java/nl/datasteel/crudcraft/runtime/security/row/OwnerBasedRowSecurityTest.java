@@ -219,7 +219,11 @@ class OwnerBasedRowSecurityTest {
             throw new Exception("boom");
         }
 
-        public void setOwnerId(UUID ownerId) {}
+        public void setOwnerId(UUID ownerId) {
+            if (ownerId != null) {
+                ownerId.getLeastSignificantBits();
+            }
+        }
     }
 
     private static final class WriteOnlyOwnerEntity {

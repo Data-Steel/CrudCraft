@@ -31,10 +31,12 @@ public final class SecureInternalSecretRelationshipMeta {
     }
 
     public static void fix(SecureInternalSecret entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(SecureInternalSecret entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

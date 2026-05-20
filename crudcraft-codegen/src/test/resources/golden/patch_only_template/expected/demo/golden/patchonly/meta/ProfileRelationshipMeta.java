@@ -31,10 +31,12 @@ public final class ProfileRelationshipMeta {
     }
 
     public static void fix(Profile entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(Profile entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

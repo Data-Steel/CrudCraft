@@ -31,10 +31,12 @@ public final class CatalogItemRelationshipMeta {
     }
 
     public static void fix(CatalogItem entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(CatalogItem entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

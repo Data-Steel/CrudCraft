@@ -51,17 +51,21 @@ public class ExistsEndpoint extends AbstractEndpointSpecProvider {
                 CrudEndpoint.EXISTS,
                 "exists",
                 md ->
-                        AnnotationSpec.builder(EndpointSupport.REQUEST_MAPPING)
-                                .addMember("value", "$S", "/exists/{id}")
-                                .addMember(
-                                        "method",
-                                        "{$T.HEAD, $T.GET}",
-                                        EndpointSupport.REQUEST_METHOD,
-                                        EndpointSupport.REQUEST_METHOD)
-                                .build(),
+                        EndpointSupport.withModel(
+                                md,
+                                AnnotationSpec.builder(EndpointSupport.REQUEST_MAPPING)
+                                        .addMember("value", "$S", "/exists/{id}")
+                                        .addMember(
+                                                "method",
+                                                "{$T.HEAD, $T.GET}",
+                                                EndpointSupport.REQUEST_METHOD,
+                                                EndpointSupport.REQUEST_METHOD)
+                                        .build()),
                 md ->
-                        ParameterizedTypeName.get(
-                                EndpointSupport.RESP_ENTITY, ClassName.get(Void.class)),
+                        EndpointSupport.withModel(
+                                md,
+                                ParameterizedTypeName.get(
+                                        EndpointSupport.RESP_ENTITY, ClassName.get(Void.class))),
                 List.of(
                         md ->
                                 ParameterSpec.builder(

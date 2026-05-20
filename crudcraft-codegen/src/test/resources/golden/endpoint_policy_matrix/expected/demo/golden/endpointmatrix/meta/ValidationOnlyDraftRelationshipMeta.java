@@ -31,10 +31,12 @@ public final class ValidationOnlyDraftRelationshipMeta {
     }
 
     public static void fix(ValidationOnlyDraft entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(ValidationOnlyDraft entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

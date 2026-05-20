@@ -579,7 +579,11 @@ class ClaimScopedRowSecurityHandlerTest {
             throw new IllegalArgumentException("boom");
         }
 
-        public void setTenantId(String tenantId) {}
+        public void setTenantId(String tenantId) {
+            if (tenantId != null) {
+                tenantId.length();
+            }
+        }
     }
 
     public static class ErrorThrowingEntity {
@@ -587,7 +591,11 @@ class ClaimScopedRowSecurityHandlerTest {
             throw new AssertionError("boom");
         }
 
-        public void setTenantId(String tenantId) {}
+        public void setTenantId(String tenantId) {
+            if (tenantId != null) {
+                tenantId.length();
+            }
+        }
     }
 
     public static class CheckedThrowingEntity {
@@ -595,7 +603,11 @@ class ClaimScopedRowSecurityHandlerTest {
             throw new Exception("boom");
         }
 
-        public void setTenantId(String tenantId) {}
+        public void setTenantId(String tenantId) {
+            if (tenantId != null) {
+                tenantId.length();
+            }
+        }
     }
 
     public enum Tier {

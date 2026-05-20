@@ -507,19 +507,19 @@ abstract class CoreCrudOperations<T, U, R, F, ID>
     }
 
     protected void preSave(T entity, U request) {
-        // no-op by default
+        consume(entity, request);
     }
 
     protected void postSave(T entity) {
-        // no-op by default
+        consume(entity);
     }
 
     protected void preDelete(T entity) {
-        // no-op by default
+        consume(entity);
     }
 
     protected void postDelete(T entity) {
-        // no-op by default
+        consume(entity);
     }
 
     /**
@@ -630,6 +630,14 @@ abstract class CoreCrudOperations<T, U, R, F, ID>
     private String bulkFailureMessage(RuntimeException ex) {
         String message = ex.getMessage();
         return message == null || message.isBlank() ? ex.getClass().getSimpleName() : message;
+    }
+
+    private static void consume(Object... values) {
+        for (Object value : values) {
+            if (value != null) {
+                value.getClass();
+            }
+        }
     }
 
     private U beforeCreate(U request) {

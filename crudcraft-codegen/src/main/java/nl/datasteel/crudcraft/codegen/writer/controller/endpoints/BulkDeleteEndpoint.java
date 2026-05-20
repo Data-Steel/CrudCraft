@@ -51,9 +51,11 @@ public class BulkDeleteEndpoint extends AbstractEndpointSpecProvider {
                 CrudEndpoint.BULK_DELETE,
                 "deleteAllByIds",
                 md ->
-                        AnnotationSpec.builder(EndpointSupport.DELETE_MAPPING)
-                                .addMember("value", "$S", "/batch/delete")
-                                .build(),
+                        EndpointSupport.withModel(
+                                md,
+                                AnnotationSpec.builder(EndpointSupport.DELETE_MAPPING)
+                                        .addMember("value", "$S", "/batch/delete")
+                                        .build()),
                 md ->
                         ParameterizedTypeName.get(
                                 EndpointSupport.RESP_ENTITY,

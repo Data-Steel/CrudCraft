@@ -558,6 +558,7 @@ public class ProjectController {
         long _crudcraftStarted = System.nanoTime();
         String _crudcraftOutcome = "success";
         try {
+            request.getClass();
             return ResponseEntity.ok().build();
         } catch (RuntimeException ex) {
             _crudcraftOutcome = "error";

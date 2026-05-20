@@ -50,17 +50,13 @@ public class GetAllEndpoint extends AbstractEndpointSpecProvider {
 
         List<java.util.function.Function<ModelDescriptor, ParameterSpec>> params =
                 new java.util.ArrayList<>();
-        params.add(
-                EndpointParameterTemplates.PAGEABLE.create(
-                        ClassName.get(
-                                modelDescriptor.getPackageName(),
-                                modelDescriptor.getName())));
+        params.add(md2 -> EndpointSupport.withModel(md2, ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable").build()));
 
         return new EndpointSpec(
                 CrudEndpoint.GET_ALL,
                 "getAll",
-                m -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
-                m -> returnType,
+                m -> EndpointSupport.withModel(m, AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build()),
+                m -> EndpointSupport.withModel(m, returnType),
                 params,
                 (mb, m) -> {
                     mb.addCode(

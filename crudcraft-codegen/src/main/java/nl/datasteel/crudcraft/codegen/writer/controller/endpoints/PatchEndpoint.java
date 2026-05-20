@@ -69,10 +69,12 @@ public class PatchEndpoint extends AbstractEndpointSpecProvider {
         } else {
             params.add(
                     md ->
-                            ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
-                                    .addAnnotation(EndpointSupport.NOT_NULL)
-                                    .addAnnotation(EndpointSupport.REQUEST_BODY)
-                                    .build());
+                            EndpointSupport.withModel(
+                                    md,
+                                    ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
+                                            .addAnnotation(EndpointSupport.NOT_NULL)
+                                            .addAnnotation(EndpointSupport.REQUEST_BODY)
+                                            .build()));
         }
 
         return new EndpointSpec(
@@ -91,8 +93,11 @@ public class PatchEndpoint extends AbstractEndpointSpecProvider {
                     return mapping.build();
                 },
                 md ->
-                        ParameterizedTypeName.get(
-                                EndpointSupport.RESP_ENTITY, ClassName.get(dtoRespPkg, dtoFull)),
+                        EndpointSupport.withModel(
+                                md,
+                                ParameterizedTypeName.get(
+                                        EndpointSupport.RESP_ENTITY,
+                                        ClassName.get(dtoRespPkg, dtoFull))),
                 params,
                 (mb, md) -> {
                     if (md.hasLobFields()) {

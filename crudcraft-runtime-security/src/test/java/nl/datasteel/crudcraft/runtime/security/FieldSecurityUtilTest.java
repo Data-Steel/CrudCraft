@@ -231,10 +231,12 @@ class FieldSecurityUtilTest {
             List<Callable<Boolean>> checks =
                     java.util.stream.IntStream.range(0, 200)
                             .<Callable<Boolean>>mapToObj(
-                                    ignored ->
-                                            () ->
-                                                    FieldSecurityUtil.canReadField(
-                                                            PlainDto.class, "value"))
+                                    index -> {
+                                        Math.abs(index);
+                                        return () ->
+                                                FieldSecurityUtil.canReadField(
+                                                        PlainDto.class, "value");
+                                    })
                             .toList();
 
             for (Future<Boolean> result : executor.invokeAll(checks)) {

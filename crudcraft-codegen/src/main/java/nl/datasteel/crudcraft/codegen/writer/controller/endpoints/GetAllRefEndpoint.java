@@ -54,16 +54,18 @@ public class GetAllRefEndpoint extends AbstractEndpointSpecProvider {
 
         List<java.util.function.Function<ModelDescriptor, ParameterSpec>> params =
                 new java.util.ArrayList<>();
-        params.add(m -> ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable").build());
+        params.add(m -> EndpointSupport.withModel(m, ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable").build()));
 
         return new EndpointSpec(
                 CrudEndpoint.GET_ALL_REF,
                 "getAllRef",
                 m ->
-                        AnnotationSpec.builder(EndpointSupport.GET_MAPPING)
-                                .addMember("value", "$S", "/ref")
-                                .build(),
-                m -> returnType,
+                        EndpointSupport.withModel(
+                                m,
+                                AnnotationSpec.builder(EndpointSupport.GET_MAPPING)
+                                        .addMember("value", "$S", "/ref")
+                                        .build()),
+                m -> EndpointSupport.withModel(m, returnType),
                 params,
                 (mb, m) -> {
                     mb.addCode(

@@ -61,9 +61,9 @@ class ResponseComponentTest {
                         CrudEndpoint.COUNT,
                         "count",
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
-                        md -> null,
+                        md -> { if (md != null) { md.getName(); } return null; },
                         java.util.List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         ControllerMethodContext ctx =
                 new ControllerMethodContext(
                         MethodSpec.methodBuilder("count"),

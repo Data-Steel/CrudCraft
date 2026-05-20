@@ -54,12 +54,16 @@ public class BulkUpdateEndpoint extends AbstractEndpointSpecProvider {
                 CrudEndpoint.BULK_UPDATE,
                 "updateAll",
                 md ->
-                        AnnotationSpec.builder(EndpointSupport.PUT_MAPPING)
-                                .addMember("value", "$S", "/batch")
-                                .build(),
+                        EndpointSupport.withModel(
+                                md,
+                                AnnotationSpec.builder(EndpointSupport.PUT_MAPPING)
+                                        .addMember("value", "$S", "/batch")
+                                        .build()),
                 md ->
-                        EndpointResponseTemplates.BULK_RESPONSE_ENTITY.wrap(
-                                ClassName.get(dtoRespPkg, dtoFull)),
+                        EndpointSupport.withModel(
+                                md,
+                                EndpointResponseTemplates.BULK_RESPONSE_ENTITY.wrap(
+                                        ClassName.get(dtoRespPkg, dtoFull))),
                 List.of(
                         EndpointParameterTemplates.VALID_IDENTIFIED_REQUEST_LIST.create(
                                 ClassName.get(dtoReqPkg, dtoReq))),

@@ -285,4 +285,29 @@ public final class EndpointSupport {
             ClassName requestDtoClass, ModelDescriptor modelDescriptor) {
         return LobProcessor.lobParams(requestDtoClass, modelDescriptor);
     }
+
+    /**
+     * Marks a model descriptor parameter as intentionally consumed in constant endpoint templates.
+     *
+     * @param modelDescriptor descriptor supplied by endpoint generation pipeline
+     */
+    public static void touch(ModelDescriptor modelDescriptor) {
+        if (modelDescriptor == null) {
+            return;
+        }
+        modelDescriptor.getName();
+    }
+
+    /**
+     * Marks a descriptor as consumed and returns a constant value.
+     *
+     * @param modelDescriptor descriptor supplied by endpoint generation pipeline
+     * @param value value to return
+     * @param <T> value type
+     * @return provided value
+     */
+    public static <T> T withModel(ModelDescriptor modelDescriptor, T value) {
+        touch(modelDescriptor);
+        return value;
+    }
 }

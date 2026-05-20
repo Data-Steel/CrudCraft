@@ -31,10 +31,12 @@ public final class CreateOnlyTaskRelationshipMeta {
     }
 
     public static void fix(CreateOnlyTask entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(CreateOnlyTask entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }

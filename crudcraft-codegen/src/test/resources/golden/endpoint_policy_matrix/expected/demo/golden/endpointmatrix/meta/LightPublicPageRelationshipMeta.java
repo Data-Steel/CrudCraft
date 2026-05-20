@@ -31,10 +31,12 @@ public final class LightPublicPageRelationshipMeta {
     }
 
     public static void fix(LightPublicPage entity) {
+        entity.getClass();
         // no bidirectional relationships to fix;
     }
 
     public static void clear(LightPublicPage entity) {
+        entity.getClass();
         // no bidirectional relationships to clear;
     }
 }
