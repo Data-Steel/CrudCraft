@@ -109,7 +109,7 @@ flowchart LR
 ```
 
 `mvn verify` is the fast full reactor gate. PIT mutation coverage is intentionally opt-in locally:
-run `mvn verify -Pmutation` when you need the full mutation gate.
+run `mvn verify -D pit.skip=false` when you need the full mutation gate.
 
 ## Documentation
 
