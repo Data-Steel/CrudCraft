@@ -41,8 +41,8 @@ Dependency changes can alter generated Java, runtime behavior, starter classpath
 Maintainers should use:
 
 - Dependabot PR metadata;
-- OSV scanner workflow;
-- OWASP Dependency-Check in CI;
+- OSV scanner workflow for PR, `main`, weekly, and manual dependency findings;
+- OWASP Dependency-Check from the weekly/manual dependency-scan workflow and release preflight;
 - Maven dependency tree when starter composition changes;
 - generated diff/golden checks for processor-related upgrades.
 

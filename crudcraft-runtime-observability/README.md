@@ -26,3 +26,10 @@ Auto-configuration tests verify bean registration and user override behavior.
 - Configuration: use standard Micrometer/OpenTelemetry Spring Boot properties.
 - Extension points: wrap generated services or controllers with the provided observation support.
 Public helpers document span names, tag names, and operation wrapping behavior.
+
+```mermaid
+graph LR
+  C[CrudCraft Runtime] --> O[Observation Support]
+  O --> M[Micrometer Observation]
+  M --> T[OpenTelemetry Exporters]
+```
