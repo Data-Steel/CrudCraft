@@ -199,7 +199,7 @@ jobs:
           cache: maven
 
       - name: Download JaCoCo XML
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: jacoco-xml
           path: coverage-reports
@@ -229,7 +229,7 @@ jobs:
             -Dsonar.pullrequest.base="$SONAR_PR_BASE"
 
       - name: Wait for Sonar Quality Gate
-        uses: SonarSource/sonarqube-quality-gate-action@v1.1.0
+        uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
         with:
           scanMetadataReportFile: target/sonar/report-task.txt
         env:
