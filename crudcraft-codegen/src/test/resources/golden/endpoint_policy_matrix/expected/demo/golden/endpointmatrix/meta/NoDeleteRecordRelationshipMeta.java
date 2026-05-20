@@ -31,12 +31,16 @@ public final class NoDeleteRecordRelationshipMeta {
     }
 
     public static void fix(NoDeleteRecord entity) {
-        entity.getClass();
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(NoDeleteRecord entity) {
-        entity.getClass();
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

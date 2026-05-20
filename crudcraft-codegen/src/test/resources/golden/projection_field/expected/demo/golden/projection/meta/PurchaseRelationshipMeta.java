@@ -31,12 +31,16 @@ public final class PurchaseRelationshipMeta {
     }
 
     public static void fix(Purchase entity) {
-        entity.getClass();
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(Purchase entity) {
-        entity.getClass();
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

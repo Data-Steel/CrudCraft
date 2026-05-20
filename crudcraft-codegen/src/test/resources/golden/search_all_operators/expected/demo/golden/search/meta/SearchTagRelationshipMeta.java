@@ -31,12 +31,16 @@ public final class SearchTagRelationshipMeta {
     }
 
     public static void fix(SearchTag entity) {
-        entity.getClass();
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(SearchTag entity) {
-        entity.getClass();
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

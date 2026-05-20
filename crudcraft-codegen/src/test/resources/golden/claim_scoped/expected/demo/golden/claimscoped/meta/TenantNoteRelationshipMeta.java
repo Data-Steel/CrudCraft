@@ -31,12 +31,16 @@ public final class TenantNoteRelationshipMeta {
     }
 
     public static void fix(TenantNote entity) {
-        entity.getClass();
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(TenantNote entity) {
-        entity.getClass();
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

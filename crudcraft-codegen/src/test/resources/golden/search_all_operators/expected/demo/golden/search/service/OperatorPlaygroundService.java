@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
  * Support: For file generation bugs or feedback, open an issue at
  * https://github.com/Data-Steel/CrudCraft/issues.
  */
+@SuppressWarnings("PMD")
 @Service
 public class OperatorPlaygroundService extends AbstractCrudService<OperatorPlayground, OperatorPlaygroundRequestDto, OperatorPlaygroundResponseDto, OperatorPlaygroundRef, UUID> {
     public OperatorPlaygroundService(OperatorPlaygroundRepository repository,

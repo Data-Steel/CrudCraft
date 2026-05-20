@@ -198,6 +198,10 @@ public class MapperGenerator implements StubGenerator {
                 TypeSpec.interfaceBuilder(mapperName)
                         .addJavadoc(header)
                         .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(
+                                AnnotationSpec.builder(SuppressWarnings.class)
+                                        .addMember("value", "$S", "PMD")
+                                        .build())
                         .addSuperinterface(superType)
                         .addAnnotation(mapperAnnotation)
                         .addMethods(

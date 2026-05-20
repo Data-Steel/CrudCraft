@@ -64,6 +64,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
  * Support: For file generation bugs or feedback, open an issue at
  * https://github.com/Data-Steel/CrudCraft/issues.
  */
+@SuppressWarnings("PMD")
 @RestController
 @RequestMapping("/lookups")
 public class LookupController {

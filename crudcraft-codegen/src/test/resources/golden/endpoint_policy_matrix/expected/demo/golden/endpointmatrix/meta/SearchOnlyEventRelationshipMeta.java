@@ -31,12 +31,16 @@ public final class SearchOnlyEventRelationshipMeta {
     }
 
     public static void fix(SearchOnlyEvent entity) {
-        entity.getClass();
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(SearchOnlyEvent entity) {
-        entity.getClass();
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

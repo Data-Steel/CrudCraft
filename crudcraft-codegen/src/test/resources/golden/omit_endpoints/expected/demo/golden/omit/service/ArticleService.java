@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
  * Support: For file generation bugs or feedback, open an issue at
  * https://github.com/Data-Steel/CrudCraft/issues.
  */
+@SuppressWarnings("PMD")
 @Service
 public class ArticleService extends AbstractCrudService<Article, ArticleRequestDto, ArticleResponseDto, ArticleRef, UUID> {
     public ArticleService(ArticleRepository repository, ArticleMapper mapper) {

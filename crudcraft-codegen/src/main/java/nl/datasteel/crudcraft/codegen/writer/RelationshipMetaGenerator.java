@@ -243,7 +243,9 @@ public class RelationshipMetaGenerator implements Generator {
                         .addParameter(entityType, "entity");
 
         if (relFields.isEmpty()) {
-            fix.addStatement("entity.getClass()");
+            fix.beginControlFlow("if (entity == null)")
+                    .addStatement("throw new $T($S)", IllegalArgumentException.class, "entity")
+                    .endControlFlow();
             fix.addStatement("// no bidirectional relationships to fix");
         } else {
             fix.beginControlFlow("try");
@@ -285,7 +287,9 @@ public class RelationshipMetaGenerator implements Generator {
                         .addParameter(entityType, "entity");
 
         if (relFields.isEmpty()) {
-            clear.addStatement("entity.getClass()");
+            clear.beginControlFlow("if (entity == null)")
+                    .addStatement("throw new $T($S)", IllegalArgumentException.class, "entity")
+                    .endControlFlow();
             clear.addStatement("// no bidirectional relationships to clear");
         } else {
             clear.beginControlFlow("try");

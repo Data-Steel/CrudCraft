@@ -31,12 +31,16 @@ public final class NoBatchTicketRelationshipMeta {
     }
 
     public static void fix(NoBatchTicket entity) {
-        entity.getClass();
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(NoBatchTicket entity) {
-        entity.getClass();
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

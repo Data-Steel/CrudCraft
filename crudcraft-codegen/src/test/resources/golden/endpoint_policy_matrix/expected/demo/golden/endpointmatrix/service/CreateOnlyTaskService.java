@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
  * Support: For file generation bugs or feedback, open an issue at
  * https://github.com/Data-Steel/CrudCraft/issues.
  */
+@SuppressWarnings("PMD")
 @Service
 public class CreateOnlyTaskService extends AbstractCrudService<CreateOnlyTask, CreateOnlyTaskRequestDto, CreateOnlyTaskResponseDto, CreateOnlyTaskRef, UUID> {
     public CreateOnlyTaskService(CreateOnlyTaskRepository repository, CreateOnlyTaskMapper mapper) {

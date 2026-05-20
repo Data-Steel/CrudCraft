@@ -18,6 +18,7 @@ package nl.datasteel.crudcraft.codegen.writer.stubs;
 
 // CHECKSTYLE.SUPPRESS: LineLength for +1000 lines
 
+import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.JavaFile;
@@ -126,6 +127,10 @@ public class ServiceGenerator implements StubGenerator {
                 TypeSpec.classBuilder(serviceName)
                         .addJavadoc(header)
                         .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(
+                                AnnotationSpec.builder(SuppressWarnings.class)
+                                        .addMember("value", "$S", "PMD")
+                                        .build())
                         .addAnnotation(svcAnn)
                         .superclass(
                                 ParameterizedTypeName.get(

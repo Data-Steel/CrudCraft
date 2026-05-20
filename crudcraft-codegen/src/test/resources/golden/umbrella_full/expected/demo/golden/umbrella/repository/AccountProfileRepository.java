@@ -29,6 +29,7 @@ import org.springframework.stereotype.Repository;
  * Support: For file generation bugs or feedback, open an issue at
  * https://github.com/Data-Steel/CrudCraft/issues.
  */
+@SuppressWarnings("PMD")
 @Repository
 public interface AccountProfileRepository extends JpaRepository<AccountProfile, UUID>, JpaSpecificationExecutor<AccountProfile> {
 }
