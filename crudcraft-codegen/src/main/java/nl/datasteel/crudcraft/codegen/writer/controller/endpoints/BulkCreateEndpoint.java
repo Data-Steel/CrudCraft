@@ -54,12 +54,16 @@ public class BulkCreateEndpoint extends AbstractEndpointSpecProvider {
                 CrudEndpoint.BULK_CREATE,
                 "createAll",
                 md ->
-                        AnnotationSpec.builder(EndpointSupport.POST_MAPPING)
-                                .addMember("value", "$S", "/batch")
-                                .build(),
+                        EndpointSupport.withModel(
+                                md,
+                                AnnotationSpec.builder(EndpointSupport.POST_MAPPING)
+                                        .addMember("value", "$S", "/batch")
+                                        .build()),
                 md ->
-                        EndpointResponseTemplates.BULK_RESPONSE_ENTITY.wrap(
-                                ClassName.get(dtoRespPkg, dtoFull)),
+                        EndpointSupport.withModel(
+                                md,
+                                EndpointResponseTemplates.BULK_RESPONSE_ENTITY.wrap(
+                                        ClassName.get(dtoRespPkg, dtoFull))),
                 List.of(
                         EndpointParameterTemplates.VALID_REQUEST_LIST.create(
                                 ClassName.get(dtoReqPkg, dtoReq))),

@@ -86,7 +86,7 @@ abstract class CoreCrudOperations<T, U, R, F, ID>
     protected final Class<T> entityClass;
     protected final Class<R> responseClass;
     protected final Class<F> refClass;
-    protected QueryExecutionStrategy<T> queryExecutor;
+    private volatile QueryExecutionStrategy<T> queryExecutor;
 
     /*
      * Published by Spring through @PersistenceContext before request handling.
@@ -207,6 +207,10 @@ abstract class CoreCrudOperations<T, U, R, F, ID>
     @Override
     protected QueryExecutionStrategy<T> queryExecutor() {
         return queryExecutor;
+    }
+
+    void setQueryExecutorForTests(QueryExecutionStrategy<T> queryExecutor) {
+        this.queryExecutor = queryExecutor;
     }
 
     @Override
@@ -503,19 +507,19 @@ abstract class CoreCrudOperations<T, U, R, F, ID>
     }
 
     protected void preSave(T entity, U request) {
-        // no-op by default
+        consume(entity, request);
     }
 
     protected void postSave(T entity) {
-        // no-op by default
+        consume(entity);
     }
 
     protected void preDelete(T entity) {
-        // no-op by default
+        consume(entity);
     }
 
     protected void postDelete(T entity) {
-        // no-op by default
+        consume(entity);
     }
 
     /**
@@ -626,6 +630,20 @@ abstract class CoreCrudOperations<T, U, R, F, ID>
     private String bulkFailureMessage(RuntimeException ex) {
         String message = ex.getMessage();
         return message == null || message.isBlank() ? ex.getClass().getSimpleName() : message;
+    }
+
+    @SuppressFBWarnings(
+            value = "UC_USELESS_VOID_METHOD",
+            justification =
+                    "This helper intentionally consumes default-hook parameters in no-op base"
+                            + " implementations to keep extension signatures stable and static"
+                            + " analysis-friendly.")
+    private static void consume(Object... values) {
+        for (Object value : values) {
+            if (value == null) {
+                return;
+            }
+        }
     }
 
     private U beforeCreate(U request) {

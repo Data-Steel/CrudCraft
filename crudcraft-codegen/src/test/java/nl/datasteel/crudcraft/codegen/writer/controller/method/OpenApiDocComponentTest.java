@@ -64,7 +64,7 @@ class OpenApiDocComponentTest {
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
                         md -> ClassName.get(Void.class),
                         List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
 
         MethodSpec.Builder builder =
                 MethodSpec.methodBuilder("exists").returns(ClassName.get(Void.class));
@@ -90,7 +90,7 @@ class OpenApiDocComponentTest {
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
                         md -> ClassName.get(Void.class),
                         List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
 
         MethodSpec.Builder postBuilder =
                 MethodSpec.methodBuilder("exists").returns(ClassName.get(Void.class));
@@ -153,7 +153,7 @@ class OpenApiDocComponentTest {
                             md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
                             md -> ClassName.get(Void.class),
                             List.of(),
-                            (b, md) -> {});
+                            (b, md) -> { if (md != null) { md.getName(); } });
 
             MethodSpec.Builder builder =
                     MethodSpec.methodBuilder("method").returns(ClassName.get(Void.class));
@@ -258,7 +258,7 @@ class OpenApiDocComponentTest {
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
                         md -> ClassName.get(Void.class),
                         List.of(),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         MethodSpec.Builder builder =
                 MethodSpec.methodBuilder("method").returns(ClassName.get(Void.class));
 

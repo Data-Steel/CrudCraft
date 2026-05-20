@@ -55,15 +55,19 @@ public class BulkPatchEndpoint extends AbstractEndpointSpecProvider {
                 CrudEndpoint.BULK_PATCH,
                 "patchAll",
                 md ->
-                        AnnotationSpec.builder(EndpointSupport.PATCH_MAPPING)
-                                .addMember("value", "$S", "/batch")
-                                .build(),
+                        EndpointSupport.withModel(
+                                md,
+                                AnnotationSpec.builder(EndpointSupport.PATCH_MAPPING)
+                                        .addMember("value", "$S", "/batch")
+                                        .build()),
                 md ->
-                        ParameterizedTypeName.get(
-                                EndpointSupport.RESP_ENTITY,
+                        EndpointSupport.withModel(
+                                md,
                                 ParameterizedTypeName.get(
-                                        EndpointSupport.BULK_RESULT,
-                                        ClassName.get(dtoRespPkg, dtoFull))),
+                                        EndpointSupport.RESP_ENTITY,
+                                        ParameterizedTypeName.get(
+                                                EndpointSupport.BULK_RESULT,
+                                                ClassName.get(dtoRespPkg, dtoFull)))),
                 List.of(
                         md ->
                                 ParameterSpec.builder(

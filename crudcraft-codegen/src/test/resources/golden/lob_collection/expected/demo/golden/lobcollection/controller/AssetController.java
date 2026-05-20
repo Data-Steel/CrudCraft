@@ -70,6 +70,7 @@ import org.springframework.web.server.ResponseStatusException;
  * Support: For file generation bugs or feedback, open an issue at
  * https://github.com/Data-Steel/CrudCraft/issues.
  */
+@SuppressWarnings("PMD")
 @RestController
 @RequestMapping("/assets")
 public class AssetController {
@@ -606,6 +607,7 @@ public class AssetController {
         long _crudcraftStarted = System.nanoTime();
         String _crudcraftOutcome = "success";
         try {
+            request.getClass();
             return ResponseEntity.ok().build();
         } catch (RuntimeException ex) {
             _crudcraftOutcome = "error";

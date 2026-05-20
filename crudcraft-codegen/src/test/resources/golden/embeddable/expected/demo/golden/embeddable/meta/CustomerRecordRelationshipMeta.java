@@ -31,10 +31,16 @@ public final class CustomerRecordRelationshipMeta {
     }
 
     public static void fix(CustomerRecord entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(CustomerRecord entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

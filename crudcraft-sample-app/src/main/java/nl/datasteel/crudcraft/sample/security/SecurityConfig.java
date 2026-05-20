@@ -16,6 +16,7 @@
 
 package nl.datasteel.crudcraft.sample.security;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -35,6 +37,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.header.HeaderWriterFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
@@ -49,7 +52,12 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(
             HttpSecurity http, JwtAuthenticationConverter jwtAuthConverter) throws Exception {
 
-        http.csrf(csrf -> csrf.disable())
+        http.csrf(
+                        csrf ->
+                                csrf.csrfTokenRepository(
+                                                CookieCsrfTokenRepository.withHttpOnlyFalse())
+                                        .ignoringRequestMatchers(
+                                                SecurityConfig::isStatelessApiRequest))
                 .headers(
                         h ->
                                 h.withObjectPostProcessor(new EagerHeaderWriterFilterProcessor())
@@ -93,6 +101,21 @@ public class SecurityConfig {
                                                         jwtAuthConverter)));
 
         return http.build();
+    }
+
+    static boolean isStatelessApiRequest(HttpServletRequest request) {
+        if (hasBearerToken(request)) {
+            return true;
+        }
+        String path = request.getRequestURI();
+        return !path.startsWith("/h2-console")
+                && !path.startsWith("/swagger-ui")
+                && !path.startsWith("/v3/api-docs");
+    }
+
+    static boolean hasBearerToken(HttpServletRequest request) {
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+        return authorization != null && authorization.startsWith("Bearer ");
     }
 
     @Bean

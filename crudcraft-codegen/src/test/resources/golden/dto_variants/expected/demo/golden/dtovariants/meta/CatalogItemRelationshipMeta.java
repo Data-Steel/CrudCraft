@@ -31,10 +31,16 @@ public final class CatalogItemRelationshipMeta {
     }
 
     public static void fix(CatalogItem entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(CatalogItem entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

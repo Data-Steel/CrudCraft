@@ -70,7 +70,7 @@ public record ModelIdentity(
      * @return the list of field descriptors
      */
     public List<FieldDescriptor> getFields() {
-        return fields;
+        return List.copyOf(fields);
     }
 
     /**

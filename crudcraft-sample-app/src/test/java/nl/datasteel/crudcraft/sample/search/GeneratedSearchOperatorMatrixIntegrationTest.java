@@ -155,7 +155,8 @@ class GeneratedSearchOperatorMatrixIntegrationTest extends PostgresIntegrationTe
                 get("/operatormatrixprobes/search")
                         .header(HttpHeaders.AUTHORIZATION, bearerToken())
                         .param("size", "10");
-        for (int i = 0; i < params.length; i += 2) {
+        requireParamPairs(params);
+        for (int i = 0; i + 1 < params.length; i += 2) {
             request.param(params[i], params[i + 1]);
         }
         return objectMapper.readTree(
@@ -164,6 +165,12 @@ class GeneratedSearchOperatorMatrixIntegrationTest extends PostgresIntegrationTe
                         .andReturn()
                         .getResponse()
                         .getContentAsString());
+    }
+
+    private static void requireParamPairs(String[] params) {
+        if (params.length % 2 != 0) {
+            throw new IllegalArgumentException("params must contain key/value pairs");
+        }
     }
 
     private void assertContainsTitle(JsonNode page, String title) {

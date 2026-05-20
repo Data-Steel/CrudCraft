@@ -88,9 +88,11 @@ final class LobProcessor {
         List<Function<ModelDescriptor, ParameterSpec>> params = new ArrayList<>();
         params.add(
                 md ->
-                        addRequestPartAnnotations(
-                                ParameterSpec.builder(requestDtoClass, "request"),
-                                validateRequest));
+                        EndpointSupport.withModel(
+                                md,
+                                addRequestPartAnnotations(
+                                        ParameterSpec.builder(requestDtoClass, "request"),
+                                        validateRequest)));
         for (FieldDescriptor lf : modelDescriptor.getRequestLobFields()) {
             String fieldName = lf.getName();
             boolean required = isRequiredLobField(lf);
@@ -167,27 +169,32 @@ final class LobProcessor {
     private static Function<ModelDescriptor, ParameterSpec> lobCollectionParam(
             String fieldName, boolean required) {
         return md ->
-                ParameterSpec.builder(
-                                ParameterizedTypeName.get(
-                                        EndpointSupport.LIST, EndpointSupport.MULTIPART_FILE),
-                                fieldName)
-                        .addAnnotation(
-                                AnnotationSpec.builder(EndpointSupport.REQUEST_PART)
-                                        .addMember("value", "$S", fieldName)
-                                        .addMember("required", "$L", required)
-                                        .build())
-                        .build();
+                EndpointSupport.withModel(
+                        md,
+                        ParameterSpec.builder(
+                                        ParameterizedTypeName.get(
+                                                EndpointSupport.LIST,
+                                                EndpointSupport.MULTIPART_FILE),
+                                        fieldName)
+                                .addAnnotation(
+                                        AnnotationSpec.builder(EndpointSupport.REQUEST_PART)
+                                                .addMember("value", "$S", fieldName)
+                                                .addMember("required", "$L", required)
+                                                .build())
+                                .build());
     }
 
     private static Function<ModelDescriptor, ParameterSpec> lobScalarParam(
             String fieldName, boolean required) {
         return md ->
-                ParameterSpec.builder(EndpointSupport.MULTIPART_FILE, fieldName)
-                        .addAnnotation(
-                                AnnotationSpec.builder(EndpointSupport.REQUEST_PART)
-                                        .addMember("value", "$S", fieldName)
-                                        .addMember("required", "$L", required)
-                                        .build())
-                        .build();
+                EndpointSupport.withModel(
+                        md,
+                        ParameterSpec.builder(EndpointSupport.MULTIPART_FILE, fieldName)
+                                .addAnnotation(
+                                        AnnotationSpec.builder(EndpointSupport.REQUEST_PART)
+                                                .addMember("value", "$S", fieldName)
+                                                .addMember("required", "$L", required)
+                                                .build())
+                                .build());
     }
 }

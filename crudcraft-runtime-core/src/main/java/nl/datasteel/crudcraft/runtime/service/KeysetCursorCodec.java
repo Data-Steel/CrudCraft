@@ -77,19 +77,19 @@ final class KeysetCursorCodec {
             return raw;
         }
         if (Long.class.equals(javaType) || long.class.equals(javaType)) {
-            return Long.valueOf(raw);
+            return parseLong(raw);
         }
         if (Integer.class.equals(javaType) || int.class.equals(javaType)) {
-            return Integer.valueOf(raw);
+            return parseInteger(raw);
         }
         if (Double.class.equals(javaType) || double.class.equals(javaType)) {
-            return Double.valueOf(raw);
+            return parseDouble(raw);
         }
         if (Float.class.equals(javaType) || float.class.equals(javaType)) {
-            return Float.valueOf(raw);
+            return parseFloat(raw);
         }
         if (UUID.class.equals(javaType)) {
-            return UUID.fromString(raw);
+            return parseUuid(raw);
         }
         if (Instant.class.equals(javaType)) {
             return Instant.parse(raw);
@@ -181,6 +181,53 @@ final class KeysetCursorCodec {
         return new BadRequestException(
                 "Invalid keyset cursor. Use the opaque cursor returned by a previous keyset"
                         + " response; do not edit or construct cursor values.");
+    }
+
+    private static BadRequestException invalidCursor(Throwable cause) {
+        return new BadRequestException(
+                "Invalid keyset cursor. Use the opaque cursor returned by a previous keyset"
+                        + " response; do not edit or construct cursor values.",
+                cause);
+    }
+
+    private static Long parseLong(String raw) {
+        try {
+            return Long.valueOf(raw);
+        } catch (NumberFormatException ex) {
+            throw invalidCursor(ex);
+        }
+    }
+
+    private static Integer parseInteger(String raw) {
+        try {
+            return Integer.valueOf(raw);
+        } catch (NumberFormatException ex) {
+            throw invalidCursor(ex);
+        }
+    }
+
+    private static Double parseDouble(String raw) {
+        try {
+            return Double.valueOf(raw);
+        } catch (NumberFormatException ex) {
+            throw invalidCursor(ex);
+        }
+    }
+
+    private static Float parseFloat(String raw) {
+        try {
+            return Float.valueOf(raw);
+        } catch (NumberFormatException ex) {
+            throw invalidCursor(ex);
+        }
+    }
+
+    private static UUID parseUuid(String raw) {
+        try {
+            return UUID.fromString(raw);
+        } catch (IllegalArgumentException ex) {
+            throw invalidCursor(ex);
+        }
     }
 
     record CursorData(String property, String direction, String sortValue, String idValue) {}

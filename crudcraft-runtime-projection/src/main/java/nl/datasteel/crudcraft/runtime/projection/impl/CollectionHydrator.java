@@ -17,6 +17,7 @@
 package nl.datasteel.crudcraft.runtime.projection.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,7 +73,7 @@ public final class CollectionHydrator {
          * @param joinTypes the Java types of the joined associations
          */
         public FetchResult {
-            rows = List.copyOf(rows);
+            rows = copyRows(rows);
             joinTypes = List.copyOf(joinTypes);
         }
 
@@ -84,7 +85,7 @@ public final class CollectionHydrator {
          */
         @Override
         public List<Object[]> rows() {
-            return List.copyOf(rows);
+            return copyRows(rows);
         }
 
         /**
@@ -96,6 +97,10 @@ public final class CollectionHydrator {
         @Override
         public List<Class<?>> joinTypes() {
             return List.copyOf(joinTypes);
+        }
+
+        private static List<Object[]> copyRows(List<Object[]> source) {
+            return source.stream().map(row -> Arrays.copyOf(row, row.length)).toList();
         }
     }
 
@@ -139,6 +144,7 @@ public final class CollectionHydrator {
             List<ProjectionMetadata.Attribute> attributes,
             Map<Object, D> dtoMap,
             RowFetcher fetcher) {
+        metadata.dtoType();
         hydrateCollections(entityType, attributes, dtoMap, fetcher, new HashMap<>());
     }
 
@@ -147,9 +153,10 @@ public final class CollectionHydrator {
      * database.
      *
      * @param entityType the type of the entity being projected
-     * @param metadata the projection metadata for the DTO type
+     * @param attributes the projection metadata attributes
      * @param dtoMap a map of IDs to DTO instances to hydrate
      * @param fetcher a function that fetches collection data for the given entity type
+     * @param visited the already visited attributes
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static <T, D> void hydrateCollections(

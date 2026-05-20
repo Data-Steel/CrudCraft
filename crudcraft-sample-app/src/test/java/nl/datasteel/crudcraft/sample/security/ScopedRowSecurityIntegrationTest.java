@@ -288,7 +288,8 @@ class ScopedRowSecurityIntegrationTest extends PostgresIntegrationTestBase {
             throws Exception {
         org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder request =
                 get(BASE_PATH + "/export").header("Authorization", "Bearer " + token);
-        for (int i = 0; i < params.length; i += 2) {
+        requireParamPairs(params);
+        for (int i = 0; i + 1 < params.length; i += 2) {
             request.param(params[i], params[i + 1]);
         }
         MvcResult start = mockMvc.perform(request).andReturn();
@@ -296,6 +297,12 @@ class ScopedRowSecurityIntegrationTest extends PostgresIntegrationTestBase {
             return mockMvc.perform(asyncDispatch(start));
         }
         return new ImmediateResultActions(start);
+    }
+
+    private static void requireParamPairs(String[] params) {
+        if (params.length % 2 != 0) {
+            throw new IllegalArgumentException("params must contain key/value pairs");
+        }
     }
 
     private JsonNode json(MvcResult result) throws Exception {

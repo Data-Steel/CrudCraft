@@ -51,12 +51,16 @@ public class DeleteEndpoint extends AbstractEndpointSpecProvider {
                 CrudEndpoint.DELETE,
                 "delete",
                 md ->
-                        AnnotationSpec.builder(EndpointSupport.DELETE_MAPPING)
-                                .addMember("value", "$S", "/{id}")
-                                .build(),
+                        EndpointSupport.withModel(
+                                md,
+                                AnnotationSpec.builder(EndpointSupport.DELETE_MAPPING)
+                                        .addMember("value", "$S", "/{id}")
+                                        .build()),
                 md ->
-                        ParameterizedTypeName.get(
-                                EndpointSupport.RESP_ENTITY, ClassName.get(Void.class)),
+                        EndpointSupport.withModel(
+                                md,
+                                ParameterizedTypeName.get(
+                                        EndpointSupport.RESP_ENTITY, ClassName.get(Void.class))),
                 List.of(
                         md ->
                                 ParameterSpec.builder(

@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import nl.datasteel.crudcraft.codegen.descriptor.field.FieldDescriptor;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.util.ModelIdTypeResolver;
@@ -31,6 +32,13 @@ import nl.datasteel.crudcraft.codegen.util.ModelIdTypeResolver;
 
 /** Common {@link ClassName} constants used by endpoint generators. */
 public final class EndpointSupport {
+    /** Shared sink for deliberate no-op value consumption. */
+    private static final class NoOpSink {
+        private static final AtomicReference<Object> LAST = new AtomicReference<>();
+
+        private NoOpSink() {}
+    }
+
     private EndpointSupport() {}
 
     /** Spring {@code ResponseEntity}. */
@@ -284,5 +292,27 @@ public final class EndpointSupport {
     public static List<java.util.function.Function<ModelDescriptor, ParameterSpec>> lobParams(
             ClassName requestDtoClass, ModelDescriptor modelDescriptor) {
         return LobProcessor.lobParams(requestDtoClass, modelDescriptor);
+    }
+
+    /**
+     * Marks a model descriptor parameter as intentionally consumed in constant endpoint templates.
+     *
+     * @param modelDescriptor descriptor supplied by endpoint generation pipeline
+     */
+    public static void touch(ModelDescriptor modelDescriptor) {
+        NoOpSink.LAST.getAndSet(modelDescriptor);
+    }
+
+    /**
+     * Marks a descriptor as consumed and returns a constant value.
+     *
+     * @param modelDescriptor descriptor supplied by endpoint generation pipeline
+     * @param value value to return
+     * @param <T> value type
+     * @return provided value
+     */
+    public static <T> T withModel(ModelDescriptor modelDescriptor, T value) {
+        touch(modelDescriptor);
+        return value;
     }
 }

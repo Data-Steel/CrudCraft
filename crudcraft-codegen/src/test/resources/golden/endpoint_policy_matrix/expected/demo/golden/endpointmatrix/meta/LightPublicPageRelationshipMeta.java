@@ -31,10 +31,16 @@ public final class LightPublicPageRelationshipMeta {
     }
 
     public static void fix(LightPublicPage entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(LightPublicPage entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

@@ -57,10 +57,12 @@ public class FindByIdsEndpoint extends AbstractEndpointSpecProvider {
                 CrudEndpoint.FIND_BY_IDS,
                 "findByIds",
                 m ->
-                        AnnotationSpec.builder(EndpointSupport.POST_MAPPING)
-                                .addMember("value", "$S", "/batch/ids")
-                                .build(),
-                m -> returnType,
+                        EndpointSupport.withModel(
+                                m,
+                                AnnotationSpec.builder(EndpointSupport.POST_MAPPING)
+                                        .addMember("value", "$S", "/batch/ids")
+                                        .build()),
+                m -> EndpointSupport.withModel(m, returnType),
                 List.of(
                         m ->
                                 ParameterSpec.builder(

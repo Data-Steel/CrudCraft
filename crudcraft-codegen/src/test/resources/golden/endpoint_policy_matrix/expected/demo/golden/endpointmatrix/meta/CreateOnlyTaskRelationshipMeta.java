@@ -31,10 +31,16 @@ public final class CreateOnlyTaskRelationshipMeta {
     }
 
     public static void fix(CreateOnlyTask entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(CreateOnlyTask entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

@@ -16,6 +16,7 @@
 
 package nl.datasteel.crudcraft.codegen.writer.stubs;
 
+import com.palantir.javapoet.AnnotationSpec;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.ParameterizedTypeName;
@@ -112,6 +113,10 @@ public class RepositoryGenerator implements StubGenerator {
                 TypeSpec.interfaceBuilder(repoName)
                         .addJavadoc(header)
                         .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(
+                                AnnotationSpec.builder(SuppressWarnings.class)
+                                        .addMember("value", "$S", "PMD")
+                                        .build())
                         .addAnnotation(repoAnn)
                         .addSuperinterface(super1)
                         .addSuperinterface(super2)

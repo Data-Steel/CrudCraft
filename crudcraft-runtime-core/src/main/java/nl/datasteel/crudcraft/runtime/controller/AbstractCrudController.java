@@ -308,6 +308,9 @@ public abstract class AbstractCrudController<T, U, R, F, ID> {
      */
     @PostMapping("/validate")
     public ResponseEntity<Void> validate(@Valid @RequestBody @NotNull U request) {
+        if (request == null) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok().build();
     }
 

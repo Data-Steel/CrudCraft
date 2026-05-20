@@ -88,7 +88,7 @@ class AbstractCrudServiceConcurrencyTest {
         TestService service = service();
         QueryExecutionStrategy<TestEntity> queryExecutionStrategy =
                 (QueryExecutionStrategy<TestEntity>) mock(QueryExecutionStrategy.class);
-        service.queryExecutor = queryExecutionStrategy;
+        service.setQueryExecutorForTests(queryExecutionStrategy);
         when(queryExecutionStrategy.findAll(any(), any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(new TestEntity(UUID.randomUUID(), "seed"))));
         CrudRuntimeExtension<TestEntity, TestRequest> extension =
@@ -124,7 +124,7 @@ class AbstractCrudServiceConcurrencyTest {
         int entityCount = 128;
         int requestCount = 1024;
         TestService service = service();
-        service.queryExecutor = new InMemoryQueryExecutionStrategy(testEntities(entityCount));
+        service.setQueryExecutorForTests(new InMemoryQueryExecutionStrategy(testEntities(entityCount)));
 
         List<Integer> sizes =
                 runConcurrently(

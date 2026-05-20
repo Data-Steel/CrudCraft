@@ -53,48 +53,65 @@ public class ExportEndpoint extends AbstractEndpointSpecProvider {
         if (searchEnabled) {
             params.add(
                     md ->
-                            ParameterSpec.builder(
-                                            ClassName.get(
-                                                    modelDescriptor.getPackageName() + ".search",
-                                                    name + "SearchRequest"),
-                                            "searchRequest")
-                                    .addAnnotation(EndpointSupport.MODEL_ATTR)
-                                    .build());
+                            EndpointSupport.withModel(
+                                    md,
+                                    ParameterSpec.builder(
+                                                    ClassName.get(
+                                                            modelDescriptor.getPackageName()
+                                                                    + ".search",
+                                                            name + "SearchRequest"),
+                                                    "searchRequest")
+                                            .addAnnotation(EndpointSupport.MODEL_ATTR)
+                                            .build()));
         }
         params.add(
                 md ->
-                        ParameterSpec.builder(ClassName.get(Integer.class), "limit")
-                                .addAnnotation(
-                                        AnnotationSpec.builder(EndpointSupport.REQUEST_PARAM)
-                                                .addMember("value", "$S", "limit")
-                                                .addMember("required", "$L", false)
-                                                .build())
-                                .build());
+                        EndpointSupport.withModel(
+                                md,
+                                ParameterSpec.builder(ClassName.get(Integer.class), "limit")
+                                        .addAnnotation(
+                                                AnnotationSpec.builder(
+                                                                EndpointSupport.REQUEST_PARAM)
+                                                        .addMember("value", "$S", "limit")
+                                                        .addMember("required", "$L", false)
+                                                        .build())
+                                        .build()));
         params.add(
                 md ->
-                        ParameterSpec.builder(ClassName.get(String.class), "format")
-                                .addAnnotation(
-                                        AnnotationSpec.builder(EndpointSupport.REQUEST_PARAM)
-                                                .addMember("value", "$S", "format")
-                                                .addMember("required", "$L", true)
-                                                .build())
-                                .build());
+                        EndpointSupport.withModel(
+                                md,
+                                ParameterSpec.builder(ClassName.get(String.class), "format")
+                                        .addAnnotation(
+                                                AnnotationSpec.builder(
+                                                                EndpointSupport.REQUEST_PARAM)
+                                                        .addMember("value", "$S", "format")
+                                                        .addMember("required", "$L", true)
+                                                        .build())
+                                        .build()));
         params.add(
                 md ->
-                        ParameterSpec.builder(EndpointSupport.EXPORT_REQUEST, "exportRequest")
-                                .addAnnotation(EndpointSupport.MODEL_ATTR)
-                                .build());
+                        EndpointSupport.withModel(
+                                md,
+                                ParameterSpec.builder(
+                                                EndpointSupport.EXPORT_REQUEST, "exportRequest")
+                                        .addAnnotation(EndpointSupport.MODEL_ATTR)
+                                        .build()));
 
         return new EndpointSpec(
                 CrudEndpoint.EXPORT,
                 "export",
                 md ->
-                        AnnotationSpec.builder(EndpointSupport.GET_MAPPING)
-                                .addMember("value", "$S", "/export")
-                                .build(),
+                        EndpointSupport.withModel(
+                                md,
+                                AnnotationSpec.builder(EndpointSupport.GET_MAPPING)
+                                        .addMember("value", "$S", "/export")
+                                        .build()),
                 md ->
-                        ParameterizedTypeName.get(
-                                EndpointSupport.RESP_ENTITY, EndpointSupport.STREAMING_BODY),
+                        EndpointSupport.withModel(
+                                md,
+                                ParameterizedTypeName.get(
+                                        EndpointSupport.RESP_ENTITY,
+                                        EndpointSupport.STREAMING_BODY)),
                 params,
                 searchEnabled ? this::searchAwareBody : this::plainBody);
     }

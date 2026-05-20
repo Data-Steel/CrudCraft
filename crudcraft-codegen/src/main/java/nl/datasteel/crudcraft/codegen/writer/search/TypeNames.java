@@ -27,10 +27,9 @@ final class TypeNames {
 
     static TypeName simple(TypeName t) {
         if (t instanceof ParameterizedTypeName p) {
-            ClassName raw = (ClassName) simple(p.rawType());
-            TypeName[] args =
-                    p.typeArguments().stream().map(TypeNames::simple).toArray(TypeName[]::new);
-            return ParameterizedTypeName.get(raw, args);
+            return ParameterizedTypeName.get(
+                    (ClassName) simple(p.rawType()),
+                    p.typeArguments().stream().map(TypeNames::simple).toArray(TypeName[]::new));
         }
         if (t instanceof ClassName cn) {
             // keep only simple names (handles nested types too)

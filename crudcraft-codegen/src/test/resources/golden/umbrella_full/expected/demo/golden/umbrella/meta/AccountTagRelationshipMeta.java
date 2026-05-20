@@ -31,10 +31,16 @@ public final class AccountTagRelationshipMeta {
     }
 
     public static void fix(AccountTag entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(AccountTag entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

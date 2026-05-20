@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
  * Support: For file generation bugs or feedback, open an issue at
  * https://github.com/Data-Steel/CrudCraft/issues.
  */
+@SuppressWarnings("PMD")
 @Service
 public class NoDeleteRecordService extends AbstractCrudService<NoDeleteRecord, NoDeleteRecordRequestDto, NoDeleteRecordResponseDto, NoDeleteRecordRef, UUID> {
     public NoDeleteRecordService(NoDeleteRecordRepository repository, NoDeleteRecordMapper mapper) {

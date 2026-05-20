@@ -29,8 +29,9 @@ enum EndpointParameterTemplates {
     PATH_ID {
         @Override
         Function<ModelDescriptor, ParameterSpec> create(ClassName requestDto) {
-            return ignored ->
-                    ParameterSpec.builder(EndpointSupport.resolveModelIdType(ignored), "id")
+            return modelDescriptor ->
+                    ParameterSpec.builder(
+                                    EndpointSupport.resolveModelIdType(modelDescriptor), "id")
                             .addAnnotation(
                                     AnnotationSpec.builder(EndpointSupport.PATH_VAR)
                                             .addMember("value", "$S", "id")
@@ -42,39 +43,44 @@ enum EndpointParameterTemplates {
     REQUEST_BODY {
         @Override
         Function<ModelDescriptor, ParameterSpec> create(ClassName requestDto) {
-            return ignored ->
-                    ParameterSpec.builder(requestDto, "request")
+            return modelDescriptor ->
+                    EndpointSupport.withModel(
+                            modelDescriptor,
+                            ParameterSpec.builder(requestDto, "request")
                             .addAnnotation(EndpointSupport.VALID)
                             .addAnnotation(EndpointSupport.NOT_NULL)
                             .addAnnotation(EndpointSupport.REQUEST_BODY)
-                            .build();
+                            .build());
         }
     },
 
     VALID_REQUEST_LIST {
         @Override
         Function<ModelDescriptor, ParameterSpec> create(ClassName requestDto) {
-            return ignored ->
-                    ParameterSpec.builder(
+            return modelDescriptor ->
+                    EndpointSupport.withModel(
+                            modelDescriptor,
+                            ParameterSpec.builder(
                                     ParameterizedTypeName.get(EndpointSupport.LIST, requestDto),
                                     "requests")
                             .addAnnotation(EndpointSupport.VALID)
                             .addAnnotation(EndpointSupport.NOT_NULL)
                             .addAnnotation(EndpointSupport.REQUEST_BODY)
-                            .build();
+                            .build());
         }
     },
 
     VALID_IDENTIFIED_REQUEST_LIST {
         @Override
         Function<ModelDescriptor, ParameterSpec> create(ClassName requestDto) {
-            return ignored ->
+            return modelDescriptor ->
                     ParameterSpec.builder(
                                     ParameterizedTypeName.get(
                                             EndpointSupport.LIST,
                                             ParameterizedTypeName.get(
                                                     EndpointSupport.IDENTIFIED,
-                                                    EndpointSupport.resolveModelIdType(ignored),
+                                                    EndpointSupport.resolveModelIdType(
+                                                            modelDescriptor),
                                                     requestDto)),
                                     "requests")
                             .addAnnotation(EndpointSupport.VALID)
@@ -87,7 +93,10 @@ enum EndpointParameterTemplates {
     PAGEABLE {
         @Override
         Function<ModelDescriptor, ParameterSpec> create(ClassName requestDto) {
-            return ignored -> ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable").build();
+            return modelDescriptor ->
+                    EndpointSupport.withModel(
+                            modelDescriptor,
+                            ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable").build());
         }
     };
 

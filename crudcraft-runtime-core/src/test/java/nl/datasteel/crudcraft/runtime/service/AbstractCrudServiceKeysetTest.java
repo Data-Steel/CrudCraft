@@ -59,7 +59,7 @@ class AbstractCrudServiceKeysetTest {
         queryExecutionStrategy =
                 (QueryExecutionStrategy<TestEntity>) mock(QueryExecutionStrategy.class);
         service = new TestService(repository, new TestMapper());
-        service.queryExecutor = queryExecutionStrategy;
+        service.setQueryExecutorForTests(queryExecutionStrategy);
     }
 
     @Test

@@ -19,8 +19,8 @@ CrudCraft CI is not generic Maven automation. It protects generated source deter
 
 | Workflow | Trigger | Maintainer responsibility |
 |---|---|---|
-| `.github/workflows/ci.yml` | Pull requests to `main`/`develop`. | Keep verify, golden, license, Javadoc, quality report, dependency-check, docs drift, PIT, benchmark, generated roundtrip, and Sonar gates meaningful. |
-| `.github/workflows/dependency-scan.yml` | PRs, pushes to `main`, weekly schedule, manual. | Treat OSV findings as dependency/security review input. |
+| `.github/workflows/ci.yml` | Pull requests to `main`/`develop`. | Keep verify, golden, license, Javadoc, quality report, docs drift, PIT, benchmark, generated roundtrip, and Sonar gates meaningful. |
+| `.github/workflows/dependency-scan.yml` | PRs, pushes to `main`, weekly schedule, manual. | Treat OSV findings as PR/push security input. Treat weekly/manual OWASP Dependency-Check results as slower dependency-risk review input. |
 | `.github/workflows/reproducible-build.yml` | PRs, pushes to `main`, manual. | Ensure package output is reproducible across two clean builds. |
 | `.github/workflows/release-please.yml` | Push to `main`, manual. | Keep automated release PR generation aligned with versioning policy. |
 | `.github/workflows/cut-release.yml` | Manual. | Use only for intentional SemVer tag/release creation from an approved ref. |
@@ -36,13 +36,18 @@ The main PR workflow currently checks:
 - license headers;
 - aggregate Javadocs;
 - parsed quality reports through `scripts/verify-quality-reports.ps1`;
-- OWASP Dependency-Check with CVSS threshold;
 - documentation index validation and doc drift;
 - JaCoCo XML artifact upload;
 - PIT mutation matrix for codegen;
 - JMH paging benchmark build/run;
 - generated roundtrip PIT for sample app;
 - Sonar PR analysis and quality gate.
+
+Dependency scanning is intentionally split from the main PR workflow:
+
+- OSV runs in `.github/workflows/dependency-scan.yml` on PRs, pushes to `main`, weekly schedule, and manual dispatch.
+- OWASP Dependency-Check runs in `.github/workflows/dependency-scan.yml` only on weekly schedule or manual dispatch, with cached NVD data and report upload.
+- OWASP Dependency-Check remains a release preflight in `.github/workflows/release.yml`.
 
 Removing one of these requires either a replacement with equivalent risk coverage or an explicit policy change.
 

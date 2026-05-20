@@ -16,12 +16,6 @@
 
 package nl.datasteel.crudcraft.codegen.util;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Year;
-import java.util.stream.Collectors;
 import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 import nl.datasteel.crudcraft.codegen.fileheader.LogicEditableHeader;
 import nl.datasteel.crudcraft.codegen.fileheader.LogicStrictHeader;
@@ -33,31 +27,17 @@ public final class StubGeneratorUtil {
     private StubGeneratorUtil() {}
 
     /**
-     * Returns the normalized license header content used in generated files.
+     * Returns the license header content used in generated files.
      *
-     * @return the file header text, or an empty string when unavailable
+     * @return an empty string because generated application code must not carry CrudCraft's
+     *     project license header
      */
     public static String licenseHeader() {
         return loadLicenseHeader();
     }
 
     private static String loadLicenseHeader() {
-        try {
-            String baseDir =
-                    System.getProperty(
-                            "maven.multiModuleProjectDirectory", System.getProperty("user.dir"));
-            Path header = Path.of(baseDir, ".license-header");
-            String content =
-                    Files.readString(header, StandardCharsets.UTF_8)
-                            .replace("YEAR", String.valueOf(Year.now().getValue()))
-                            .replace("OWNER", "CrudCraft contributors");
-            return content.lines()
-                    .filter(line -> !line.startsWith("/*") && !line.startsWith("*/"))
-                    .map(line -> line.startsWith(" *") ? line.substring(2) : line)
-                    .collect(Collectors.joining(System.lineSeparator()));
-        } catch (IOException e) {
-            return "";
-        }
+        return "";
     }
 
     /**

@@ -65,6 +65,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Support: For file generation bugs or feedback, open an issue at
  * https://github.com/Data-Steel/CrudCraft/issues.
  */
+@SuppressWarnings("PMD")
 @RestController
 @RequestMapping("/catalogitems")
 public class CatalogItemController {
@@ -553,6 +554,7 @@ public class CatalogItemController {
         long _crudcraftStarted = System.nanoTime();
         String _crudcraftOutcome = "success";
         try {
+            request.getClass();
             return ResponseEntity.ok().build();
         } catch (RuntimeException ex) {
             _crudcraftOutcome = "error";

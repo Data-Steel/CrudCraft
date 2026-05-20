@@ -79,6 +79,7 @@ public class WriteContext implements ProcessingEnvironmentProvider, ModelRegistr
      *
      * @return the ProcessingEnvironment instance
      */
+    @Override
     public ProcessingEnvironment env() {
         return env;
     }
@@ -88,6 +89,7 @@ public class WriteContext implements ProcessingEnvironmentProvider, ModelRegistr
      *
      * @param model model descriptor to include
      */
+    @Override
     public void registerInsomniaModel(ModelDescriptor model) {
         insomniaModels.add(model);
     }
@@ -97,6 +99,7 @@ public class WriteContext implements ProcessingEnvironmentProvider, ModelRegistr
      *
      * @return immutable model snapshot
      */
+    @Override
     public Set<ModelDescriptor> insomniaModels() {
         return Collections.unmodifiableSet(new LinkedHashSet<>(insomniaModels));
     }
@@ -107,6 +110,7 @@ public class WriteContext implements ProcessingEnvironmentProvider, ModelRegistr
      * @param fqcn fully qualified class name
      * @return the {@link TypeElement} or {@code null} if not found
      */
+    @Override
     public TypeElement findTypeElement(String fqcn) {
         return env.getElementUtils().getTypeElement(fqcn);
     }
@@ -117,6 +121,7 @@ public class WriteContext implements ProcessingEnvironmentProvider, ModelRegistr
      *
      * @param jf the JavaFile to write
      */
+    @Override
     public void write(JavaFile jf) {
         FilerUtils.writeJavaFile(jf, env.getFiler(), env.getMessager());
     }

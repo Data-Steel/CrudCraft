@@ -26,6 +26,7 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.UUID;
 import nl.datasteel.crudcraft.runtime.security.AccessDeniedException;
+import nl.datasteel.crudcraft.runtime.security.row.fixture.RowSecurityFixtures;
 import nl.datasteel.crudcraft.runtime.security.scope.PrincipalScopeAccessor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -309,8 +310,7 @@ class ClaimScopedRowSecurityHandlerTest {
     @Test
     void applyWrapsIllegalAccessForPackagePrivateForeignEntity() throws Exception {
         Class<?> type =
-                Class.forName(
-                        "nl.datasteel.crudcraft.runtime.security.row.fixture.PackagePrivateScopedEntity");
+                Class.forName(RowSecurityFixtures.packagePrivateScopedEntityType().getName());
         Constructor<?> ctor = type.getDeclaredConstructor();
         ctor.setAccessible(true);
         Object entity = ctor.newInstance();
@@ -579,7 +579,11 @@ class ClaimScopedRowSecurityHandlerTest {
             throw new IllegalArgumentException("boom");
         }
 
-        public void setTenantId(String tenantId) {}
+        public void setTenantId(String tenantId) {
+            if (tenantId != null) {
+                tenantId.length();
+            }
+        }
     }
 
     public static class ErrorThrowingEntity {
@@ -587,7 +591,11 @@ class ClaimScopedRowSecurityHandlerTest {
             throw new AssertionError("boom");
         }
 
-        public void setTenantId(String tenantId) {}
+        public void setTenantId(String tenantId) {
+            if (tenantId != null) {
+                tenantId.length();
+            }
+        }
     }
 
     public static class CheckedThrowingEntity {
@@ -595,7 +603,11 @@ class ClaimScopedRowSecurityHandlerTest {
             throw new Exception("boom");
         }
 
-        public void setTenantId(String tenantId) {}
+        public void setTenantId(String tenantId) {
+            if (tenantId != null) {
+                tenantId.length();
+            }
+        }
     }
 
     public enum Tier {

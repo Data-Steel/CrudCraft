@@ -51,16 +51,20 @@ public class CountEndpoint extends AbstractEndpointSpecProvider {
                 CrudEndpoint.COUNT,
                 "count",
                 md ->
-                        AnnotationSpec.builder(EndpointSupport.GET_MAPPING)
-                                .addMember("value", "$S", "/count")
-                                .build(),
+                        EndpointSupport.withModel(
+                                md,
+                                AnnotationSpec.builder(EndpointSupport.GET_MAPPING)
+                                        .addMember("value", "$S", "/count")
+                                        .build()),
                 md ->
-                        ParameterizedTypeName.get(
-                                EndpointSupport.RESP_ENTITY,
+                        EndpointSupport.withModel(
+                                md,
                                 ParameterizedTypeName.get(
-                                        EndpointSupport.MAP,
-                                        ClassName.get(String.class),
-                                        ClassName.get(Long.class))),
+                                        EndpointSupport.RESP_ENTITY,
+                                        ParameterizedTypeName.get(
+                                                EndpointSupport.MAP,
+                                                ClassName.get(String.class),
+                                                ClassName.get(Long.class)))),
                 List.of(),
                 (mb, md) ->
                         mb.addCode(

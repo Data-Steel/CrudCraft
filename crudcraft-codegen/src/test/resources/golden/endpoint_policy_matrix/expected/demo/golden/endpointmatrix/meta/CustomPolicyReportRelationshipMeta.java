@@ -31,10 +31,16 @@ public final class CustomPolicyReportRelationshipMeta {
     }
 
     public static void fix(CustomPolicyReport entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(CustomPolicyReport entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

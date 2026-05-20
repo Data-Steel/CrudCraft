@@ -31,10 +31,16 @@ public final class ValidationOnlyDraftRelationshipMeta {
     }
 
     public static void fix(ValidationOnlyDraft entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(ValidationOnlyDraft entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

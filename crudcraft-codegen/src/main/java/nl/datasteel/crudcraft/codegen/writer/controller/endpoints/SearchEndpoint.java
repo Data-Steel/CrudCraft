@@ -61,16 +61,22 @@ public class SearchEndpoint extends AbstractEndpointSpecProvider {
                 CrudEndpoint.SEARCH,
                 "search",
                 m ->
-                        AnnotationSpec.builder(EndpointSupport.GET_MAPPING)
-                                .addMember("value", "$S", "/search")
-                                .build(),
-                m -> returnType,
+                        EndpointSupport.withModel(
+                                m,
+                                AnnotationSpec.builder(EndpointSupport.GET_MAPPING)
+                                        .addMember("value", "$S", "/search")
+                                        .build()),
+                m -> EndpointSupport.withModel(m, returnType),
                 List.of(
                         m ->
                                 ParameterSpec.builder(searchReq, "searchRequest")
                                         .addAnnotation(EndpointSupport.MODEL_ATTR)
                                         .build(),
-                        m -> ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable").build()),
+                        m ->
+                                EndpointSupport.withModel(
+                                        m,
+                                        ParameterSpec.builder(EndpointSupport.PAGEABLE, "pageable")
+                                                .build())),
                 (mb, m) -> {
                     mb.addCode(
                             "$T clamped = clampPageable(pageable);\n"

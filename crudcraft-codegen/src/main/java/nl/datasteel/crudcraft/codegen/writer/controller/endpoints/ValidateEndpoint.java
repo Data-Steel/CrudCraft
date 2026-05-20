@@ -53,24 +53,33 @@ public class ValidateEndpoint extends AbstractEndpointSpecProvider {
                 CrudEndpoint.VALIDATE,
                 "validate",
                 md ->
-                        AnnotationSpec.builder(EndpointSupport.POST_MAPPING)
-                                .addMember("value", "$S", "/validate")
-                                .build(),
+                        EndpointSupport.withModel(
+                                md,
+                                AnnotationSpec.builder(EndpointSupport.POST_MAPPING)
+                                        .addMember("value", "$S", "/validate")
+                                        .build()),
                 md ->
-                        ParameterizedTypeName.get(
-                                EndpointSupport.RESP_ENTITY, ClassName.get(Void.class)),
+                        EndpointSupport.withModel(
+                                md,
+                                ParameterizedTypeName.get(
+                                        EndpointSupport.RESP_ENTITY, ClassName.get(Void.class))),
                 List.of(
                         md ->
-                                ParameterSpec.builder(ClassName.get(dtoReqPkg, dtoReq), "request")
-                                        .addAnnotation(EndpointSupport.VALID)
-                                        .addAnnotation(EndpointSupport.NOT_NULL)
-                                        .addAnnotation(EndpointSupport.REQUEST_BODY)
-                                        .build()),
+                                EndpointSupport.withModel(
+                                        md,
+                                        ParameterSpec.builder(
+                                                        ClassName.get(dtoReqPkg, dtoReq), "request")
+                                                .addAnnotation(EndpointSupport.VALID)
+                                                .addAnnotation(EndpointSupport.NOT_NULL)
+                                                .addAnnotation(EndpointSupport.REQUEST_BODY)
+                                                .build())),
                 (mb, md) -> {
                     if (EndpointSupport.hasFieldSecurity(md)) {
                         mb.addCode(
                                 "$T.filterWrite(request);\n",
                                 EndpointSupport.FIELD_SECURITY_UTIL);
+                    } else {
+                        mb.addCode("request.getClass();\n");
                     }
                     mb.addCode("return $T.ok().build();\n", EndpointSupport.RESP_ENTITY);
                 });
