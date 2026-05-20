@@ -81,8 +81,10 @@ public class UpdateEndpoint extends AbstractEndpointSpecProvider {
                     return mapping.build();
                 },
                 md ->
-                        EndpointResponseTemplates.RESPONSE_ENTITY.wrap(
-                                ClassName.get(dtoRespPkg, dtoFull)),
+                        EndpointSupport.withModel(
+                                md,
+                                EndpointResponseTemplates.RESPONSE_ENTITY.wrap(
+                                        ClassName.get(dtoRespPkg, dtoFull))),
                 params,
                 (mb, md) -> {
                     if (md.hasLobFields()) {

@@ -243,7 +243,13 @@ class TckMatrixCoverageTest {
                 String methodName = methodMatcher.group(1);
                 TckEvidence evidence = new TckEvidence(relativePath, className, methodName);
                 for (String pendingTag : pendingTags) {
-                    tags.computeIfAbsent(pendingTag, ignored -> new ArrayList<>()).add(evidence);
+                    tags.computeIfAbsent(
+                                    pendingTag,
+                                    tagId -> {
+                                        tagId.length();
+                                        return new ArrayList<>();
+                                    })
+                            .add(evidence);
                 }
                 pendingTags.clear();
             }

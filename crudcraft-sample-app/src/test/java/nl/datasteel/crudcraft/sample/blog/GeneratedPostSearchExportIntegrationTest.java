@@ -501,7 +501,8 @@ class GeneratedPostSearchExportIntegrationTest extends PostgresIntegrationTestBa
             throws Exception {
         org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder request =
                 get(path).header(HttpHeaders.AUTHORIZATION, bearerToken());
-        for (int i = 0; i < params.length; i += 2) {
+        requireParamPairs(params);
+        for (int i = 0; i + 1 < params.length; i += 2) {
             request.param(params[i], params[i + 1]);
         }
         MvcResult start = mockMvc.perform(request).andReturn();
@@ -519,7 +520,8 @@ class GeneratedPostSearchExportIntegrationTest extends PostgresIntegrationTestBa
     private JsonNode getJson(String path, String... params) throws Exception {
         org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder request =
                 get(path).header(HttpHeaders.AUTHORIZATION, bearerToken());
-        for (int i = 0; i < params.length; i += 2) {
+        requireParamPairs(params);
+        for (int i = 0; i + 1 < params.length; i += 2) {
             request.param(params[i], params[i + 1]);
         }
         return objectMapper.readTree(
@@ -528,6 +530,12 @@ class GeneratedPostSearchExportIntegrationTest extends PostgresIntegrationTestBa
                         .andReturn()
                         .getResponse()
                         .getContentAsString());
+    }
+
+    private static void requireParamPairs(String[] params) {
+        if (params.length % 2 != 0) {
+            throw new IllegalArgumentException("params must contain key/value pairs");
+        }
     }
 
     private SearchSeed searchSeed() {

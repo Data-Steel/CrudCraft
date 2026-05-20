@@ -31,10 +31,16 @@ public final class ProjectRelationshipMeta {
     }
 
     public static void fix(Project entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(Project entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

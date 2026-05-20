@@ -56,10 +56,12 @@ public class GetOneEndpoint extends AbstractEndpointSpecProvider {
                 CrudEndpoint.GET_ONE,
                 "getById",
                 m ->
-                        AnnotationSpec.builder(EndpointSupport.GET_MAPPING)
-                                .addMember("value", "$S", "/{id}")
-                                .build(),
-                m -> returnType,
+                        EndpointSupport.withModel(
+                                m,
+                                AnnotationSpec.builder(EndpointSupport.GET_MAPPING)
+                                        .addMember("value", "$S", "/{id}")
+                                        .build()),
+                m -> EndpointSupport.withModel(m, returnType),
                 List.of(
                         m ->
                                 ParameterSpec.builder(

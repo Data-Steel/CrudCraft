@@ -16,6 +16,7 @@
 
 package nl.datasteel.crudcraft.runtime.service.extension;
 
+import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.data.jpa.domain.Specification;
 
 
@@ -27,6 +28,13 @@ import org.springframework.data.jpa.domain.Specification;
  */
 public interface CrudRuntimeExtension<T, U> {
 
+    /** Internal sink used to consume intentionally ignored default-hook parameters. */
+    class NoOpSink {
+        private static final AtomicReference<Object> VALUE = new AtomicReference<>();
+
+        private NoOpSink() {}
+    }
+
     /**
      * Adds an optional read restriction for the current request context.
      *
@@ -34,6 +42,7 @@ public interface CrudRuntimeExtension<T, U> {
      * @return additional read filter or {@code null}
      */
     default Specification<T> readFilter(Class<T> entityType) {
+        consume(entityType);
         return null;
     }
 
@@ -66,6 +75,7 @@ public interface CrudRuntimeExtension<T, U> {
      * @return transformed request DTO
      */
     default U beforeUpdate(U request, T existing) {
+        consume(existing);
         return request;
     }
 
@@ -75,7 +85,7 @@ public interface CrudRuntimeExtension<T, U> {
      * @param entity entity to persist
      */
     default void beforeSave(T entity) {
-        // no-op by default
+        consume(entity);
     }
 
     /**
@@ -84,6 +94,10 @@ public interface CrudRuntimeExtension<T, U> {
      * @param entity entity to delete
      */
     default void beforeDelete(T entity) {
-        // no-op by default
+        consume(entity);
+    }
+
+    private static void consume(Object value) {
+        NoOpSink.VALUE.getAndSet(value);
     }
 }

@@ -40,6 +40,7 @@ public interface SearchRequest<T> extends SpecificationProvider<T> {
      *
      * @return search specification
      */
+    @Override
     @NonNull Specification<T> toSpecification();
 
     /**

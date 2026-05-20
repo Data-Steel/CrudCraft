@@ -266,10 +266,8 @@ public final class ExportUtil {
             }
             List<Map<String, Object>> maps = flatRows(dtos.iterator(), null);
             String[] headers = headersFor(maps);
-            try (CSVPrinter printer =
-                    new CSVPrinter(
-                            new OutputStreamWriter(out, StandardCharsets.UTF_8),
-                            csvFormat(headers))) {
+            try (OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
+                    CSVPrinter printer = new CSVPrinter(writer, csvFormat(headers))) {
                 for (Map<String, Object> row : maps) {
                     writeCsvRow(printer, headers, row);
                 }
@@ -344,10 +342,9 @@ public final class ExportUtil {
                 return;
             }
             String[] headers = headersFor(rows);
-            try (CSVPrinter printer =
-                    new CSVPrinter(
-                            new OutputStreamWriter(buffered(out), StandardCharsets.UTF_8),
-                            csvFormat(headers))) {
+            try (OutputStreamWriter writer =
+                            new OutputStreamWriter(buffered(out), StandardCharsets.UTF_8);
+                    CSVPrinter printer = new CSVPrinter(writer, csvFormat(headers))) {
                 for (Map<String, Object> row : rows) {
                     writeCsvRow(printer, headers, row);
                 }
@@ -375,10 +372,9 @@ public final class ExportUtil {
             @Nullable ExportRequest exportRequest,
             String[] headers)
             throws IOException {
-        try (CSVPrinter printer =
-                new CSVPrinter(
-                        new OutputStreamWriter(buffered(out), StandardCharsets.UTF_8),
-                        csvFormat(headers))) {
+        try (OutputStreamWriter writer =
+                        new OutputStreamWriter(buffered(out), StandardCharsets.UTF_8);
+                CSVPrinter printer = new CSVPrinter(writer, csvFormat(headers))) {
             while (dtos.hasNext()) {
                 writeCsvRow(printer, headers, toFlatMap(dtos.next(), exportRequest));
             }

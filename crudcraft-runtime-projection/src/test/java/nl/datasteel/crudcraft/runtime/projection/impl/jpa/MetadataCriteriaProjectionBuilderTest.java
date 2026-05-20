@@ -36,6 +36,7 @@ import nl.datasteel.crudcraft.runtime.projection.metadata.ProjectionMetadataRegi
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,6 +54,7 @@ class MetadataCriteriaProjectionBuilderTest {
     void buildCreatesDistinctCriteriaQuery() {
         ProjectionMetadataRegistry registry = mock(ProjectionMetadataRegistry.class);
         MetadataCriteriaProjectionBuilder builder = new MetadataCriteriaProjectionBuilder(registry);
+        assertNotNull(builder);
         CriteriaBuilder cb = mock(CriteriaBuilder.class);
         CriteriaQuery criteriaQuery = mock(CriteriaQuery.class);
         Root root = mock(Root.class);

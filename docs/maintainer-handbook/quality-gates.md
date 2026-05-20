@@ -55,7 +55,8 @@ compatibility decision, and Feature Guide update before merge.
 When approving a risk:
 
 ```text
-Accepted risk: full OWASP scan not run locally; CI dependency-scan passed on this PR.
+Accepted risk: full OWASP scan not run locally; OSV passed on this PR and
+weekly/manual OWASP dependency-scan has no blocking finding for the affected dependency.
 ```
 
 ## Related Documentation

@@ -61,7 +61,10 @@ public class CreateEndpoint extends AbstractEndpointSpecProvider {
                     }
                     return mapping.build();
                 },
-                ignored -> EndpointResponseTemplates.RESPONSE_ENTITY.wrap(responseDto),
+                descriptor ->
+                        EndpointSupport.withModel(
+                                descriptor,
+                                EndpointResponseTemplates.RESPONSE_ENTITY.wrap(responseDto)),
                 hasLob
                         ? EndpointSupport.lobParams(requestDto, md)
                         : List.of(EndpointParameterTemplates.REQUEST_BODY.create(requestDto)),

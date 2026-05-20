@@ -400,6 +400,7 @@ public final class FieldDescriptor {
      *
      * @return an integer hash code
      */
+    @Override
     public int hashCode() {
         return Objects.hash(
                 identity.getName(),

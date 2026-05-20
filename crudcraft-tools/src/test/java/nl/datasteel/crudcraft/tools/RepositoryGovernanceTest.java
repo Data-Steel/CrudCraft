@@ -278,11 +278,13 @@ class RepositoryGovernanceTest {
 
     @Test
     void releaseWorkflowRunsPullRequestProofSurfaceBeforeDeploy() throws IOException {
+        String ciWorkflow = Files.readString(REPOSITORY_ROOT.resolve(".github/workflows/ci.yml"));
         String releaseWorkflow =
                 Files.readString(REPOSITORY_ROOT.resolve(".github/workflows/release.yml"));
         int verify = releaseWorkflow.indexOf("Release preflight / verify Maven reactor");
         int deploy = releaseWorkflow.indexOf("Build, sign & deploy");
 
+        assertFalse(ciWorkflow.contains("OWASP Dependency-Check"));
         assertTrue(verify >= 0, "release workflow must run the reactor verify preflight");
         assertTrue(deploy > verify, "release preflight must complete before deployment");
         assertTrue(releaseWorkflow.contains("-Dcrudcraft.tck.postgres.required=true"));
@@ -356,7 +358,9 @@ class RepositoryGovernanceTest {
         assertContains("docs/architecture/module-boundaries.md", "split packages");
         assertContains("docs/architecture/module-boundaries.md", "module-info.java");
         assertContains("docs/migration-guides/README.md", "Deferred Breaking Changes");
-        assertContains(".github/workflows/dependency-scan.yml", "--fail-on-vuln");
+        assertContains(".github/workflows/dependency-scan.yml", "fail-on-vuln: true");
+        assertContains(".github/workflows/dependency-scan.yml", "OWASP Dependency-Check");
+        assertContains(".github/workflows/dependency-scan.yml", "github.event_name == 'schedule'");
         assertContains(".github/workflows/reproducible-build.yml", "Compare two clean package builds");
         assertContains(".github/workflows/release.yml", "sigstore/cosign-installer");
         assertContains(".github/workflows/release.yml", "cyclonedx");

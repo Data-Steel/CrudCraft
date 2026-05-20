@@ -100,7 +100,7 @@ public final class CrudCraftStartupValidator implements SmartInitializingSinglet
         if (service.mapper == null) {
             missing.add("mapper");
         }
-        if (service.queryExecutor == null) {
+        if (service.queryExecutor() == null) {
             missing.add("queryExecutor");
         }
         if (service.entityClass == null) {

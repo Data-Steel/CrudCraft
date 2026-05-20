@@ -31,10 +31,16 @@ public final class ProfileRelationshipMeta {
     }
 
     public static void fix(Profile entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(Profile entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

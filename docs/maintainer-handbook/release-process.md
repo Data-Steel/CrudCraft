@@ -13,7 +13,7 @@ related:
 
 # Release Process
 
-CrudCraft releases are published from GitHub automation, not local machines. The release workflow sets the Maven version from the tag, runs tests, deploys signed artifacts to Maven Central, verifies publication, signs release artifacts with Sigstore, uploads SBOM/signature bundles, and dispatches docs deployment.
+CrudCraft releases are published from GitHub automation, not local machines. The release workflow sets the Maven version from the tag, runs tests, runs OWASP Dependency-Check as a release preflight, deploys signed artifacts to Maven Central, verifies publication, signs release artifacts with Sigstore, uploads SBOM/signature bundles, and dispatches docs deployment.
 
 ## Release Preconditions
 
@@ -21,6 +21,7 @@ CrudCraft releases are published from GitHub automation, not local machines. The
 - Version impact is decided.
 - Compatibility and deprecation impact are documented.
 - Required PR checks passed on the release source.
+- OWASP Dependency-Check passes in the release workflow.
 - Docs build from the release source.
 - Release notes describe user-visible changes, generated API changes, runtime module changes, compatibility impact, and known limitations.
 - Maven Central, signing, and docs dispatch secrets are available.

@@ -23,7 +23,8 @@ import nl.datasteel.crudcraft.codegen.descriptor.model.ModelDescriptor;
 
 /** CRUD-only test generator that records write invocations. */
 public class TestCrudGenerator implements Generator {
-    public static int writes = 0;
+    public static int writes;
+    public static boolean written;
 
     @Override
     public List<JavaFile> generate(ModelDescriptor model, WriteContext ctx) {
@@ -38,5 +39,6 @@ public class TestCrudGenerator implements Generator {
     @Override
     public void write(ModelDescriptor model, WriteContext ctx) {
         writes++;
+        written = true;
     }
 }

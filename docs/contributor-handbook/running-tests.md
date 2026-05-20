@@ -65,13 +65,16 @@ CI also runs checks that are expensive or environment-dependent:
 - `license:check`;
 - aggregate Javadocs with warnings failing;
 - `scripts/verify-quality-reports.ps1`;
-- OWASP Dependency-Check;
 - `scripts/update-doc-index.ps1`;
 - `scripts/check-doc-drift.ps1`;
 - PIT matrix for `crudcraft-codegen`;
 - JMH benchmark build/run;
 - generated roundtrip PIT against `crudcraft-sample-app`;
 - Sonar analysis and quality gate.
+
+Dependency scanning is split out from the main PR workflow. OSV runs on PRs, pushes to `main`,
+the weekly schedule, and manual dispatch. OWASP Dependency-Check runs from the dependency-scan
+workflow only on the weekly schedule or manual dispatch, and still runs as a release preflight.
 
 Contributors do not need to run every CI job locally for every PR, but PR notes must be honest about what was and was not run.
 

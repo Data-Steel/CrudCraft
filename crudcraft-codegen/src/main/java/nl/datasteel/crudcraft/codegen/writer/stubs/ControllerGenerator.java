@@ -444,6 +444,10 @@ public class ControllerGenerator implements StubGenerator {
                 TypeSpec.classBuilder(controllerName)
                         .addJavadoc(header)
                         .addModifiers(Modifier.PUBLIC)
+                        .addAnnotation(
+                                AnnotationSpec.builder(SuppressWarnings.class)
+                                        .addMember("value", "$S", "PMD")
+                                        .build())
                         .addAnnotation(restCtrl)
                         .addAnnotation(
                                 AnnotationSpec.builder(reqMap)

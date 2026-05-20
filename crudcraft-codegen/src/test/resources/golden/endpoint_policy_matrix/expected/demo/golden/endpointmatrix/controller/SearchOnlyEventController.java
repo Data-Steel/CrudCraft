@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Support: For file generation bugs or feedback, open an issue at
  * https://github.com/Data-Steel/CrudCraft/issues.
  */
+@SuppressWarnings("PMD")
 @RestController
 @RequestMapping("/searchonlyevents")
 public class SearchOnlyEventController {

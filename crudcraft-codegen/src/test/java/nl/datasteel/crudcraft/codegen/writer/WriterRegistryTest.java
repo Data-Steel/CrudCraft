@@ -46,7 +46,9 @@ class WriterRegistryTest {
         when(env.getMessager()).thenReturn(messager);
         ctx = new WriteContext(env);
         TestBasicGenerator.writes = 0;
+        TestBasicGenerator.written = false;
         TestCrudGenerator.writes = 0;
+        TestCrudGenerator.written = false;
         WriterRegistry.clearGeneratorOverridesForTests();
     }
 

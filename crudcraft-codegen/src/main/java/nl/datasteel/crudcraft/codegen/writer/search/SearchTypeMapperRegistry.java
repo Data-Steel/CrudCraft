@@ -168,12 +168,11 @@ public final class SearchTypeMapperRegistry {
             if (!(original instanceof ParameterizedTypeName p)) {
                 return original;
             }
-            ClassName raw = p.rawType();
-            TypeName[] args =
+            return ParameterizedTypeName.get(
+                    p.rawType(),
                     p.typeArguments().stream()
                             .map(SearchTypeMapperRegistry::map)
-                            .toArray(TypeName[]::new);
-            return ParameterizedTypeName.get(raw, args);
+                            .toArray(TypeName[]::new));
         }
     }
 }

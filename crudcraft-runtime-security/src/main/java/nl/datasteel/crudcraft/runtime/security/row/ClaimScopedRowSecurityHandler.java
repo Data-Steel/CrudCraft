@@ -167,28 +167,28 @@ public final class ClaimScopedRowSecurityHandler<T> implements RowSecurityHandle
             return asString;
         }
         if (Long.class.equals(targetType) || long.class.equals(targetType)) {
-            return Long.valueOf(asString);
+            return parseLong(asString, targetType);
         }
         if (Integer.class.equals(targetType) || int.class.equals(targetType)) {
-            return Integer.valueOf(asString);
+            return parseInteger(asString, targetType);
         }
         if (Boolean.class.equals(targetType) || boolean.class.equals(targetType)) {
             return parseBoolean(asString);
         }
         if (Short.class.equals(targetType) || short.class.equals(targetType)) {
-            return Short.valueOf(asString);
+            return parseShort(asString, targetType);
         }
         if (Byte.class.equals(targetType) || byte.class.equals(targetType)) {
-            return Byte.valueOf(asString);
+            return parseByte(asString, targetType);
         }
         if (Double.class.equals(targetType) || double.class.equals(targetType)) {
-            return Double.valueOf(asString);
+            return parseDouble(asString, targetType);
         }
         if (Float.class.equals(targetType) || float.class.equals(targetType)) {
-            return Float.valueOf(asString);
+            return parseFloat(asString, targetType);
         }
         if (java.util.UUID.class.equals(targetType)) {
-            return java.util.UUID.fromString(asString);
+            return parseUuid(asString, targetType);
         }
         if (targetType.isEnum()) {
             @SuppressWarnings({"rawtypes", "unchecked"})
@@ -214,6 +214,76 @@ public final class ClaimScopedRowSecurityHandler<T> implements RowSecurityHandle
             return false;
         }
         throw new IllegalArgumentException("Invalid boolean value: " + raw);
+    }
+
+    private static @NonNull Long parseLong(
+            @NonNull String raw, @NonNull Class<?> targetType) {
+        try {
+            return Long.valueOf(raw);
+        } catch (NumberFormatException ex) {
+            throw invalidClaimValue(raw, targetType, ex);
+        }
+    }
+
+    private static @NonNull Integer parseInteger(
+            @NonNull String raw, @NonNull Class<?> targetType) {
+        try {
+            return Integer.valueOf(raw);
+        } catch (NumberFormatException ex) {
+            throw invalidClaimValue(raw, targetType, ex);
+        }
+    }
+
+    private static @NonNull Short parseShort(
+            @NonNull String raw, @NonNull Class<?> targetType) {
+        try {
+            return Short.valueOf(raw);
+        } catch (NumberFormatException ex) {
+            throw invalidClaimValue(raw, targetType, ex);
+        }
+    }
+
+    private static @NonNull Byte parseByte(
+            @NonNull String raw, @NonNull Class<?> targetType) {
+        try {
+            return Byte.valueOf(raw);
+        } catch (NumberFormatException ex) {
+            throw invalidClaimValue(raw, targetType, ex);
+        }
+    }
+
+    private static @NonNull Double parseDouble(
+            @NonNull String raw, @NonNull Class<?> targetType) {
+        try {
+            return Double.valueOf(raw);
+        } catch (NumberFormatException ex) {
+            throw invalidClaimValue(raw, targetType, ex);
+        }
+    }
+
+    private static @NonNull Float parseFloat(
+            @NonNull String raw, @NonNull Class<?> targetType) {
+        try {
+            return Float.valueOf(raw);
+        } catch (NumberFormatException ex) {
+            throw invalidClaimValue(raw, targetType, ex);
+        }
+    }
+
+    private static @NonNull java.util.UUID parseUuid(
+            @NonNull String raw, @NonNull Class<?> targetType) {
+        try {
+            return java.util.UUID.fromString(raw);
+        } catch (IllegalArgumentException ex) {
+            throw invalidClaimValue(raw, targetType, ex);
+        }
+    }
+
+    private static IllegalArgumentException invalidClaimValue(
+            String raw, Class<?> targetType, RuntimeException cause) {
+        return new IllegalArgumentException(
+                "Invalid scoped claim value '" + raw + "' for " + targetType.getSimpleName(),
+                cause);
     }
 
     private static boolean isUnsetValue(

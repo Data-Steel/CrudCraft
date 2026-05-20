@@ -72,7 +72,7 @@ public abstract class CrudCraftRuntimeException extends RuntimeException {
      * @return context map
      */
     public Map<String, String> getContext() {
-        return context;
+        return Map.copyOf(context);
     }
 
     private static String formatMessage(String message, Map<String, String> context) {

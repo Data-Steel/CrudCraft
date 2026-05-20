@@ -39,7 +39,7 @@ class ParameterComponentTest {
                         CrudEndpoint.GET_ONE,
                         "m",
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
-                        md -> null,
+                        md -> { if (md != null) { md.getName(); } return null; },
                         java.util.List.of(
                                 md ->
                                         ParameterSpec.builder(EndpointSupport.UUID_CLASS, "id")
@@ -47,7 +47,7 @@ class ParameterComponentTest {
                                 md ->
                                         ParameterSpec.builder(ClassName.get(String.class), "name")
                                                 .build()),
-                        (b, md) -> {});
+                        (b, md) -> { if (md != null) { md.getName(); } });
         ControllerMethodContext ctx =
                 new ControllerMethodContext(
                         MethodSpec.methodBuilder("m"),
@@ -66,9 +66,9 @@ class ParameterComponentTest {
                         CrudEndpoint.GET_ONE,
                         "m",
                         md -> AnnotationSpec.builder(EndpointSupport.GET_MAPPING).build(),
-                        md -> null,
-                        java.util.List.of(md -> null),
-                        (b, md) -> {});
+                        md -> { if (md != null) { md.getName(); } return null; },
+                        java.util.List.of(md -> { if (md != null) { md.getName(); } return null; }),
+                        (b, md) -> { if (md != null) { md.getName(); } });
         ControllerMethodContext ctx =
                 new ControllerMethodContext(
                         MethodSpec.methodBuilder("m"),

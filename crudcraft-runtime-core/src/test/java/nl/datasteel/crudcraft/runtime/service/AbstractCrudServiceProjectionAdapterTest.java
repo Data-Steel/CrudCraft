@@ -64,7 +64,7 @@ class AbstractCrudServiceProjectionAdapterTest {
         queryExecutionStrategy =
                 (QueryExecutionStrategy<TestEntity>) mock(QueryExecutionStrategy.class);
         service = new TestService(repository, new TestMapper());
-        service.queryExecutor = queryExecutionStrategy;
+        service.setQueryExecutorForTests(queryExecutionStrategy);
         context = mock(ApplicationContext.class);
         service.setApplicationContext(context);
     }

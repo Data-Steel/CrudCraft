@@ -55,24 +55,30 @@ public class BulkUpsertEndpoint extends AbstractEndpointSpecProvider {
                 CrudEndpoint.BULK_UPSERT,
                 "upsertAll",
                 md ->
-                        AnnotationSpec.builder(EndpointSupport.POST_MAPPING)
-                                .addMember("value", "$S", "/batch/upsert")
-                                .build(),
+                        EndpointSupport.withModel(
+                                md,
+                                AnnotationSpec.builder(EndpointSupport.POST_MAPPING)
+                                        .addMember("value", "$S", "/batch/upsert")
+                                        .build()),
                 md ->
-                        ParameterizedTypeName.get(
-                                EndpointSupport.RESP_ENTITY,
+                        EndpointSupport.withModel(
+                                md,
                                 ParameterizedTypeName.get(
-                                        EndpointSupport.BULK_RESULT,
-                                        ClassName.get(dtoRespPkg, dtoFull))),
+                                        EndpointSupport.RESP_ENTITY,
+                                        ParameterizedTypeName.get(
+                                                EndpointSupport.BULK_RESULT,
+                                                ClassName.get(dtoRespPkg, dtoFull)))),
                 List.of(
                         md ->
-                                ParameterSpec.builder(
-                                                ParameterizedTypeName.get(
-                                                        EndpointSupport.COLLECTION,
-                                                        ClassName.get(dtoReqPkg, dtoReq)),
-                                                "requests")
-                                        .addAnnotation(EndpointSupport.REQUEST_BODY)
-                                        .build()),
+                                EndpointSupport.withModel(
+                                        md,
+                                        ParameterSpec.builder(
+                                                        ParameterizedTypeName.get(
+                                                                EndpointSupport.COLLECTION,
+                                                                ClassName.get(dtoReqPkg, dtoReq)),
+                                                        "requests")
+                                                .addAnnotation(EndpointSupport.REQUEST_BODY)
+                                                .build())),
                 (mb, md) -> {
                     var resultType =
                             ParameterizedTypeName.get(

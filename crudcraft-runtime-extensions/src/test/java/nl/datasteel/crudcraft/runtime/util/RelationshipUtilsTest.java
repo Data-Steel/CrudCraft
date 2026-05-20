@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import nl.datasteel.crudcraft.runtime.util.clearmissing.ClearMissingMethodEntity;
 import nl.datasteel.crudcraft.runtime.util.fixthrowing.FixThrowingEntity;
 import nl.datasteel.crudcraft.runtime.util.hiddenaccess.HiddenAccessEntity;
+import nl.datasteel.crudcraft.runtime.util.hiddenaccess.meta.HiddenAccessMetaFixtures;
 import nl.datasteel.crudcraft.runtime.util.missingmethod.MissingMethodEntity;
 import nl.datasteel.crudcraft.runtime.util.support.SupportedEntity;
 import nl.datasteel.crudcraft.runtime.util.support.meta.SupportedEntityRelationshipMeta;
@@ -161,6 +162,10 @@ class RelationshipUtilsTest {
 
     @Test
     void fixBidirectionalThrowsWhenMetaClassIsNotAccessible() {
+        assertEquals(
+                "nl.datasteel.crudcraft.runtime.util.hiddenaccess.meta"
+                        + ".HiddenAccessEntityRelationshipMeta",
+                HiddenAccessMetaFixtures.hiddenAccessEntityRelationshipMetaType().getName());
         IllegalStateException thrown =
                 assertThrows(
                         IllegalStateException.class,

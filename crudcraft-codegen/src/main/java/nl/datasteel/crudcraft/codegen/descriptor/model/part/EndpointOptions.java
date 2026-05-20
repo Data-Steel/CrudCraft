@@ -39,14 +39,8 @@ public record EndpointOptions(
 
     /** Immutable constructor for EndpointOptions. */
     public EndpointOptions {
-        omitEndpoints =
-                omitEndpoints == null
-                        ? new CrudEndpoint[0]
-                        : Arrays.copyOf(omitEndpoints, omitEndpoints.length);
-        includeEndpoints =
-                includeEndpoints == null
-                        ? new CrudEndpoint[0]
-                        : Arrays.copyOf(includeEndpoints, includeEndpoints.length);
+        omitEndpoints = copyEndpoints(omitEndpoints);
+        includeEndpoints = copyEndpoints(includeEndpoints);
     }
 
     /**
@@ -156,5 +150,9 @@ public record EndpointOptions(
                 + ", endpointPolicy="
                 + endpointPolicy
                 + '}';
+    }
+
+    private static CrudEndpoint[] copyEndpoints(CrudEndpoint[] endpoints) {
+        return endpoints == null ? new CrudEndpoint[0] : Arrays.copyOf(endpoints, endpoints.length);
     }
 }

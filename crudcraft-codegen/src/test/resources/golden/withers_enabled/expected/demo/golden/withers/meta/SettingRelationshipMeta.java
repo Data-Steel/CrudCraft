@@ -31,10 +31,16 @@ public final class SettingRelationshipMeta {
     }
 
     public static void fix(Setting entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to fix;
     }
 
     public static void clear(Setting entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("entity");
+        }
         // no bidirectional relationships to clear;
     }
 }

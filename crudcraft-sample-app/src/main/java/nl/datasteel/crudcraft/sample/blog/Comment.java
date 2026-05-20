@@ -16,6 +16,8 @@
 
 package nl.datasteel.crudcraft.sample.blog;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
@@ -39,8 +41,6 @@ import nl.datasteel.crudcraft.annotations.fields.Dto;
 import nl.datasteel.crudcraft.annotations.fields.ProjectionField;
 import nl.datasteel.crudcraft.annotations.fields.Request;
 import nl.datasteel.crudcraft.annotations.fields.Searchable;
-
-import static jakarta.persistence.FetchType.LAZY;
 
 
 /**

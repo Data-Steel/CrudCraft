@@ -28,7 +28,6 @@ jobs:
           args: >-
             --no-progress
             --verbose
-            --base .
-            --exclude-mail
+            --root-dir ${{ github.workspace }}
             --accept 200,429
             "./**/*.md"
