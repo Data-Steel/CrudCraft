@@ -5,6 +5,13 @@ All notable changes to CrudCraft are documented in this file.
 The format follows Keep a Changelog and the project follows semantic versioning as documented in
 `STABILITY.md`.
 
+## [2.0.1](https://github.com/Data-Steel/CrudCraft/compare/v2.0.0...v2.0.1) (2026-05-21)
+
+
+### Bug Fixes
+
+* add integration tests module to publish exclusion list ([154792c](https://github.com/Data-Steel/CrudCraft/commit/154792c977e3fab45e42c382209987bbde1d3241))
+
 ## [2.0.0](https://github.com/Data-Steel/CrudCraft/compare/v1.0.10...v2.0.0) (2026-05-20)
 
 
