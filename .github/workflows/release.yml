@@ -116,7 +116,7 @@ jobs:
       - name: Build, sign & deploy
         run: |
           mvn -B -U -P release \
-            -pl '!crudcraft-sample-app' -am \
+            -pl '!crudcraft-sample-app,!crudcraft-integration-tests' -am \
             -Dgpg.passphrase="${{ secrets.SIGNING_PASSWORD }}" \
             -Dgpg.executable=gpg \
             -DskipTests=false \
