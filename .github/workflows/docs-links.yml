@@ -20,7 +20,7 @@ jobs:
     name: markdown links
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Check markdown links
         uses: lycheeverse/lychee-action@v2
