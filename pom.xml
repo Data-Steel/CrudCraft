@@ -80,13 +80,13 @@
             ${maven.multiModuleProjectDirectory}/**/target/site/jacoco/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
 
-        <spring.boot.version>4.0.6</spring.boot.version>
-        <tomcat.version>11.0.22</tomcat.version>
-        <javapoet.version>0.15.0</javapoet.version>
+        <spring.boot.version>4.1.0</spring.boot.version>
+        <tomcat.version>11.0.23</tomcat.version>
+        <javapoet.version>0.16.0</javapoet.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <springdoc.version>3.0.3</springdoc.version>
-        <swagger.annotations.version>2.2.50</swagger.annotations.version>
-        <micrometer.version>1.16.5</micrometer.version>
+        <swagger.annotations.version>2.2.52</swagger.annotations.version>
+        <micrometer.version>1.17.0</micrometer.version>
 
         <!-- Dependency versions -->
         <auto.service.version>1.1.1</auto.service.version>
@@ -101,12 +101,12 @@
         <testcontainers.junit.version>1.21.4</testcontainers.junit.version>
         <testcontainers.postgres.version>1.21.4</testcontainers.postgres.version>
         <postgresql.version>42.7.11</postgresql.version>
-        <spotbugs.annotations.version>4.9.8</spotbugs.annotations.version>
-        <checkstyle.lib.version>13.4.2</checkstyle.lib.version>
+        <spotbugs.annotations.version>4.10.2</spotbugs.annotations.version>
+        <checkstyle.lib.version>13.6.0</checkstyle.lib.version>
 
         <!-- Plugin versions -->
         <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
-        <maven.surefire.plugin.version>3.5.5</maven.surefire.plugin.version>
+        <maven.surefire.plugin.version>3.5.6</maven.surefire.plugin.version>
         <maven.checkstyle.plugin.version>3.6.0</maven.checkstyle.plugin.version>
         <maven.pmd.plugin.version>3.28.0</maven.pmd.plugin.version>
         <pmd.linkXRef>false</pmd.linkXRef>
@@ -117,13 +117,13 @@
         <maven.jar.plugin.version>3.5.0</maven.jar.plugin.version>
         <exec.maven.plugin.version>3.6.3</exec.maven.plugin.version>
         <maven.enforcer.plugin.version>3.6.3</maven.enforcer.plugin.version>
-        <maven.spotbugs.plugin.version>4.9.8.3</maven.spotbugs.plugin.version>
-        <pitest.maven.plugin.version>1.24.1</pitest.maven.plugin.version>
+        <maven.spotbugs.plugin.version>4.10.2.0</maven.spotbugs.plugin.version>
+        <pitest.maven.plugin.version>1.25.5</pitest.maven.plugin.version>
         <pitest.junit5.plugin.version>1.2.3</pitest.junit5.plugin.version>
-        <cyclonedx.maven.plugin.version>2.9.1</cyclonedx.maven.plugin.version>
+        <cyclonedx.maven.plugin.version>2.9.2</cyclonedx.maven.plugin.version>
         <pit.skip>true</pit.skip>
         <pitest.threads>8</pitest.threads>
-        <jacoco.version>0.8.14</jacoco.version>
+        <jacoco.version>0.8.15</jacoco.version>
         <coverage.minimum.line>0.90</coverage.minimum.line>
         <coverage.minimum.branch>0.90</coverage.minimum.branch>
         <coverage.minimum.mutation>90</coverage.minimum.mutation>
@@ -719,7 +719,7 @@
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.10.0</version>
+                        <version>0.11.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
