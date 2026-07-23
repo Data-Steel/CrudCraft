@@ -100,7 +100,7 @@
         <mockito.version>5.23.0</mockito.version>
         <testcontainers.junit.version>1.21.4</testcontainers.junit.version>
         <testcontainers.postgres.version>1.21.4</testcontainers.postgres.version>
-        <postgresql.version>42.7.11</postgresql.version>
+        <postgresql.version>42.7.12</postgresql.version>
         <spotbugs.annotations.version>4.9.8</spotbugs.annotations.version>
         <checkstyle.lib.version>13.4.2</checkstyle.lib.version>
 
